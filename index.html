@@ -130,7 +130,8 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
 .zoom span { min-width: 46px; text-align: center; }
 
 /* Tools in two rows, row details, quote */
-.tools.grid5 { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.tools.grid5 { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.item-more input.valin { flex: 1 1 100%; background: var(--b08); padding: 3px 5px; font-size: 11.5px; }
 .readout.small { font-size: 22px; }
 .item-more { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; padding: 4px 0 2px 21px; flex-wrap: wrap; }
 .item-more select { width: auto; flex: 1; min-width: 0; padding: 2px 4px; font-size: 11.5px; }
@@ -346,8 +347,8 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
   };
 
   // ---------- Measure ----------
-  var COL = { length: 'var(--green)', run: 'var(--blue)', area: 'var(--purple)', count: 'var(--pink)', angle: 'var(--red)', note: 'var(--yellow)', calib: 'var(--orange)', draft: 'var(--yellow)' };
-  var TYPE_NAME = { length: 'Length', run: 'Run', area: 'Area', count: 'Count', angle: 'Angle', note: 'Note' };
+  var COL = { length: 'var(--green)', run: 'var(--blue)', area: 'var(--purple)', count: 'var(--pink)', angle: 'var(--red)', note: 'var(--yellow)', dim: '#f2f2f2', calib: 'var(--orange)', draft: 'var(--yellow)' };
+  var TYPE_NAME = { length: 'Length', run: 'Run', area: 'Area', count: 'Count', angle: 'Angle', note: 'Note', dim: 'Dimension' };
   var CATS = [['', 'No category'], ['mural', 'Mural'], ['film', 'Privacy film'], ['markers', 'Distraction markers'], ['signage', 'Signage']];
   function freshN() { return { length: 0, run: 0, area: 0, count: 0, angle: 0, note: 0, rect: 0 }; }
   var PRESETS = [];
@@ -458,7 +459,24 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
     return d > 180 ? 360 - d : d;
   }
   function areaSqft(it) { return sqftOf(polyArea(it.pts), it.page); }
+  // A size you type (site survey, photo) wins over the measured one. Plain numbers are inches.
+  function parseSize(t) {
+    var s2 = String(t).trim();
+    if (/^\d+(\.\d+)?$/.test(s2)) return parseFloat(s2);
+    if (/^\d+\s+\d+\/\d+$/.test(s2)) { var q = s2.split(/\s+/), fr = q[1].split('/'); return Number(q[0]) + fr[0] / fr[1]; }
+    var v = parseLen(s2); return v > 0 ? v : NaN;
+  }
+  function setManual(it, text) {
+    var t = String(text || '').trim();
+    if (!t) { delete it.manual; delete it.manualIn; return; }
+    it.manual = t; var v = it.type === 'area' ? NaN : parseSize(t);
+    if (isFinite(v)) it.manualIn = v; else delete it.manualIn;
+  }
+  function manualText(it) { return isFinite(it.manualIn) ? fmtLen(it.manualIn) : it.manual; }
+  function itemLenIn(it) { return isFinite(it.manualIn) ? it.manualIn : lenIn(pathLen(it.pts), it.page); }
   function itemValue(it) {
+    if (it.manual && /dim|length|run|area/.test(it.type)) return manualText(it);
+    if (it.type === 'dim') { var dv = lenIn(pathLen(it.pts), it.page); return isFinite(dv) ? fmtLen(dv) : 'type a size'; }
     if (it.type === 'count') return it.pts.length + ' ea';
     if (it.type === 'angle') return angleAt(it.pts).toFixed(1) + '°';
     if (it.type === 'note') return '';
@@ -714,6 +732,13 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
         });
         return;
       }
+      if (it.type === 'dim') {
+        var A = it.pts[0], B = it.pts[1], ang = Math.atan2(B.y - A.y, B.x - A.x), nx = -Math.sin(ang) * 8 * k, ny = Math.cos(ang) * 8 * k;
+        var dl = 'M' + A.x + ' ' + A.y + 'L' + B.x + ' ' + B.y + 'M' + (A.x - nx) + ' ' + (A.y - ny) + 'L' + (A.x + nx) + ' ' + (A.y + ny) + 'M' + (B.x - nx) + ' ' + (B.y - ny) + 'L' + (B.x + nx) + ' ' + (B.y + ny);
+        o += '<path d="' + dl + '" fill="none" stroke="#ffffff" stroke-width="' + (isSel ? 7 : 5) + '" stroke-opacity=".9" stroke-linecap="round" vector-effect="non-scaling-stroke"/><path d="' + dl + '" fill="none" stroke="#262626" stroke-width="1.75" stroke-linecap="round" vector-effect="non-scaling-stroke"/>';
+        if (editing || isSel) it.pts.forEach(function (p, i) { var on = isSel && sel.pt === i; o += pt(p, on ? COL.draft : '#f2f2f2', on, on); });
+        return;
+      }
       if (it.type === 'note') { o += '<path d="M' + it.pts[0].x + ' ' + it.pts[0].y + 'l' + (-5 * k) + ' ' + (-12 * k) + 'h' + (10 * k) + 'z" fill="' + c + '" stroke="#4a4a4a" stroke-width="1" vector-effect="non-scaling-stroke"/>'; o += pt(it.pts[0], c, isSel, isSel); return; }
       if (isSel) o += (it.type === 'area' ? '<polygon' : '<polyline') + ' points="' + svgPts(it.pts) + '" fill="none" stroke="#ffffff" stroke-width="6" stroke-opacity=".85" vector-effect="non-scaling-stroke"/>';
       if (it.type === 'area') o += '<polygon points="' + svgPts(it.pts) + '" fill="' + c + '" fill-opacity="' + (isSel ? .3 : .2) + '" stroke="' + c + '" stroke-width="2"' + (it.deduct ? ' stroke-dasharray="6 4"' : '') + ' vector-effect="non-scaling-stroke"/>';
@@ -725,6 +750,13 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
     });
     mine.forEach(function (it) {
       var pos, c = it.deduct ? 'var(--red)' : COL[it.type], label = it.type === 'note' ? it.name : it.name + '  ' + itemValue(it);
+      if (it.type === 'dim') {
+        var A2 = it.pts[0], B2 = it.pts[1], deg = Math.atan2(B2.y - A2.y, B2.x - A2.x) * 180 / Math.PI;
+        if (deg > 90) deg -= 180; else if (deg < -90) deg += 180;
+        var mx = (A2.x + B2.x) / 2, my = (A2.y + B2.y) / 2;
+        o += '<g transform="rotate(' + deg.toFixed(2) + ' ' + mx + ' ' + my + ')">' + tag(mx, my, itemValue(it), COL.dim) + '</g>';
+        return;
+      }
       if (it.type === 'area') { var sx = 0, sy = 0; it.pts.forEach(function (p) { sx += p.x; sy += p.y; }); pos = { x: sx / it.pts.length, y: sy / it.pts.length }; }
       else if (it.type === 'count') pos = { x: it.pts[0].x, y: it.pts[0].y - 20 * k };
       else if (it.type === 'note') pos = { x: it.pts[0].x, y: it.pts[0].y - 26 * k };
@@ -803,14 +835,14 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
   function inPoly(p, pts) { var c = false; for (var i = 0, j = pts.length - 1; i < pts.length; j = i++) { var a = pts[i], b = pts[j]; if (((a.y > p.y) !== (b.y > p.y)) && (p.x < (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x)) c = !c; } return c; }
   function removePoint(itemId, idx) {
     var it = itemById(itemId); if (!it) return;
-    var min = { area: 3, angle: 3, count: 1, note: 1 }[it.type] || 2;
+    var min = { area: 3, angle: 3, count: 1, note: 1, dim: 2 }[it.type] || 2;
     if (it.rect) it.rect = false;
     if (it.pts.length - 1 < min) { M.items = M.items.filter(function (x) { return x !== it; }); M.sel = null; M.note = it.name + ' removed (it needs at least ' + min + ' points).'; }
     else { it.pts.splice(idx, 1); M.sel = { item: it.id, pt: null }; }
     M.hoverPt = null; renderOverlay(); renderPanels();
   }
   function insertPoint(hs) {
-    var it = itemById(hs.item); if (!it || hs.seg < 0 || /count|note|angle/.test(it.type)) return;
+    var it = itemById(hs.item); if (!it || hs.seg < 0 || /count|note|angle|dim/.test(it.type)) return;
     it.rect = false;
     if (it.type === 'length') { it.type = 'run'; M.n.run += 1; if (/^Length \d+$/.test(it.name)) it.name = 'Run ' + M.n.run; }
     it.pts.splice(hs.seg + 1, 0, { x: hs.at.x, y: hs.at.y });
@@ -864,6 +896,14 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
     }
     if (M.tool === 'length') { M.draft.push(p); if (M.draft.length === 2) commit('length'); else renderOverlay(); return; }
     if (M.tool === 'angle') { M.draft.push(p); if (M.draft.length === 3) commit('angle'); else renderOverlay(); return; }
+    if (M.tool === 'dim') {
+      M.draft.push(p);
+      if (M.draft.length === 2) {
+        var d0 = M.draft[0], d1 = M.draft[1]; M.draft = [];
+        if (dist(d0, d1) * M.zoom > 3) { var dm = addItem('dim', [d0, d1]); M.sel = { item: dm.id, pt: null }; renderOverlay(); renderPanels(); var vi = leftEl.querySelector('[data-val="' + dm.id + '"]'); if (vi) vi.focus(); return; }
+      }
+      renderOverlay(); return;
+    }
     if (M.tool === 'rect') {
       M.draft.push(p);
       if (M.draft.length === 2) {
@@ -958,7 +998,7 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
     if (b.dataset.z === 'in') zoomAt(1.25); else if (b.dataset.z === 'out') zoomAt(0.8); else fit();
   });
   function typing(e) { return /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName); }
-  var HOTKEYS = { h: 'pan', s: 'scale', l: 'length', r: 'run', a: 'area', v: 'edit', b: 'rect', c: 'count', g: 'angle', t: 'note' };
+  var HOTKEYS = { h: 'pan', s: 'scale', l: 'length', r: 'run', a: 'area', v: 'edit', b: 'rect', c: 'count', g: 'angle', t: 'note', d: 'dim' };
   var ARROWS = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
   document.addEventListener('keydown', function (e) {
     if (mode !== 'measure' || typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -979,7 +1019,7 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
   });
 
   // ---- Panels ----
-  var MTOOLS = [['hand', 'pan', 'Pan (H, or hold Space)'], ['select', 'edit', 'Edit points (V): drag to move, right-click or Delete to remove'], ['scale', 'scale', 'Set scale from a known length (S)'], ['length', 'length', 'Length (L)'], ['run', 'run', 'Run: several segments (R)'],
+  var MTOOLS = [['hand', 'pan', 'Pan (H, or hold Space)'], ['select', 'edit', 'Edit points (V): drag to move, right-click or Delete to remove'], ['scale', 'scale', 'Set scale from a known length (S)'], ['length', 'length', 'Length (L)'], ['run', 'run', 'Run: several segments (R)'], ['dim', 'dim', 'Dimension: click both ends, then type the size you measured (D)'],
     ['area', 'area', 'Area (A)'], ['rect', 'rect', 'Rectangle area: two corners (B)'], ['count', 'count', 'Count: click each item, Enter starts a new count (C)'], ['angle', 'angle', 'Angle: three clicks, corner in the middle (G)'], ['note', 'note', 'Note: click to pin a note (T)']];
   function renderTools() {
     toolsEl.classList.toggle('grid5', mode === 'measure');
@@ -1019,6 +1059,7 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
       return { label: 'Measuring · ' + TYPE_NAME[M.tool], text: isFinite(v) ? fmtLen(v) : 'set scale', live: true };
     }
     if (M.tool === 'scale') return { label: 'Set scale', text: 'Click 2 points', live: false };
+    if (M.tool === 'dim' && !M.sel) return { label: 'Dimension', text: 'Click 2 points', live: false };
     var mine = M.items.filter(function (it) { return it.page === M.page; });
     var pick = (M.sel && itemById(M.sel.item)) || mine.find(function (it) { return it.id === M.last; }) || mine.slice(-1)[0];
     if (pick) {
@@ -1049,7 +1090,8 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
       var on = M.sel && M.sel.item === it.id, chip = it.deduct ? 'var(--red)' : COL[it.type];
       var row = '<div class="item' + (on ? ' sel' : '') + '" data-item="' + it.id + '"><span class="chip' + (it.type === 'count' ? ' round' : '') + '" style="background:' + chip + '" title="' + TYPE_NAME[it.type] + '"></span><input type="text" value="' + esc(it.name) + '" data-name="' + it.id + '" aria-label="' + (it.type === 'note' ? 'Note text' : 'Name of ' + esc(it.name)) + '"><b>' + itemValue(it) + '</b><button type="button" data-del="' + it.id + '" aria-label="Delete ' + esc(it.name) + '">×</button>';
       if (on && it.type !== 'note' && it.type !== 'angle') {
-        row += '<div class="item-more"><select data-cat="' + it.id + '" aria-label="Category">' + CATS.map(function (c2) { return '<option value="' + c2[0] + '"' + ((it.cat || '') === c2[0] ? ' selected' : '') + '>' + c2[1] + '</option>'; }).join('') + '</select>';
+        var ph = it.type === 'dim' ? 'Size, e.g. 48 or 8\'-2 1/2&quot;' : it.type === 'area' ? 'Label instead, e.g. 48&quot; × 96&quot;' : it.type === 'count' ? '' : 'Typed size (instead of measured)';
+        row += '<div class="item-more">' + (ph ? '<input type="text" class="valin" data-val="' + it.id + '" value="' + esc(it.manual || '') + '" placeholder="' + ph + '" aria-label="Typed size">' : '') + '<select data-cat="' + it.id + '" aria-label="Category">' + CATS.map(function (c2) { return '<option value="' + c2[0] + '"' + ((it.cat || '') === c2[0] ? ' selected' : '') + '>' + c2[1] + '</option>'; }).join('') + '</select>';
         if (it.type === 'area') row += '<label class="chk"><input type="checkbox" data-deduct="' + it.id + '"' + (it.deduct ? ' checked' : '') + '> Deduct</label>';
         row += '</div>';
       } else if (it.cat) row += '<div class="item-tag">' + esc(CATS.find(function (c3) { return c3[0] === it.cat; })[1]) + '</div>';
@@ -1062,7 +1104,7 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
   function totalsFor(items) {
     var t = { lin: 0, area: 0, deduct: 0, counts: [], angles: 0, notes: 0 };
     items.forEach(function (it) {
-      if (it.type === 'length' || it.type === 'run') t.lin += lenIn(pathLen(it.pts), it.page) || 0;
+      if (it.type === 'length' || it.type === 'run') t.lin += itemLenIn(it) || 0;
       else if (it.type === 'area') { var a = areaSqft(it) || 0; if (it.deduct) t.deduct += a; else t.area += a; }
       else if (it.type === 'count') t.counts.push(it);
       else if (it.type === 'angle') t.angles++;
@@ -1118,12 +1160,12 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
     Object.keys(cats).forEach(function (k) { var ct = totalsFor(cats[k]), nm = CATS.find(function (c5) { return c5[0] === k; })[1]; tt += '<p class="hint" style="margin:0">' + esc(nm) + ': ' + [ct.lin ? (ct.lin / 12).toFixed(1) + ' lin ft' : '', ct.area - ct.deduct ? fmtSqft(ct.area - ct.deduct) : ''].filter(Boolean).join(', ') + '</p>'; });
     h += sec('totals', 'Totals', s ? tt : '<p class="hint" style="margin:0">Set a scale to see totals.</p>');
     // Export
-    var ex = M.items.length ? '<div class="row"><button type="button" class="btn strong" data-act="copy">Copy list</button><button type="button" class="btn" data-act="csv" data-dl>CSV</button><button type="button" class="btn" data-act="pdf" data-dl' + (Markup.busy ? ' disabled' : '') + '>Marked-up PDF</button></div><p class="hint" style="margin:0">The marked-up PDF draws your measurements on the original sheet and adds a list page, ready to email.</p>' : '<p class="hint" style="margin:0">Measure something first.</p>';
+    var ex = M.items.length ? '<div class="row"><button type="button" class="btn strong" data-act="copy">Copy list</button><button type="button" class="btn" data-act="csv" data-dl>CSV</button><button type="button" class="btn" data-act="pdf" data-dl' + (Markup.busy ? ' disabled' : '') + '>Marked-up PDF</button><button type="button" class="btn" data-act="jpg" data-dl' + (Markup.busy ? ' disabled' : '') + '>Marked-up image</button></div><p class="hint" style="margin:0">Both draw your measurements on the drawing or photo, ready to email or text. The PDF adds a list page.</p>' : '<p class="hint" style="margin:0">Measure something first.</p>';
     if (Markup.note) ex += '<p class="ok">' + esc(Markup.note) + '</p>';
     ex += '<textarea id="copybox" hidden readonly class="copybox"></textarea>';
     h += sec('export', 'Export', ex);
     // Shortcuts
-    h += sec('keys', 'Shortcuts', '<div class="keys"><kbd>Ctrl Z</kbd><span>Undo (Shift for redo)</span><kbd>Ctrl S</kbd><span>Save project</span><kbd>V</kbd><span>Edit points: drag to move</span><kbd>Right-click</kbd><span>Remove a point (or the last one while drawing)</span><kbd>Delete</kbd><span>Remove the selected point or measurement</span><kbd>Dbl-click</kbd><span>On an edge in Edit: add a point</span><kbd>Arrows</kbd><span>Nudge the selection (Shift ×10)</span><kbd>H</kbd><span>Pan, or hold Space</span><kbd>S</kbd><span>Set scale</span><kbd>L</kbd><span>Length</span><kbd>R</kbd><span>Run</span><kbd>A</kbd><span>Area</span><kbd>B</kbd><span>Rectangle area</span><kbd>C</kbd><span>Count (Enter starts a new count)</span><kbd>G</kbd><span>Angle</span><kbd>T</kbd><span>Note</span><kbd>F</kbd><span>Fit page</span><kbd>Shift</kbd><span>Straight lines</span><kbd>Alt</kbd><span>Place without snapping</span><kbd>Enter</kbd><span>Finish run, area or count</span><kbd>Esc</kbd><span>Cancel</span><kbd>Ctrl</kbd><span>+ scroll to zoom</span></div>');
+    h += sec('keys', 'Shortcuts', '<div class="keys"><kbd>Ctrl Z</kbd><span>Undo (Shift for redo)</span><kbd>Ctrl S</kbd><span>Save project</span><kbd>V</kbd><span>Edit points: drag to move</span><kbd>Right-click</kbd><span>Remove a point (or the last one while drawing)</span><kbd>Delete</kbd><span>Remove the selected point or measurement</span><kbd>Dbl-click</kbd><span>On an edge in Edit: add a point</span><kbd>Arrows</kbd><span>Nudge the selection (Shift ×10)</span><kbd>H</kbd><span>Pan, or hold Space</span><kbd>S</kbd><span>Set scale</span><kbd>L</kbd><span>Length</span><kbd>R</kbd><span>Run</span><kbd>A</kbd><span>Area</span><kbd>B</kbd><span>Rectangle area</span><kbd>C</kbd><span>Count (Enter starts a new count)</span><kbd>G</kbd><span>Angle</span><kbd>T</kbd><span>Note</span><kbd>D</kbd><span>Dimension: type the size you measured</span><kbd>F</kbd><span>Fit page</span><kbd>Shift</kbd><span>Straight lines</span><kbd>Alt</kbd><span>Place without snapping</span><kbd>Enter</kbd><span>Finish run, area or count</span><kbd>Esc</kbd><span>Cancel</span><kbd>Ctrl</kbd><span>+ scroll to zoom</span></div>');
     h += aboutSec();
     rightEl.innerHTML = h;
   }
@@ -1142,11 +1184,11 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
     return M.items.map(function (it) {
       var unitVal = NaN, unit = '', s = scaleFor(it.page);
       if (it.type === 'area') { unitVal = areaSqft(it) * (it.deduct ? -1 : 1); unit = 'sq ft'; }
-      else if (it.type === 'length' || it.type === 'run') { unitVal = lenIn(pathLen(it.pts), it.page) / 12; unit = 'ft'; }
+      else if (it.type === 'length' || it.type === 'run' || it.type === 'dim') { unitVal = itemLenIn(it) / 12; unit = 'ft'; }
       else if (it.type === 'count') { unitVal = it.pts.length; unit = 'ea'; }
       else if (it.type === 'angle') { unitVal = angleAt(it.pts); unit = 'deg'; }
       var cat = it.cat ? CATS.find(function (c) { return c[0] === it.cat; })[1] : '';
-      return { name: it.name, type: TYPE_NAME[it.type] + (it.rect ? ' (rectangle)' : '') + (it.deduct ? ' (deduct)' : ''), cat: cat, page: it.page, text: itemValue(it), value: isFinite(unitVal) ? unitVal.toFixed(2) : '', unit: unit, inches: unit === 'ft' && isFinite(unitVal) ? (unitVal * 12).toFixed(2) : '', scale: s ? s.label : '' };
+      return { name: it.name, type: TYPE_NAME[it.type] + (it.rect ? ' (rectangle)' : '') + (it.deduct ? ' (deduct)' : '') + (it.manual ? ' (typed)' : ''), cat: cat, page: it.page, text: itemValue(it), value: isFinite(unitVal) ? unitVal.toFixed(2) : '', unit: unit, inches: unit === 'ft' && isFinite(unitVal) ? (unitVal * 12).toFixed(2) : '', scale: s ? s.label : '' };
     });
   }
   function copyList() {
@@ -1179,6 +1221,8 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
     }
   });
   leftEl.addEventListener('input', function (e) {
+    var vid = e.target.dataset && e.target.dataset.val;
+    if (vid) { var vit = itemById(Number(vid)); if (vit) { setManual(vit, e.target.value); renderOverlay(); var bb = e.target.closest('.item').querySelector('b'); if (bb) bb.textContent = itemValue(vit); } return; }
     var id = e.target.dataset && e.target.dataset.name;
     if (!id) return;
     var it = M.items.find(function (x) { return x.id === Number(id); });
@@ -1188,10 +1232,11 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
     if (mode !== 'measure') return;
     var d = e.target.dataset || {};
     if (d.name) { History.record(); return; }
+    if (d.val) { renderRight(); History.record(); return; }
     if (d.cat) { var it = itemById(Number(d.cat)); if (it) { it.cat = e.target.value; renderPanels(); } }
     if (d.deduct) { var it2 = itemById(Number(d.deduct)); if (it2) { it2.deduct = e.target.checked; renderOverlay(); renderPanels(); } }
   });
-  leftEl.addEventListener('keydown', function (e) { if (e.target.dataset && e.target.dataset.name && e.key === 'Enter') e.target.blur(); });
+  leftEl.addEventListener('keydown', function (e) { if (e.target.dataset && (e.target.dataset.name || e.target.dataset.val) && e.key === 'Enter') e.target.blur(); });
   leftEl.addEventListener('click', function (e) {
     if (mode !== 'measure') return;
     var del = e.target.closest('[data-del]');
@@ -1221,6 +1266,7 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
     else if (a === 'csv') downloadCsv();
     else if (a === 'save') Project.save();
     else if (a === 'pdf') Markup.run();
+    else if (a === 'jpg') Markup.image();
   });
 
   function updateStatus() {
@@ -1236,6 +1282,7 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
     else if (M.tool === 'rect') live = M.draft.length ? 'Click the opposite corner' : 'Click one corner, then the opposite corner';
     else if (M.tool === 'count') { var ac = M.activeCount && itemById(M.activeCount); live = ac ? esc(ac.name) + ' <b>' + ac.pts.length + ' ea</b> · Enter starts a new count' : 'Click each item to count it'; }
     else if (M.tool === 'angle') live = M.draft.length === 1 ? 'Click the corner' : M.draft.length === 2 ? 'Click the other side · <b>' + (M.hover ? angleAt(withHover(M.draft)).toFixed(1) + '°' : '') + '</b>' : 'Click a point on one side';
+    else if (M.tool === 'dim') live = M.draft.length ? 'Click the other end' : 'Click both ends of something you measured, then type its size in the list';
     else if (M.tool === 'note') live = 'Click to pin a note, then type it in the list';
     else if (M.tool === 'edit') { var si = M.sel && itemById(M.sel.item); live = si ? esc(si.name) + ' <b>' + itemValue(si) + '</b> · drag points · Delete removes ' + (M.sel.pt != null ? 'the point' : 'it') + ' · double-click an edge to add a point' : 'Click a point or line to select · drag points to move · right-click a point to remove it'; }
     else live = 'Drag to move around';
@@ -1359,7 +1406,77 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
     return loadScript('vendor/pdf-lib/pdf-lib.min.js').catch(function () { return loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js'); }).then(function () { return window.PDFLib; });
   }
   var Markup = { busy: false, note: '' };
-  var RGB = { length: [0.33, 0.69, 0.45], run: [0.30, 0.56, 0.86], area: [0.56, 0.45, 0.86], count: [0.91, 0.47, 0.66], angle: [0.86, 0.36, 0.31], note: [0.95, 0.80, 0.30], deduct: [0.86, 0.36, 0.31] };
+  function rgbCss(a) { return 'rgb(' + a.map(function (v) { return Math.round(v * 255); }).join(',') + ')'; }
+  function canvasMarkup(ctx, items, f) {
+    var u = Math.max(M.w, M.h) / 1000 * f, dark = '#333333';
+    function P(p) { return { x: p.x * f, y: p.y * f }; }
+    function rr(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+    function tag(x, y, text, fill, ang) {
+      ctx.save(); ctx.translate(x, y); if (ang) ctx.rotate(ang);
+      ctx.font = '700 ' + (11 * u) + 'px "JetBrains Mono", ui-monospace, monospace';
+      var w = ctx.measureText(text).width + 12 * u, h = 20 * u;
+      rr(-w / 2, -h / 2, w, h, 4 * u); ctx.globalAlpha = 0.94; ctx.fillStyle = fill; ctx.fill(); ctx.globalAlpha = 1; ctx.lineWidth = Math.max(1, u); ctx.strokeStyle = dark; ctx.stroke();
+      ctx.fillStyle = '#222222'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, 0, 0.6 * u); ctx.restore();
+    }
+    function line(pts, color, w, close, dash) {
+      ctx.beginPath(); pts.forEach(function (q, i) { if (i) ctx.lineTo(q.x, q.y); else ctx.moveTo(q.x, q.y); }); if (close) ctx.closePath();
+      ctx.setLineDash(dash || []); ctx.lineWidth = w; ctx.strokeStyle = color; ctx.stroke(); ctx.setLineDash([]);
+    }
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    items.forEach(function (it) {
+      var c = rgbCss(it.deduct ? RGB.deduct : RGB[it.type]), pts = it.pts.map(P);
+      if (it.type === 'dim') {
+        var a = pts[0], b = pts[1], ang = Math.atan2(b.y - a.y, b.x - a.x), nx = -Math.sin(ang) * 9 * u, ny = Math.cos(ang) * 9 * u;
+        var segs = [[a, b], [{ x: a.x - nx, y: a.y - ny }, { x: a.x + nx, y: a.y + ny }], [{ x: b.x - nx, y: b.y - ny }, { x: b.x + nx, y: b.y + ny }]];
+        segs.forEach(function (sg) { line(sg, 'rgba(255,255,255,.9)', 6 * u); }); segs.forEach(function (sg) { line(sg, '#262626', 2 * u); });
+        var t = ang; if (t > Math.PI / 2) t -= Math.PI; else if (t < -Math.PI / 2) t += Math.PI;
+        tag((a.x + b.x) / 2, (a.y + b.y) / 2, itemValue(it), '#f2f2f2', t); return;
+      }
+      if (it.type === 'area') {
+        ctx.beginPath(); pts.forEach(function (q, i) { if (i) ctx.lineTo(q.x, q.y); else ctx.moveTo(q.x, q.y); }); ctx.closePath();
+        ctx.globalAlpha = 0.22; ctx.fillStyle = c; ctx.fill(); ctx.globalAlpha = 1;
+        line(pts, c, 2.5 * u, true, it.deduct ? [8 * u, 5 * u] : null);
+      } else if (/length|run|angle/.test(it.type)) { line(pts, 'rgba(255,255,255,.7)', 6 * u); line(pts, c, 3 * u); }
+      if (it.type === 'count') pts.forEach(function (q, i) {
+        ctx.beginPath(); ctx.arc(q.x, q.y, 8 * u, 0, Math.PI * 2); ctx.fillStyle = c; ctx.fill(); ctx.lineWidth = Math.max(1, u); ctx.strokeStyle = dark; ctx.stroke();
+        ctx.fillStyle = '#222'; ctx.font = '700 ' + (9.5 * u) + 'px "JetBrains Mono", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(i + 1), q.x, q.y + 0.5 * u);
+      });
+      else pts.forEach(function (q) { ctx.fillStyle = c; ctx.fillRect(q.x - 4 * u, q.y - 4 * u, 8 * u, 8 * u); ctx.lineWidth = Math.max(1, u * 0.8); ctx.strokeStyle = dark; ctx.strokeRect(q.x - 4 * u, q.y - 4 * u, 8 * u, 8 * u); });
+      var pos, off = 18 * u;
+      if (it.type === 'area') { var sx = 0, sy = 0; pts.forEach(function (q) { sx += q.x; sy += q.y; }); pos = { x: sx / pts.length, y: sy / pts.length }; }
+      else if (it.type === 'count' || it.type === 'note') pos = { x: pts[0].x, y: pts[0].y - off * 1.3 };
+      else if (it.type === 'angle') pos = { x: pts[1].x, y: pts[1].y - off };
+      else { var p1 = pts[pts.length - 2], p2 = pts[pts.length - 1]; pos = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 - off }; }
+      tag(pos.x, pos.y, it.type === 'note' ? it.name : it.name + '  ' + itemValue(it), c);
+    });
+  }
+  Markup.image = function () {
+    if (Markup.busy) return;
+    Markup.busy = true; Markup.note = 'Making the image…'; renderRight();
+    var f, paintP;
+    if (M.src === 'image') { f = Math.min(1, 6000 / Math.max(M.w, M.h)); paintP = Promise.resolve(function (ctx) { ctx.drawImage(M.img, 0, 0, M.w * f, M.h * f); }); }
+    else if (M.src === 'pdf') { f = Math.min(4, 4000 / Math.max(M.w, M.h)); paintP = M.pdf.getPage(M.page).then(function (pg) { return function (ctx) { return pg.render({ canvasContext: ctx, viewport: pg.getViewport({ scale: f }) }).promise; }; }); }
+    else {
+      f = 2;
+      paintP = new Promise(function (res, rej) {
+        var im = new Image(); im.onload = function () { res(function (ctx) { ctx.drawImage(im, 0, 0, M.w * f, M.h * f); }); }; im.onerror = function () { rej(new Error('the sample could not be drawn')); };
+        im.src = URL.createObjectURL(new Blob(['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + M.w + ' ' + M.h + '" width="' + M.w * f + '" height="' + M.h * f + '">' + sampleSVG() + '</svg>'], { type: 'image/svg+xml' }));
+      });
+    }
+    paintP.then(function (paint) {
+      var cv = document.createElement('canvas'); cv.width = Math.round(M.w * f); cv.height = Math.round(M.h * f);
+      var ctx = cv.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cv.width, cv.height);
+      return Promise.resolve(paint(ctx)).then(function () {
+        canvasMarkup(ctx, M.items.filter(function (it) { return it.page === M.page; }), f);
+        return new Promise(function (res, rej) { cv.toBlob(function (b) { if (b) res(b); else rej(new Error('the image is too large for this browser')); }, 'image/jpeg', 0.92); });
+      });
+    }).then(function (blob) {
+      saveBlob(blob, baseName() + (M.pages > 1 ? ' p' + M.page : '') + ' marked up.jpg');
+      Markup.busy = false; Markup.note = 'Marked-up image saved.'; renderRight();
+      setTimeout(function () { Markup.note = ''; if (mode === 'measure') renderRight(); }, 3000);
+    }).catch(function (err) { Markup.busy = false; Markup.note = 'Could not make the image: ' + (err && err.message ? err.message : err); renderRight(); });
+  };
+  var RGB = { dim: [0.95, 0.95, 0.95], length: [0.33, 0.69, 0.45], run: [0.30, 0.56, 0.86], area: [0.56, 0.45, 0.86], count: [0.91, 0.47, 0.66], angle: [0.86, 0.36, 0.31], note: [0.95, 0.80, 0.30], deduct: [0.86, 0.36, 0.31] };
   function pdfText(t) { return String(t).replace(/−/g, '-').replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[^\x20-\x7E\xA0-\xFF]/g, ''); }
   Markup.run = function () {
     if (Markup.busy) return;
@@ -1410,6 +1527,14 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
       }
       items.forEach(function (it) {
         var c = it.deduct ? RGB.deduct : RGB[it.type], P = it.pts.map(m.map);
+        if (it.type === 'dim') {
+          var ang = Math.atan2(P[1].y - P[0].y, P[1].x - P[0].x), nx = -Math.sin(ang) * 6 * k, ny = Math.cos(ang) * 6 * k, white = PL.rgb(1, 1, 1);
+          [[P[0], P[1]], [{ x: P[0].x - nx, y: P[0].y - ny }, { x: P[0].x + nx, y: P[0].y + ny }], [{ x: P[1].x - nx, y: P[1].y - ny }, { x: P[1].x + nx, y: P[1].y + ny }]].forEach(function (sg) {
+            pg.drawLine({ start: sg[0], end: sg[1], thickness: 4 * k, color: white, opacity: 0.85 }); pg.drawLine({ start: sg[0], end: sg[1], thickness: 1.4 * k, color: dark });
+          });
+          tag({ x: (it.pts[0].x + it.pts[1].x) / 2, y: (it.pts[0].y + it.pts[1].y) / 2 }, itemValue(it), RGB.dim);
+          return;
+        }
         if (it.type === 'area') {
           var d = 'M ' + P.map(function (q) { return q.x.toFixed(2) + ' ' + (-q.y).toFixed(2); }).join(' L ') + ' Z';
           pg.drawSvgPath(d, { x: 0, y: 0, color: col(c), opacity: 0.2, borderWidth: 0 });
@@ -1464,7 +1589,7 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
     var ROLLS = [48, 54, 60, 61];
     var L = {
       job: 'mural', roll: 54, margin: 6,
-      mural: { w: 288, h: 108, bleed: 1, overlap: 1, orient: 'vertical', balance: false, custom: null, marks: true, art: 'gradient', color: '#5b8fbf', g1: '#1f3b57', g2: '#8fd0c8', angle: 0, img: null, imgName: '', fit: 'cover', tileW: 24, dpi: 50 },
+      mural: { w: 288, h: 108, bleed: 1, overlap: 1, orient: 'vertical', balance: true, custom: null, marks: true, art: 'gradient', color: '#5b8fbf', g1: '#1f3b57', g2: '#8fd0c8', angle: 0, img: null, imgName: '', fit: 'cover', tileW: 24, dpi: 50 },
       film: { allow: 1, defH: 96, mode: 'auto', look: 'gradient', c1: '#ffffff', c2: '#9cc8e8', sel: 0,
         panes: [{ name: 'Conference 27-015', w: 60, h: 96, qty: 6 }, { name: 'Conference 27-016', w: 48, h: 96, qty: 4 }, { name: 'Office sidelite', w: 24, h: 96, qty: 6 }] },
       markers: { bands: '30, 60', barH: 2, maxStrip: 96, pattern: 'squares', size: 2, gap: 7.5, margin: 0, glassH: 96, spacing: 0.5, sel: 0,
