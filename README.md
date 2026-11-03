@@ -13,7 +13,7 @@ DIM is a proof of concept for a shop drawing tool. **Measure** and **Layout** wo
 - **Snap to the drawing:** DIM reads the vector lines in a PDF, so points lock onto line ends (preferred) or onto a line. Hold Alt to place a point without snapping. Scans and images have no lines to snap to.
 - **Tools:** Length, Run (several segments), Area, Rectangle area (two corners), Count (click each item; Enter starts a new count), Angle (three clicks, corner in the middle) and Note (pin a note, type it in the list).
 - **Edit** (`V`): drag points (rectangles stay rectangular); right-click any point to remove it, or the last point while drawing; Delete removes the selection; arrow keys nudge it (Shift for 10×); double-click an edge to add a point.
-- **On the selected measurement:** a category (Mural, Privacy film, Distraction markers) that Layout uses when it imports from Measure, and **Deduct** for areas such as doors and windows. Totals show area, deductions and net area, counts, and subtotals per category.
+- **On the selected measurement:** a category (Mural, Privacy film, Distraction markers, Signage) that Layout uses when it imports from Measure, and **Deduct** for areas such as doors and windows. Totals show area, deductions and net area, counts, and subtotals per category.
 - **Undo / redo** with Ctrl+Z and Ctrl+Shift+Z (Cmd on a Mac), or the buttons in the top bar. Covers Measure and Layout.
 - **ft-in / in** in the status bar switches how lengths are shown.
 
@@ -26,10 +26,10 @@ DIM is a proof of concept for a shop drawing tool. **Measure** and **Layout** wo
 
 ## Layout
 
-Plain numbers are inches; `24'`, `2'-6"` and `3.2 m` work too. Roll widths: 48", 54", 60" and 61".
+Plain numbers are inches; `24'`, `2'-6"` and `3.2 m` work too. Roll widths: 48", 54", 60" and 61". **Printer margin** (default 6", both edges together) sets the printable width, so a 54" roll prints 48" wide; murals and film are laid out on the printable width, and media used is counted on the full roll.
 
 - **Mural:** wall width and height (or a rectangle or length from Measure), bleed on each edge (default 1"), overlap between panels (default 1"), drops or rows, and full rolls with a trimmed last panel or all panels equal. **Drag a seam** on the preview to move it off a face or logo; later seams slide with it and the last panel takes up the difference. Fill with a solid colour, a gradient or an image (fill, fit, stretch or a repeating pattern). Exports **panels as a true-size PDF** (one page per panel, with optional labels and seam marks in the bleed), a zip of PNG tiles, a panel map, a panel list and a CSV.
-- **Privacy film:** glass panes (width, height, quantity) with a trim allowance on each edge, laid out as drops or rows, whichever uses less film. **Add from Measure** turns rectangles and lengths (tagged Privacy film, or untagged) into panes. Totals linear feet, film area, seams and yield.
+- **Privacy film:** glass panes (width, height, quantity) with a trim allowance on each edge, laid out as drops or rows, whichever uses less film. **Add from Measure** turns rectangles and lengths (tagged Privacy film, or untagged) into panes. Totals **linear feet of glass** (horizontal width × quantity, the way film is quoted), glass area, roll used, film area, seams and yield; the quote can charge by glass area, linear feet or film used.
 - **Distraction markers:** glass runs, band heights (bottom edge from the floor, e.g. `30, 60`), band height and pattern (squares, dots or a solid line). **Add from Measure** brings in lengths and runs. **Cut file (PDF or SVG):** pieces nested across the roll at true size, cut lines on a spot colour named CutContour (PDF pages up to 10 ft; long strips split at the longest strip you set).
 - **Quote** (each job): price and install rate per sq ft or LF, setup, minimum, rush, and what to charge on. Copy the quote into an email or PressWise. Prices are examples until you change them; DIM remembers yours in the browser.
 
