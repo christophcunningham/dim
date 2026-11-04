@@ -134,14 +134,15 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
 .zoom span { min-width: 46px; text-align: center; }
 
 /* Tools in two rows, row details, quote */
-.tools.grid5 { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.tools.grid5 { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
 .item-more input.valin { flex: 1 1 100%; background: var(--b08); padding: 3px 5px; font-size: 11.5px; }
 .readout.small { font-size: 22px; }
 .item-more { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; padding: 4px 0 2px 21px; flex-wrap: wrap; }
 .item-more select { width: auto; flex: 1; min-width: 0; padding: 2px 4px; font-size: 11.5px; }
-.sty { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; flex: 1 1 100%; font-size: 11px; color: var(--b01); }
+.sty { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; flex: 1 1 100%; font-size: 11px; color: var(--b01); }
 .sty-l { width: 44px; flex: none; }
-.item .sw { width: 15px; height: 15px; border: 1px solid var(--b00); border-radius: 3px; padding: 0; flex: none; }
+.sty-s { width: 30px; flex: none; }
+.item .sw { width: 14px; height: 14px; border: 1px solid var(--b00); border-radius: 3px; padding: 0; flex: none; }
 .item .sw.on { outline: 2px solid var(--b00); outline-offset: 1px; }
 .item .sw.auto { background: linear-gradient(135deg, var(--green) 0 33%, var(--blue) 33% 66%, var(--purple) 66%); }
 .swpick { width: 22px; height: 17px; padding: 0; border: 1px solid var(--b00); border-radius: 3px; background: none; flex: none; cursor: pointer; }
@@ -283,7 +284,8 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
   var ICON = {
     select: '<path d="M4 3l10 6-4.5 1.2L7.5 15z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
     hand: '<path d="M6 9V4.5a1 1 0 0 1 2 0V8m0-4.5V3a1 1 0 0 1 2 0v5m0-4a1 1 0 0 1 2 0v4.5m0-3a1 1 0 0 1 2 0V11c0 3-2 5-5 5-2 0-3-1-4.5-3L3.2 10.4a1 1 0 0 1 1.6-1.2L6 10.5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>',
-    scale: '<path d="M2 9h14M2 6v6M16 6v6M6 8v2M10 8v2M13 8v2" fill="none" stroke="currentColor" stroke-width="1.4"/>',
+    scale: '<rect x="1" y="6" width="16" height="6" fill="none" stroke="currentColor" stroke-width="1"/><path d="M1 6h2v3H1zM3 9h2v3H3zM5 6h3v3H5zM8 9h3v3H8zM11 6h6v3h-6z" fill="currentColor"/>',
+    resize: '<rect x="2.5" y="7.5" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="2 1.5"/><path d="M8 10L15.5 2.5M10.5 2.5h5v5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>',
     length: '<path d="M4 14L14 4" stroke="currentColor" stroke-width="1.5"/><rect x="1.5" y="12.5" width="4" height="4" fill="currentColor"/><rect x="12.5" y="1.5" width="4" height="4" fill="currentColor"/>',
     run: '<path d="M2.5 14.5L7 6l4.5 6L15.5 3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>',
     area: '<path d="M3 5l9-2 3.5 8-7 4.5L3 12z" fill="currentColor" fill-opacity=".3" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
@@ -387,6 +389,27 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     M.scales = { 1: { inPerUnit: 2 / 3, label: '1/4" = 1\'-0"', how: 'drawing', id: 'a0.25' } };
   }
 
+  // Blank canvas: drawn at true size, 1 unit = 1 inch, with an optional foot grid.
+  function blankSVG() {
+    var B = M.blank || { w: 240, h: 144, grid: true }, o = '<rect x="0" y="0" width="' + B.w + '" height="' + B.h + '" fill="#fff"/>';
+    if (B.grid) {
+      var step = Math.max(B.w, B.h) > 2400 ? 120 : 12;
+      for (var gx = step; gx < B.w; gx += step) o += '<line x1="' + gx + '" y1="0" x2="' + gx + '" y2="' + B.h + '" stroke="' + (gx % (step * 5) ? '#ececec' : '#d4d4d4') + '" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+      for (var gy = step; gy < B.h; gy += step) o += '<line x1="0" y1="' + gy + '" x2="' + B.w + '" y2="' + gy + '" stroke="' + (gy % (step * 5) ? '#ececec' : '#d4d4d4') + '" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+    }
+    return o + '<rect x="0" y="0" width="' + B.w + '" height="' + B.h + '" fill="none" stroke="#bbbbbb" stroke-width="1" vector-effect="non-scaling-stroke"/>';
+  }
+  function baseSVG() { return M.src === 'blank' ? blankSVG() : sampleSVG(); }
+  function setBlank(B) {
+    M.blank = { w: Math.max(12, B.w || 240), h: Math.max(12, B.h || 144), grid: B.grid !== false };
+    M.w = M.blank.w; M.h = M.blank.h; M.pages = 1;
+    M.scales = { 1: { inPerUnit: 1, label: 'Blank canvas, true size', how: 'blank', id: 'blank' } };
+  }
+  function newBlank() {
+    resetDoc('Blank canvas'); M.src = 'blank'; M.pdf = null; M.img = null; M.pageObj = null; M.fileBytes = null; M.fileType = '';
+    setBlank({ w: 240, h: 144, grid: true }); if (mode !== 'measure') setMode('measure');
+    buildPage(); fit(); renderAll(); History.reset();
+  }
   function sampleSVG() {
     var o = '<rect x="0" y="0" width="1728" height="1296" fill="#fff"/><rect x="36" y="36" width="1656" height="1224" fill="none" stroke="#222" stroke-width="2"/>';
     var walls = [
@@ -759,16 +782,17 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     if (M.src === 'none') {
       pageEl = canvasEl = baseEl = ovEl = null;
       stage.innerHTML = '<div class="empty"><h2>Open a drawing to start</h2><p>Use <b>Open file</b> in the Drawing panel on the right, or drag and drop a file onto this area.</p>' + FILE_TYPES +
-        '<div class="row"><label class="btn strong" for="file-start">Open file</label><input type="file" id="file-start" accept="application/pdf,image/*,.dim,.json" hidden><button type="button" class="btn" id="try-sample">Try the sample plan</button></div></div>';
+        '<div class="row"><label class="btn strong" for="file-start">Open file</label><input type="file" id="file-start" accept="application/pdf,image/*,.dim,.json" hidden><button type="button" class="btn" id="try-blank">Start a blank canvas</button><button type="button" class="btn" id="try-sample">Try the sample plan</button></div><p style="margin:10px 0 0">A blank canvas is drawn at true size, so every line and shape shows its real dimension.</p></div>';
       $('file-start').addEventListener('change', function (e) { openFile(e.target.files && e.target.files[0]); e.target.value = ''; });
       $('try-sample').addEventListener('click', useSample);
+      $('try-blank').addEventListener('click', newBlank);
       return;
     }
     stage.innerHTML = '<div class="page" id="page"><canvas id="pdf-canvas"></canvas><svg id="base" aria-hidden="true"></svg><svg id="ov" role="img" aria-label="Measurements"></svg></div>';
     pageEl = $('page'); canvasEl = $('pdf-canvas'); baseEl = $('base'); ovEl = $('ov');
     baseEl.setAttribute('viewBox', '0 0 ' + M.w + ' ' + M.h);
     ovEl.setAttribute('viewBox', '0 0 ' + M.w + ' ' + M.h);
-    if (M.src === 'sample') { canvasEl.hidden = true; baseEl.innerHTML = sampleSVG(); }
+    if (M.src === 'sample' || M.src === 'blank') { canvasEl.hidden = true; baseEl.innerHTML = baseSVG(); }
     else { baseEl.innerHTML = ''; canvasEl.hidden = false; }
     bindPage(); sizePage();
   }
@@ -777,7 +801,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     pageEl.style.width = (M.w * M.zoom) + 'px';
     pageEl.style.height = (M.h * M.zoom) + 'px';
     $('zl').textContent = Math.round(M.zoom * 100) + '%';
-    if (M.src !== 'sample') { clearTimeout(rasterTimer); rasterTimer = setTimeout(drawRaster, 120); }
+    if (M.src === 'pdf' || M.src === 'image') { clearTimeout(rasterTimer); rasterTimer = setTimeout(drawRaster, 120); }
   }
   function drawRaster() {
     if (!canvasEl) return;
@@ -906,6 +930,14 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       o += '<polyline points="' + svgPts(dp) + '" fill="none" stroke="#4a4a4a" stroke-width="3.5" stroke-opacity=".35" vector-effect="non-scaling-stroke"/><polyline points="' + svgPts(dp) + '" fill="none" stroke="' + COL.draft + '" stroke-width="2" vector-effect="non-scaling-stroke"/>';
       M.draft.forEach(function (p) { o += pt(p, COL.draft); });
     }
+    if (M.tool === 'resize' && sel.item) {
+      var rit = itemById(sel.item);
+      if (rit && rit.page === M.page && rit.type !== 'note') {
+        var rc = resizeCorners(rit);
+        o += '<polygon points="' + svgPts(rc) + '" fill="none" stroke="#3e7bfa" stroke-width="1" stroke-dasharray="5 3" vector-effect="non-scaling-stroke"/>';
+        rc.forEach(function (q) { o += '<rect x="' + (q.x - 4.5 * k) + '" y="' + (q.y - 4.5 * k) + '" width="' + 9 * k + '" height="' + 9 * k + '" fill="#ffffff" stroke="#3e7bfa" stroke-width="1.5" vector-effect="non-scaling-stroke"/>'; });
+      }
+    }
     if (editing && M.hoverSeg && !M.hoverPt && !M.drag) o += '<circle cx="' + M.hoverSeg.at.x + '" cy="' + M.hoverSeg.at.y + '" r="' + 3.5 * k + '" fill="#ffffff" stroke="#4a4a4a" stroke-width="1" vector-effect="non-scaling-stroke"/>';
     if (M.hover && M.snapped && (!editing || M.drag)) {
       var hp2 = M.drag ? (itemById(M.drag.item) || {}).pts[M.drag.idx] : M.hover;
@@ -965,6 +997,28 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     return best;
   }
   function inPoly(p, pts) { var c = false; for (var i = 0, j = pts.length - 1; i < pts.length; j = i++) { var a = pts[i], b = pts[j]; if (((a.y > p.y) !== (b.y > p.y)) && (p.x < (b.x - a.x) * (p.y - a.y) / (b.y - a.y) + a.x)) c = !c; } return c; }
+  // ---- Resize: a measurement's bounding box, its corner handles, and scaling it to a typed size ----
+  function bboxOf(pts) { var xs = pts.map(function (q) { return q.x; }), ys = pts.map(function (q) { return q.y; }); var x0 = Math.min.apply(null, xs), y0 = Math.min.apply(null, ys); return { x: x0, y: y0, w: Math.max.apply(null, xs) - x0, h: Math.max.apply(null, ys) - y0 }; }
+  function resizeCorners(it) { var b = bboxOf(geomPts(it)), pad = 6 / M.zoom; return [{ x: b.x - pad, y: b.y - pad }, { x: b.x + b.w + pad, y: b.y - pad }, { x: b.x + b.w + pad, y: b.y + b.h + pad }, { x: b.x - pad, y: b.y + b.h + pad }]; }
+  function hitResizeHandle(it, p) {
+    if (it.type === 'note') return null;
+    var b = bboxOf(geomPts(it)), c = { x: b.x + b.w / 2, y: b.y + b.h / 2 }, tol = 8 / M.zoom;
+    return resizeCorners(it).some(function (q) { return dist(q, p) < tol; }) ? { c: c } : null;
+  }
+  // What "size" means for each kind: total length for lines, width for areas and counts.
+  function resizeBasis(it) {
+    if (it.type === 'note' || it.type === 'angle') return null;
+    if (/^(length|run|curve|dim)$/.test(it.type)) return { label: 'New length', units: pathLen(geomPts(it)) };
+    return { label: 'New width', units: bboxOf(it.pts).w };
+  }
+  function resizeTo(it, inches) {
+    var rb = resizeBasis(it), cur = rb && lenIn(rb.units, it.page);
+    if (!(cur > 0) || !(inches > 0)) return false;
+    var f = inches / cur, b = bboxOf(geomPts(it)), c = { x: b.x + b.w / 2, y: b.y + b.h / 2 };
+    it.pts = it.pts.map(function (q) { return { x: c.x + (q.x - c.x) * f, y: c.y + (q.y - c.y) * f }; });
+    if (isFinite(it.manualIn)) { delete it.manual; delete it.manualIn; }
+    return true;
+  }
   function removePoint(itemId, idx) {
     var it = itemById(itemId); if (!it) return;
     var min = { area: 3, angle: 3, curve: 3, count: 1, note: 1, dim: 2 }[it.type] || 2;
@@ -1082,7 +1136,24 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         } else {
           var hs = hitSegment(p);
           M.sel = hs ? { item: hs.item, pt: null } : null; if (hs) M.last = hs.item;
+          if (hs) {
+            var hit = itemById(hs.item);
+            if (hit.type === 'curve' && !e.shiftKey && hs.seg >= 0) {
+              // Bend: a 3-point arc moves its middle point so it passes under the cursor; longer curves get a new point here.
+              var bi = 1, ins = false;
+              if (hit.pts.length !== 3) { bi = hs.seg + 1; hit.pts.splice(bi, 0, { x: hs.at.x, y: hs.at.y }); ins = true; }
+              M.sel = { item: hit.id, pt: bi };
+              M.drag = { item: hit.id, idx: bi, start: { x: hit.pts[bi].x, y: hit.pts[bi].y }, anchor: null, moved: false, inserted: ins };
+            } else M.drag = { item: hit.id, whole: true, from: p, orig: hit.pts.map(function (q) { return { x: q.x, y: q.y }; }), moved: false };
+            pageEl.setPointerCapture(e.pointerId); pageEl.classList.add('dragging');
+          }
         }
+        renderOverlay(); renderPanels(); return;
+      }
+      if (M.tool === 'resize') {
+        var rp = toPage(e), rit = M.sel && itemById(M.sel.item), rh = rit && hitResizeHandle(rit, rp);
+        if (rh) { M.drag = { resize: true, item: rit.id, c: rh.c, d0: Math.max(1e-6, dist(rp, rh.c)), orig: rit.pts.map(function (q) { return { x: q.x, y: q.y }; }), moved: false }; pageEl.setPointerCapture(e.pointerId); pageEl.classList.add('dragging'); }
+        else { var rhp = hitPoint(rp), rhs = rhp ? null : hitSegment(rp), rid = rhp ? rhp.item : rhs ? rhs.item : null; M.sel = rid ? { item: rid, pt: null } : null; if (rid) M.last = rid; }
         renderOverlay(); renderPanels(); return;
       }
       down = { x: e.clientX, y: e.clientY };
@@ -1090,6 +1161,12 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     pageEl.addEventListener('pointermove', function (e) {
       if (pan) { stage.scrollLeft = pan.sl - (e.clientX - pan.x); stage.scrollTop = pan.st - (e.clientY - pan.y); return; }
       if (M.tool === 'pan') return;
+      if (M.drag && (M.drag.whole || M.drag.resize)) {
+        var dp = toPage(e), dit = itemById(M.drag.item); if (!dit) { M.drag = null; return; }
+        if (M.drag.whole) { var ddx = dp.x - M.drag.from.x, ddy = dp.y - M.drag.from.y; dit.pts = M.drag.orig.map(function (q) { return { x: q.x + ddx, y: q.y + ddy }; }); }
+        else { var c = M.drag.c, f = Math.max(0.02, dist(dp, c) / M.drag.d0); dit.pts = M.drag.orig.map(function (q) { return { x: c.x + (q.x - c.x) * f, y: c.y + (q.y - c.y) * f }; }); }
+        M.drag.moved = true; renderOverlay(); return;
+      }
       if (M.tool === 'edit') {
         var p = toPage(e);
         if (M.drag) {
@@ -1106,7 +1183,11 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     pageEl.addEventListener('pointerleave', function () { if (!pan && !M.drag) { M.hover = null; M.hoverPt = null; M.hoverSeg = null; renderOverlay(); } });
     pageEl.addEventListener('pointerup', function (e) {
       if (pan) { pan = null; pageEl.classList.remove('panning'); return; }
-      if (M.drag) { var moved = M.drag.moved; M.drag = null; pageEl.classList.remove('dragging'); if (moved) renderPanels(); renderOverlay(); return; }
+      if (M.drag) {
+        var dd = M.drag, moved = dd.moved; M.drag = null; pageEl.classList.remove('dragging');
+        if (!moved && dd.inserted) { var di = itemById(dd.item); if (di) { di.pts.splice(dd.idx, 1); M.sel = { item: di.id, pt: null }; } }
+        if (moved) renderPanels(); renderOverlay(); return;
+      }
       if (!down) return;
       var dist2 = Math.hypot(e.clientX - down.x, e.clientY - down.y); down = null;
       if (dist2 > 5) return;
@@ -1131,7 +1212,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     if (b.dataset.z === 'in') zoomAt(1.25); else if (b.dataset.z === 'out') zoomAt(0.8); else fit();
   });
   function typing(e) { return /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName); }
-  var HOTKEYS = { h: 'pan', s: 'scale', l: 'length', r: 'run', k: 'curve', a: 'area', v: 'edit', b: 'rect', c: 'count', g: 'angle', t: 'note', d: 'dim' };
+  var HOTKEYS = { h: 'pan', s: 'scale', z: 'resize', l: 'length', r: 'run', k: 'curve', a: 'area', v: 'edit', b: 'rect', c: 'count', g: 'angle', t: 'note', d: 'dim' };
   var ARROWS = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
   document.addEventListener('keydown', function (e) {
     if (mode !== 'measure' || typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -1152,7 +1233,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
   });
 
   // ---- Panels ----
-  var MTOOLS = [['hand', 'pan', 'Pan (H, or hold Space)'], ['select', 'edit', 'Edit points (V): drag to move, right-click or Delete to remove'], ['scale', 'scale', 'Set scale from a known length (S)'], ['length', 'length', 'Length (L)'], ['run', 'run', 'Run: several segments (R)'], ['trace', 'curve', 'Curve: click points along it, Enter to finish. 3 points make a true arc (K)'], ['dim', 'dim', 'Dimension: click both ends, then type the size you measured (D)'],
+  var MTOOLS = [['hand', 'pan', 'Pan (H, or hold Space)'], ['select', 'edit', 'Edit (V): drag points to move them, drag a line to move it, drag a curve to bend it'], ['scale', 'scale', 'Set the drawing scale from a known length (S)'], ['resize', 'resize', 'Resize a measurement: drag a corner, or type its new size (Z)'], ['length', 'length', 'Length (L)'], ['run', 'run', 'Run: several segments (R)'], ['trace', 'curve', 'Curve: click points along it, Enter to finish. 3 points make a true arc (K)'], ['dim', 'dim', 'Dimension: click both ends, then type the size you measured (D)'],
     ['area', 'area', 'Area (A)'], ['rect', 'rect', 'Rectangle area: two corners (B)'], ['count', 'count', 'Count: click each item, Enter starts a new count (C)'], ['angle', 'angle', 'Angle: three clicks, corner in the middle (G)'], ['note', 'note', 'Note: click to pin a note (T)']];
   function renderTools() {
     toolsEl.classList.toggle('grid5', mode === 'measure');
@@ -1175,6 +1256,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
   }
   function sizeText() {
     if (M.src === 'image') return M.w + ' × ' + M.h + ' px image';
+    if (M.src === 'blank') return fmtLen(M.w) + ' × ' + fmtLen(M.h) + ' canvas, drawn at true size';
     var r = function (n) { return Math.round(n / 72 * 100) / 100; };
     return r(M.w) + ' × ' + r(M.h) + ' in sheet';
   }
@@ -1219,6 +1301,15 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     }
     var mine = M.items.filter(function (it) { return it.page === M.page; });
     var h = '<div class="block"><div class="label" id="readout-label"></div><div class="readout" id="readout"></div></div>';
+    if (M.tool === 'resize') {
+      var rsel = M.sel && itemById(M.sel.item), rb = rsel && resizeBasis(rsel);
+      h += '<div class="block"><div class="label">Resize' + (rsel ? ' · ' + esc(rsel.name) : '') + '</div>';
+      if (!rsel) h += '<p class="hint">Click a measurement on the drawing, then drag a corner or type its new size here.</p>';
+      else if (!rb) h += '<p class="hint">Notes and angles can’t be resized.</p>';
+      else if (!scaleFor(rsel.page)) h += '<p class="hint">Set the drawing scale first (S).</p>';
+      else h += '<label class="field">' + rb.label + ' (now ' + fmtLen(lenIn(rb.units, rsel.page)) + ')<input type="text" id="resize-in" inputmode="decimal" placeholder="e.g. 96 or 8\'-0&quot;"></label><div class="row" style="margin-top:6px"><button type="button" class="btn strong" data-rsz="' + rsel.id + '">Resize</button></div><p class="hint">Scales it evenly around its center. Plain numbers are inches.</p>';
+      h += '</div>';
+    }
     h += '<div class="block"><div class="label">Measurements' + (M.pages > 1 ? ' · page ' + M.page : '') + '</div>';
     if (M.note) h += '<p class="hint" style="color:var(--b00)">' + esc(M.note) + '</p>';
     if (!mine.length) h += '<p class="hint">Pick a tool above, then click on the drawing.</p>';
@@ -1239,7 +1330,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     updateLive();
   }
   function styleControls(it) {
-    var h = '<div class="sty"><span class="sty-l">Color</span><button type="button" class="sw auto' + (!it.color ? ' on' : '') + '" data-color="" title="Default color" aria-label="Default color"></button>' +
+    var h = '<div class="sty"><button type="button" class="sw auto' + (!it.color ? ' on' : '') + '" data-color="" title="Default color" aria-label="Default color"></button>' +
       PALETTE.map(function (c) { return '<button type="button" class="sw' + (it.color === c ? ' on' : '') + '" data-color="' + c + '" style="background:' + c + '" aria-label="Color ' + c + '"></button>'; }).join('') +
       '<input type="color" class="swpick" data-colorpick="' + it.id + '" value="' + (it.color || '#3e7bfa') + '" title="Any color" aria-label="Pick any color"></div>';
     if (LINE_TYPES.test(it.type) || it.type === 'area') {
@@ -1276,11 +1367,13 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     // Drawing
     var d = M.src === 'none' ? '<p class="hint" style="margin:0">No drawing open.</p>' : '<p>' + esc(M.name) + '</p><p class="hint" style="margin:0">' + sizeText() + (M.pages > 1 ? ' · page ' + M.page + ' of ' + M.pages : '') + '</p>';
     d += '<div class="row"><label class="btn strong" for="file">Open file</label><input type="file" id="file" accept="application/pdf,image/*,.dim,.json" hidden>';
+    if (M.src !== 'blank') d += '<button type="button" class="btn" data-act="blank">Blank canvas</button>';
     if (M.src !== 'sample') d += '<button type="button" class="btn" data-act="sample">Sample plan</button>';
     d += '</div><p class="hint" style="margin:0">PDF, JPG, PNG, GIF, WebP or a .dim project. You can also drop a file onto the canvas.</p>';
     if (M.pages > 1) d += '<div class="row"><button type="button" class="btn" data-act="prev"' + (M.page === 1 ? ' disabled' : '') + '>‹ Prev page</button><button type="button" class="btn" data-act="next"' + (M.page === M.pages ? ' disabled' : '') + '>Next page ›</button></div>';
     var ix = M.snaps[M.page], snapInfo = M.src === 'image' ? 'Images have no lines to snap to.' : !ix ? '' : ix.pending ? 'Reading the drawing’s lines…' : ix.failed ? 'Could not read lines from this PDF.' : (M.src === 'sample' ? 'Snaps to wall ends and along walls.' : num0(ix.count || 0) + ' lines found.');
-    if (M.src !== 'none') d += '<label class="chk"><input type="checkbox" id="snap-drawing"' + (M.snapDrawing ? ' checked' : '') + (M.src === 'image' ? ' disabled' : '') + '> Snap to the drawing’s lines</label><p class="hint" style="margin:0">' + snapInfo + ' Hold Alt to place a point without snapping.</p>';
+    if (M.src === 'blank') d += '<div class="row2"><label class="field">Canvas width<input type="text" id="blank-w" value="' + esc(fmtLen(M.blank.w)) + '"></label><label class="field">Canvas height<input type="text" id="blank-h" value="' + esc(fmtLen(M.blank.h)) + '"></label></div><label class="chk"><input type="checkbox" id="blank-grid"' + (M.blank.grid ? ' checked' : '') + '> Show a 1 ft grid</label>';
+    if (M.src !== 'none' && M.src !== 'blank') d += '<label class="chk"><input type="checkbox" id="snap-drawing"' + (M.snapDrawing ? ' checked' : '') + (M.src === 'image' ? ' disabled' : '') + '> Snap to the drawing’s lines</label><p class="hint" style="margin:0">' + snapInfo + ' Hold Alt to place a point without snapping.</p>';
     if (M.error) d += '<p class="err">' + esc(M.error) + '</p>';
     h += sec('drawing', 'Drawing', d);
     // Project
@@ -1288,6 +1381,8 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     pr += '<p class="hint" style="margin:0">' + (Autosave.status || 'Your work is also kept in this browser, so a refresh or closed tab picks up where you left off.') + '</p>';
     h += sec('project', 'Project', pr);
     // Scale
+    if (M.src === 'blank') { h += sec('scale', 'Scale', '<p class="hint" style="margin:0">A blank canvas is drawn at true size: every measurement is its real length.</p>'); }
+    else {
     var sc = '<label class="field" for="scale-sel">Scale printed on the sheet<select id="scale-sel"><option value="">Choose…</option>';
     var groups = {};
     PRESETS.forEach(function (p) { (groups[p.group] = groups[p.group] || []).push(p); });
@@ -1303,6 +1398,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     }
     if (s) sc += '<p class="hint" style="margin:0">Check it: measure a dimension printed on the sheet.</p>';
     h += sec('scale', 'Scale', sc);
+    }
     // Totals
     var mine = M.items.filter(function (it) { return it.page === M.page; }), t = totalsFor(mine);
     var tt = '<dl class="kv"><dt>Length + runs</dt><dd>' + (t.lin ? (t.lin / 12).toFixed(1) + ' lin ft' : '—') + '</dd><dt>Area</dt><dd>' + (t.area ? fmtSqft(t.area) : '—') + '</dd>';
@@ -1318,7 +1414,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     ex += '<textarea id="copybox" hidden readonly class="copybox"></textarea>';
     h += sec('export', 'Export', ex);
     // Shortcuts
-    h += sec('keys', 'Shortcuts', '<div class="keys"><kbd>Ctrl Z</kbd><span>Undo (Shift for redo)</span><kbd>Ctrl S</kbd><span>Save project</span><kbd>V</kbd><span>Edit points: drag to move</span><kbd>Right-click</kbd><span>Remove a point (or the last one while drawing)</span><kbd>Delete</kbd><span>Remove the selected point or measurement</span><kbd>Dbl-click</kbd><span>On an edge in Edit: add a point</span><kbd>Arrows</kbd><span>Nudge the selection (Shift ×10)</span><kbd>H</kbd><span>Pan, or hold Space</span><kbd>S</kbd><span>Set scale</span><kbd>L</kbd><span>Length</span><kbd>R</kbd><span>Run</span><kbd>K</kbd><span>Curve (3 points make an arc)</span><kbd>A</kbd><span>Area</span><kbd>B</kbd><span>Rectangle area</span><kbd>C</kbd><span>Count (Enter starts a new count)</span><kbd>G</kbd><span>Angle</span><kbd>T</kbd><span>Note</span><kbd>D</kbd><span>Dimension: type the size you measured</span><kbd>F</kbd><span>Fit page</span><kbd>Shift</kbd><span>Straight lines</span><kbd>Alt</kbd><span>Place without snapping</span><kbd>Enter</kbd><span>Finish run, curve, area or count</span><kbd>Esc</kbd><span>Cancel</span><kbd>Ctrl</kbd><span>+ scroll to zoom</span></div>');
+    h += sec('keys', 'Shortcuts', '<div class="keys"><kbd>Ctrl Z</kbd><span>Undo (Shift for redo)</span><kbd>Ctrl S</kbd><span>Save project</span><kbd>V</kbd><span>Edit: drag points or whole lines; drag a curve to bend it (Shift+drag moves it)</span><kbd>Right-click</kbd><span>Remove a point (or the last one while drawing)</span><kbd>Delete</kbd><span>Remove the selected point or measurement</span><kbd>Dbl-click</kbd><span>On an edge in Edit: add a point</span><kbd>Arrows</kbd><span>Nudge the selection (Shift ×10)</span><kbd>H</kbd><span>Pan, or hold Space</span><kbd>S</kbd><span>Set the drawing scale</span><kbd>Z</kbd><span>Resize a measurement</span><kbd>L</kbd><span>Length</span><kbd>R</kbd><span>Run</span><kbd>K</kbd><span>Curve (3 points make an arc)</span><kbd>A</kbd><span>Area</span><kbd>B</kbd><span>Rectangle area</span><kbd>C</kbd><span>Count (Enter starts a new count)</span><kbd>G</kbd><span>Angle</span><kbd>T</kbd><span>Note</span><kbd>D</kbd><span>Dimension: type the size you measured</span><kbd>F</kbd><span>Fit page</span><kbd>Shift</kbd><span>Straight lines</span><kbd>Alt</kbd><span>Place without snapping</span><kbd>Enter</kbd><span>Finish run, curve, area or count</span><kbd>Esc</kbd><span>Cancel</span><kbd>Ctrl</kbd><span>+ scroll to zoom</span></div>');
     h += aboutSec();
     rightEl.innerHTML = h;
   }
@@ -1364,6 +1460,12 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
   rightEl.addEventListener('change', function (e) {
     if (e.target.id === 'file') { openFile(e.target.files && e.target.files[0]); e.target.value = ''; return; }
     if (e.target.id === 'snap-drawing') { M.snapDrawing = e.target.checked; renderRight(); return; }
+    if (/^blank-(w|h|grid)$/.test(e.target.id) && M.src === 'blank') {
+      var nb = Object.assign({}, M.blank), bv;
+      if (e.target.id === 'blank-grid') nb.grid = e.target.checked;
+      else { bv = parseSize(e.target.value); if (bv >= 12) nb[e.target.id === 'blank-w' ? 'w' : 'h'] = bv; }
+      setBlank(nb); buildPage(); fit(); renderAll(); return;
+    }
     if (e.target.id === 'scale-sel') {
       var v = e.target.value;
       if (v === 'calib') { setTool('scale'); return; }
@@ -1394,11 +1496,19 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     if (d.end) { var it4 = itemById(Number(d.end)); if (it4) { it4.end = e.target.value; if (it4.type !== 'area') M.style.end = it4.end; renderOverlay(); renderPanels(); } }
     if (d.rotv) { var it5 = itemById(Number(d.rotv)); if (it5) { it5.rot = normRot(e.target.value); renderOverlay(); renderPanels(); } }
   });
+  function applyResize(id) {
+    var it = itemById(id), inp = $('resize-in'); if (!it || !inp) return;
+    if (resizeTo(it, parseSize(inp.value))) { M.note = it.name + ' resized to ' + fmtLen(parseSize(inp.value)) + '.'; renderOverlay(); renderPanels(); }
+    else { inp.focus(); inp.select(); }
+  }
+  leftEl.addEventListener('keydown', function (e) { if (e.target.id === 'resize-in' && e.key === 'Enter') { var b = leftEl.querySelector('[data-rsz]'); if (b) applyResize(Number(b.dataset.rsz)); } });
   leftEl.addEventListener('keydown', function (e) { if (e.target.dataset && (e.target.dataset.name || e.target.dataset.val || e.target.dataset.rotv) && e.key === 'Enter') e.target.blur(); });
   leftEl.addEventListener('click', function (e) {
     if (mode !== 'measure') return;
     var del = e.target.closest('[data-del]');
     if (del) { var id = Number(del.dataset.del); M.items = M.items.filter(function (it) { return it.id !== id; }); if (M.sel && M.sel.item === id) M.sel = null; renderOverlay(); renderPanels(); return; }
+    var rz = e.target.closest('[data-rsz]');
+    if (rz) { applyResize(Number(rz.dataset.rsz)); return; }
     var host = e.target.closest('[data-item]'), hit = host && itemById(Number(host.dataset.item));
     var sw = e.target.closest('[data-color]');
     if (sw && hit) { setItemColor(hit, sw.dataset.color); return; }
@@ -1421,6 +1531,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     var b = e.target.closest('[data-act]'); if (!b) return;
     var a = b.dataset.act;
     if (a === 'sample') useSample();
+    else if (a === 'blank') newBlank();
     else if (a === 'prev' && M.page > 1) goPage(M.page - 1);
     else if (a === 'next' && M.page < M.pages) goPage(M.page + 1);
     else if (a === 'apply') applyCalib();
@@ -1449,7 +1560,8 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     else if (M.tool === 'angle') live = M.draft.length === 1 ? 'Click the corner' : M.draft.length === 2 ? 'Click the other side · <b>' + (M.hover ? angleAt(withHover(M.draft)).toFixed(1) + '°' : '') + '</b>' : 'Click a point on one side';
     else if (M.tool === 'dim') live = M.draft.length ? 'Click the other end' : 'Click both ends of something you measured, then type its size in the list';
     else if (M.tool === 'note') live = 'Click to pin a note, then type it in the list';
-    else if (M.tool === 'edit') { var si = M.sel && itemById(M.sel.item); live = si ? esc(si.name) + ' <b>' + itemValue(si) + '</b> · drag points · Delete removes ' + (M.sel.pt != null ? 'the point' : 'it') + ' · double-click an edge to add a point' : 'Click a point or line to select · drag points to move · right-click a point to remove it'; }
+    else if (M.tool === 'edit') { var si = M.sel && itemById(M.sel.item); live = si ? esc(si.name) + ' <b>' + itemValue(si) + '</b> · drag points or the whole line' + (si.type === 'curve' ? ' · drag the curve to bend it, Shift+drag to move it' : '') + ' · Delete removes ' + (M.sel.pt != null ? 'the point' : 'it') : 'Click a point or line to select · drag points or lines to move them · right-click a point to remove it'; }
+    else if (M.tool === 'resize') { var ri = M.sel && itemById(M.sel.item); live = ri ? esc(ri.name) + ' <b>' + itemValue(ri) + '</b> · drag a corner to resize, or type a size in the list' : 'Click a measurement to resize it'; }
     else live = 'Drag to move around';
     statusEl.innerHTML = live + snapTxt + ' · ' + (s ? esc(s.label) : 'no scale set');
   }
@@ -1507,7 +1619,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
   function toB64(blob) { return new Promise(function (res, rej) { var fr = new FileReader(); fr.onload = function () { res(String(fr.result).split(',')[1]); }; fr.onerror = function () { rej(fr.error); }; fr.readAsDataURL(blob); }); }
   function fromB64(b, type) { var bin = atob(b), u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new Blob([u], { type: type || 'application/octet-stream' }); }
   var Project = {
-    state: function () { return { app: 'DIM', v: 1, name: M.name, src: M.src, page: M.page, scales: M.scales, items: M.items, n: M.n, nextId: nextId, snapDrawing: M.snapDrawing, units: UNITS, style: M.style, layout: Lay.getState(), shop: Shop.getState(), shopLogo: Shop.getLogo() }; },
+    state: function () { return { app: 'DIM', v: 1, name: M.name, src: M.src, page: M.page, scales: M.scales, items: M.items, n: M.n, nextId: nextId, snapDrawing: M.snapDrawing, units: UNITS, style: M.style, blank: M.blank || null, markerArt: Lay.markerArt(), layout: Lay.getState(), shop: Shop.getState(), shopLogo: Shop.getLogo() }; },
     save: function () {
       var st = Project.state(), img = Lay.imageBlob();
       Promise.all([M.fileBytes ? toB64(new Blob([M.fileBytes])) : null, img ? toB64(img) : null]).then(function (r) {
@@ -1529,7 +1641,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       nextId = st.nextId || (M.items.reduce(function (m, it) { return Math.max(m, it.id); }, 0) + 1);
       M.snapDrawing = st.snapDrawing !== false;
       M.style = Object.assign({ color: '', end: '' }, st.style || {});
-      Lay.setState(st.layout, imgBlob);
+      Lay.setState(st.layout, imgBlob); if (st.markerArt) Lay.setMarkerArt(st.markerArt);
       Shop.setState(st.shop); if (st.shopLogo) Shop.setLogo(st.shopLogo);
     }
     var p;
@@ -1554,8 +1666,9 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       });
     } else {
       p = Promise.resolve().then(function () {
-        var isSample = st.src === 'sample';
-        resetDoc(isSample ? st.name || 'Sample: A-101 First floor plan.pdf' : ''); M.src = isSample ? 'sample' : 'none'; M.pdf = null; M.img = null; M.pageObj = null; M.pages = 1; M.w = 1728; M.h = 1296; M.fileBytes = null; M.fileType = '';
+        var isSample = st.src === 'sample', isBlank = st.src === 'blank';
+        resetDoc(isSample ? st.name || 'Sample: A-101 First floor plan.pdf' : isBlank ? st.name || 'Blank canvas' : ''); M.src = isSample ? 'sample' : isBlank ? 'blank' : 'none'; M.pdf = null; M.img = null; M.pageObj = null; M.pages = 1; M.w = 1728; M.h = 1296; M.fileBytes = null; M.fileType = '';
+        if (isBlank) setBlank(st.blank || {});
         if (/^Sample/.test(M.name)) document.title = 'DIM';
         applyData(); buildPage(); fit(); renderAll(); buildSnaps(1);
       });
@@ -1573,6 +1686,8 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     return loadScript('vendor/pdf-lib/pdf-lib.min.js').catch(function () { return loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js'); }).then(function () { return window.PDFLib; });
   }
   var Markup = { busy: false, note: '' };
+  // Blank canvases are in inches; the PDF page is scaled up so the long side is about 17".
+  function blankPdfScale() { return Math.max(1, 1224 / Math.max(M.w, M.h)); }
   function rgbCss(a) { return 'rgb(' + a.map(function (v) { return Math.round(v * 255); }).join(',') + ')'; }
   function canvasMarkup(ctx, items, f) {
     var u = Math.max(M.w, M.h) / 1000 * f, dark = '#333333', s = 5 * u / f;
@@ -1635,10 +1750,10 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     if (M.src === 'image') { f = Math.min(1, 6000 / Math.max(M.w, M.h)); paintP = Promise.resolve(function (ctx) { ctx.drawImage(M.img, 0, 0, M.w * f, M.h * f); }); }
     else if (M.src === 'pdf') { f = Math.min(4, 4000 / Math.max(M.w, M.h)); paintP = M.pdf.getPage(M.page).then(function (pg) { return function (ctx) { return pg.render({ canvasContext: ctx, viewport: pg.getViewport({ scale: f }) }).promise; }; }); }
     else {
-      f = 2;
+      f = Math.min(12, 3500 / Math.max(M.w, M.h));
       paintP = new Promise(function (res, rej) {
-        var im = new Image(); im.onload = function () { res(function (ctx) { ctx.drawImage(im, 0, 0, M.w * f, M.h * f); }); }; im.onerror = function () { rej(new Error('the sample could not be drawn')); };
-        im.src = URL.createObjectURL(new Blob(['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + M.w + ' ' + M.h + '" width="' + M.w * f + '" height="' + M.h * f + '">' + sampleSVG() + '</svg>'], { type: 'image/svg+xml' }));
+        var im = new Image(); im.onload = function () { res(function (ctx) { ctx.drawImage(im, 0, 0, M.w * f, M.h * f); }); }; im.onerror = function () { rej(new Error('the drawing could not be drawn')); };
+        im.src = URL.createObjectURL(new Blob(['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + M.w + ' ' + M.h + '" width="' + M.w * f + '" height="' + M.h * f + '">' + baseSVG() + '</svg>'], { type: 'image/svg+xml' }));
       });
     }
     paintP.then(function (paint) {
@@ -1680,12 +1795,19 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         });
         pg.drawText('SAMPLE CLINIC  ·  FIRST FLOOR PLAN  ·  SCALE: 1/4" = 1\'-0"', { x: 144, y: 90, size: 18, font: bold });
       }
+      if (M.src === 'blank') {
+        var bf = blankPdfScale(), bpg = doc.addPage([M.w * bf, M.h * bf]), B = M.blank, gstep = Math.max(B.w, B.h) > 2400 ? 120 : 12, gc = PL.rgb(0.88, 0.88, 0.88);
+        if (B.grid) {
+          for (var gx = gstep; gx < B.w; gx += gstep) bpg.drawLine({ start: { x: gx * bf, y: 0 }, end: { x: gx * bf, y: B.h * bf }, thickness: 0.4, color: gc });
+          for (var gy = gstep; gy < B.h; gy += gstep) bpg.drawLine({ start: { x: 0, y: gy * bf }, end: { x: B.w * bf, y: gy * bf }, thickness: 0.4, color: gc });
+        }
+      }
     }).then(function () {
       var pagesWith = []; M.items.forEach(function (it) { if (pagesWith.indexOf(it.page) < 0) pagesWith.push(it.page); });
       return pagesWith.reduce(function (chain, n) {
         return chain.then(function () {
           var mapP = M.src === 'pdf' ? M.pdf.getPage(n).then(function (pg) { var vp = pg.getViewport({ scale: 1 }); return { map: function (p) { var r = vp.convertToPdfPoint(p.x, p.y); return { x: r[0], y: r[1] }; }, w: vp.width, h: vp.height }; })
-            : Promise.resolve({ map: function (p) { return { x: p.x, y: M.h - p.y }; }, w: M.w, h: M.h });
+            : Promise.resolve((function () { var bf = M.src === 'blank' ? blankPdfScale() : 1; return { map: function (p) { return { x: p.x * bf, y: (M.h - p.y) * bf }; }, w: M.w * bf, h: M.h * bf }; })());
           return mapP.then(function (m) { drawOnPage(doc.getPage(n - 1), M.items.filter(function (it) { return it.page === n; }), m, n); });
         });
       }, Promise.resolve());
@@ -1791,7 +1913,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       mural: { w: 288, h: 108, bleed: 1, overlap: 1, orient: 'vertical', balance: true, custom: null, marks: true, art: 'gradient', color: '#5b8fbf', g1: '#1f3b57', g2: '#8fd0c8', angle: 0, img: null, imgName: '', fit: 'cover', tileW: 24, dpi: 50 },
       film: { allow: 1, defH: 96, mode: 'auto', look: 'gradient', c1: '#ffffff', c2: '#9cc8e8', sel: 0,
         panes: [{ name: 'Conference 27-015', w: 60, h: 96, qty: 6 }, { name: 'Conference 27-016', w: 48, h: 96, qty: 4 }, { name: 'Office sidelite', w: 24, h: 96, qty: 6 }] },
-      markers: { bands: '30, 60', barH: 2, maxStrip: 96, pattern: 'squares', size: 2, gap: 7.5, margin: 0, glassH: 96, spacing: 0.5, sel: 0,
+      markers: { bands: '30, 60', barH: 2, maxStrip: 96, pattern: 'squares', size: 2, gap: 7.5, margin: 0, glassH: 96, spacing: 0.5, sel: 0, graphics: [], seq: 'all', useIdx: 0, seqText: 'A, B',
         runs: [{ name: 'Reception glass', len: 384 }, { name: 'Conference front', len: 240 }, { name: 'Office fronts, east', len: 1104 }] },
       quote: null, note: '', busy: false
     };
@@ -1855,6 +1977,52 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     }
     function filmByLf() { return L.quote.film.basis === 'lf'; }
     function filmQty(t) { return filmByLf() ? num(t.run) + ' LF of glass' : num(t.net) + ' sq ft of glass'; }
+    // ---- Marker graphics: uploaded PNG or SVG, labeled A, B, C… in upload order ----
+    var artCache = {};
+    function artImg(g) {
+      var im = artCache[g.url];
+      if (!im) { im = artCache[g.url] = new Image(); im.onload = function () { if (mode === 'layout' && L.job === 'markers') draw(); }; im.src = g.url; }
+      return im.complete && im.naturalWidth ? im : null;
+    }
+    function letter(i) { return String.fromCharCode(65 + i); }
+    // Which graphic each marker in a band uses, in order: the same one every time, A B C… repeating, or your own sequence.
+    function seqList() {
+      var K = L.markers, G = K.graphics || []; if (!G.length) return [];
+      if (K.seq === 'order') return G.map(function (g, i) { return i; });
+      if (K.seq === 'custom') { var l = String(K.seqText || '').toUpperCase().replace(/[^A-Z]/g, '').split('').map(function (c) { return c.charCodeAt(0) - 65; }).filter(function (i) { return i < G.length; }); return l.length ? l : [0]; }
+      return [Math.min(K.useIdx || 0, G.length - 1)];
+    }
+    function graphicAt(i) { var l = seqList(); return l.length ? L.markers.graphics[l[i % l.length]] : null; }
+    function graphicH(g) { return g ? L.markers.size * g.h / g.w : L.markers.size; }
+    function isArt() { return L.markers.pattern === 'graphic'; }
+    function readGraphics(files) {
+      var list = Array.prototype.slice.call(files || []);
+      list.reduce(function (chain, f) {
+        return chain.then(function () {
+          return new Promise(function (res) {
+            var isSvg = /svg/i.test(f.type) || /\.svg$/i.test(f.name);
+            (isSvg ? f.text() : Promise.resolve('')).then(function (txt) {
+              var ratio = 1;
+              if (isSvg) {
+                var vb = /viewBox\s*=\s*["']\s*[-\d.]+[\s,]+[-\d.]+[\s,]+([\d.]+)[\s,]+([\d.]+)/i.exec(txt), wm = /<svg[^>]*\swidth\s*=\s*["']([\d.]+)/i.exec(txt), hm = /<svg[^>]*\sheight\s*=\s*["']([\d.]+)/i.exec(txt);
+                if (vb) ratio = vb[2] / vb[1]; else if (wm && hm) ratio = hm[1] / wm[1];
+              }
+              var url = URL.createObjectURL(f), im = new Image();
+              im.onload = function () {
+                var w0 = im.naturalWidth || 1000, h0 = im.naturalHeight || w0 * ratio;
+                if (isSvg) { w0 = 1200; h0 = 1200 * ratio; }
+                var f2 = Math.min(1, 1200 / Math.max(w0, h0)), c = document.createElement('canvas');
+                c.width = Math.max(1, Math.round(w0 * f2)); c.height = Math.max(1, Math.round(h0 * f2));
+                c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+                L.markers.graphics.push({ name: f.name, url: c.toDataURL('image/png'), w: c.width, h: c.height }); res();
+              };
+              im.onerror = function () { flash('Could not read ' + f.name + '.'); res(); };
+              im.src = url;
+            });
+          });
+        });
+      }, Promise.resolve()).then(function () { if (L.markers.graphics.length) L.markers.pattern = 'graphic'; all(); Autosave.schedule(); });
+    }
     function bands() { return String(L.markers.bands).split(/[,\s]+/).map(parseIn).filter(function (x) { return isFinite(x) && x >= 0; }).sort(function (a, b) { return a - b; }); }
     function markerCount(len) {
       var K = L.markers; if (K.pattern === 'solid') return 0;
@@ -1867,7 +2035,13 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       t.lf = t.runLen * nb / 12;
       var R = L.roll;
       if (K.pattern === 'solid') { t.lanes = Math.max(1, Math.floor(R / (K.barH + K.spacing))); t.rollFt = t.lf / t.lanes; }
-      else { t.lanes = Math.max(1, Math.floor(R / (K.size + K.spacing))); t.rollFt = Math.ceil(t.pieces / t.lanes) * (K.size + K.spacing) / 12; }
+      else {
+        t.lanes = Math.max(1, Math.floor(R / (K.size + K.spacing)));
+        var ph = K.size;
+        if (K.pattern === 'graphic') { var sl = seqList(); ph = sl.length ? sl.reduce(function (a, i) { return a + graphicH(K.graphics[i]); }, 0) / sl.length : K.size; }
+        else if (K.pattern === 'squares') ph = K.barH;
+        t.rollFt = Math.ceil(t.pieces / t.lanes) * (ph + K.spacing) / 12;
+      }
       return t;
     }
     function imagePpi() {
@@ -2011,7 +2185,11 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         else for (var q = 0; q < n; q++) {
           var px = start + q * (K.size + K.gap); if (px > shown) break;
           var sz = K.size * s;
-          if (K.pattern === 'dots') { ctx.beginPath(); ctx.arc(x0 + (px + K.size / 2) * s, y + bhPx / 2, Math.max(1, sz / 2), 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
+          if (K.pattern === 'graphic') {
+            var g = graphicAt(q), gh = graphicH(g) * s, gy = floor - bh * s - gh, gim = g && artImg(g);
+            if (gim) ctx.drawImage(gim, x0 + px * s, gy, Math.max(1, sz), gh); else ctx.strokeRect(x0 + px * s, gy, Math.max(1, sz), gh);
+          }
+          else if (K.pattern === 'dots') { ctx.beginPath(); ctx.arc(x0 + (px + K.size / 2) * s, y + bhPx / 2, Math.max(1, sz / 2), 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
           else { ctx.fillRect(x0 + px * s, y, Math.max(1, sz), bhPx); ctx.strokeRect(x0 + px * s, y, Math.max(1, sz), bhPx); }
         }
         var xd = x0 - 28 - bi * 24;
@@ -2132,8 +2310,18 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       } else {
         var K = L.markers, mt = markerTotals();
         var bnd = '<label class="field">Bottom edge of each band, from the floor<input type="text" data-k="markers.bands" data-kind="raw" value="' + esc(K.bands) + '"></label><p class="hint" style="margin:0">Separate heights with commas, e.g. 30, 60. Check local code and the spec.</p>' +
-          field('Band height', 'markers.barH', 'in') + selectF('Pattern', 'markers.pattern', [['squares', 'Squares'], ['dots', 'Dots'], ['solid', 'Solid line']]);
-        if (K.pattern !== 'solid') bnd += '<div class="row2">' + field(K.pattern === 'dots' ? 'Dot size' : 'Square size', 'markers.size', 'in') + field('Gap', 'markers.gap', 'in') + '</div>';
+          (isArt() ? '' : field('Band height', 'markers.barH', 'in')) + selectF('Pattern', 'markers.pattern', [['squares', 'Squares'], ['dots', 'Dots'], ['solid', 'Solid line'], ['graphic', 'Your graphics (PNG or SVG)']]);
+        if (isArt()) {
+          var G = K.graphics || [];
+          bnd += '<div class="label">Graphics</div>' + (G.length ? '<div class="list">' + G.map(function (g, i) { return '<div class="item ro"><span class="chip" style="background:#fff url(' + g.url + ') center/contain no-repeat"></span><span>' + letter(i) + ' · ' + esc(g.name) + '</span><b></b><button type="button" data-delart="' + i + '" aria-label="Remove ' + esc(g.name) + '">×</button></div>'; }).join('') + '</div>' : '<p class="hint" style="margin:0">Upload one or more PNG or SVG files. Each is labeled A, B, C… in the order you add them.</p>') +
+            '<div class="row"><label class="btn" for="marker-art">Upload graphics</label><input type="file" id="marker-art" accept="image/png,image/svg+xml,.svg,.png" multiple hidden></div>';
+          if (G.length) {
+            bnd += selectF('Use', 'markers.seq', [['all', 'The same graphic on every marker'], ['order', 'Each graphic in turn (A, B, C…)'], ['custom', 'My own sequence']]);
+            if (K.seq === 'all' && G.length > 1) bnd += selectF('Graphic', 'markers.useIdx', G.map(function (g, i) { return [i, letter(i) + ' · ' + g.name]; }));
+            if (K.seq === 'custom') bnd += '<label class="field">Sequence<input type="text" data-k="markers.seqText" data-kind="raw" value="' + esc(K.seqText) + '"></label><p class="hint" style="margin:0">Letters repeat along each band, e.g. A, A, B or ABC.</p>';
+          }
+        }
+        if (K.pattern !== 'solid') bnd += '<div class="row2">' + field(K.pattern === 'dots' ? 'Dot size' : isArt() ? 'Graphic width' : 'Square size', 'markers.size', 'in') + field('Gap', 'markers.gap', 'in') + '</div>' + (isArt() ? '<p class="hint" style="margin:0">Each graphic keeps its own shape; its height follows the width. The band height is where each graphic’s bottom edge sits.</p>' : '');
         bnd += field('Clear space at each end', 'markers.margin', 'in') + field('Glass height (preview)', 'markers.glassH', 'in');
         h += lsec('m_bands', 'Bands', bnd);
         h += lsec('m_cut', 'Cutting', rollSel(true) + field('Spacing between pieces on the roll', 'markers.spacing', 'in'));
@@ -2142,7 +2330,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         var nr = nest(cutPieces());
         h += lsec('m_exp', 'Export', '<div class="row"><button type="button" class="btn strong" data-lact="copy">Copy run list</button><button type="button" class="btn" data-lact="csv" data-dl>CSV</button></div>' +
           (K.pattern === 'solid' ? field('Longest strip (split longer runs)', 'markers.maxStrip', 'in') : '') +
-          '<div class="row" data-dl><button type="button" class="btn strong" data-lact="cutpdf"' + (nr.placed.length ? '' : ' disabled') + '>Cut file (PDF)</button><button type="button" class="btn" data-lact="cutsvg"' + (nr.placed.length ? '' : ' disabled') + '>Cut file (SVG)</button></div>' +
+          '<div class="row" data-dl><button type="button" class="btn strong" data-lact="cutpdf"' + (nr.placed.length ? '' : ' disabled') + '>' + (isArt() ? 'Print and cut (PDF)' : 'Cut file (PDF)') + '</button><button type="button" class="btn" data-lact="cutsvg"' + (nr.placed.length ? '' : ' disabled') + '>' + (isArt() ? 'Print and cut (SVG)' : 'Cut file (SVG)') + '</button></div>' +
           '<p class="hint" style="margin:0">' + num(nr.placed.length, 0) + ' pieces nested ' + nr.lanes + ' across a ' + L.roll + '" roll, ' + num(nr.len / 12) + ' ft long' + (nr.pages > 1 ? ' over ' + nr.pages + ' pages of up to 10 ft' : '') + '. Cut lines are on a spot color named CutContour (magenta in the SVG).</p>' + (L.note ? '<p class="ok">' + esc(L.note) + '</p>' : '') + '<textarea id="lay-copy" hidden readonly class="copybox"></textarea>');
       }
       h += lsec('l_shop', 'Shop drawing', '<div class="row"><button type="button" class="btn strong" data-lact="toshop">Open as shop drawing</button></div><p class="hint" style="margin:0">Puts this layout on a sheet with your title block, logo and scale bar.</p>');
@@ -2270,6 +2458,10 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         var max = Math.min(Math.max(6, K.maxStrip), CUT_PAGE - 2), parts = Math.ceil(len / max), each = len / parts;
         for (var b = 0; b < nb; b++) for (var q = 0; q < parts; q++) pcs.push({ w: K.barH, h: each, shape: 'rect' });
       });
+      else if (K.pattern === 'graphic') K.runs.forEach(function (r) {
+        var n = markerCount(r.len), sl = seqList(); if (!sl.length) return;
+        for (var b = 0; b < nb; b++) for (var q = 0; q < n; q++) { var gi = sl[q % sl.length]; pcs.push({ w: K.size, h: graphicH(K.graphics[gi]), shape: 'rect', g: gi }); }
+      });
       else { var t = markerTotals(); for (var i = 0; i < t.pieces; i++) pcs.push({ w: K.size, h: K.pattern === 'dots' ? K.size : K.barH, shape: K.pattern === 'dots' ? 'circle' : 'rect' }); }
       return pcs;
     }
@@ -2282,7 +2474,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         var li = 0; for (var j = 1; j < lanes; j++) if (laneY[j] < laneY[li] - 1e-9) li = j;
         var y = laneY[li], pageStart = Math.floor(y / CUT_PAGE) * CUT_PAGE;
         if (y + pc.h > pageStart + CUT_PAGE) y = pageStart + CUT_PAGE;
-        placed.push({ x: EDGE + li * (pw + sp), y: y, w: pc.w, h: pc.h, shape: pc.shape });
+        placed.push({ x: EDGE + li * (pw + sp), y: y, w: pc.w, h: pc.h, shape: pc.shape, g: pc.g });
         laneY[li] = y + pc.h + sp;
       });
       var len = placed.reduce(function (m, q) { return Math.max(m, q.y + q.h); }, 0);
@@ -2320,7 +2512,38 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var body = nr.placed.map(function (q) { return q.shape === 'circle' ? '<circle cx="' + f(q.x + q.w / 2) + '" cy="' + f(q.y + EDGE + q.h / 2) + '" r="' + f(q.w / 2) + '"/>' : '<rect x="' + f(q.x) + '" y="' + f(q.y + EDGE) + '" width="' + f(q.w) + '" height="' + f(q.h) + '"/>'; }).join('\n');
       return new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="' + R + 'in" height="' + f(H) + 'in" viewBox="0 0 ' + R + ' ' + f(H) + '">\n<g id="CutContour" fill="none" stroke="#EC008C" stroke-width="0.01">\n' + body + '\n</g>\n</svg>\n'], { type: 'image/svg+xml' });
     }
-    function cutName(ext) { var K = L.markers; return 'Distraction markers ' + (K.pattern === 'solid' ? fmtIn(K.barH) + ' strips' : fmtIn(K.size) + ' ' + K.pattern) + ' on ' + L.roll + 'in roll.' + ext; }
+    function cutName(ext) { var K = L.markers; return 'Distraction markers ' + (K.pattern === 'solid' ? fmtIn(K.barH) + ' strips' : fmtIn(K.size) + ' ' + (K.pattern === 'graphic' ? 'graphics, print and cut' : K.pattern)) + ' on ' + L.roll + 'in roll.' + ext; }
+    // Print and cut: the graphics at true size, each with a CutContour rectangle around it.
+    function artCutSvg(nr) {
+      var R = L.roll, H = nr.len + 2 * EDGE, f = function (n) { return n.toFixed(3); }, G = L.markers.graphics;
+      var art = nr.placed.map(function (q) { return '<image href="' + G[q.g].url + '" x="' + f(q.x) + '" y="' + f(q.y + EDGE) + '" width="' + f(q.w) + '" height="' + f(q.h) + '" preserveAspectRatio="none"/>'; }).join('\n');
+      var cut = nr.placed.map(function (q) { return '<rect x="' + f(q.x) + '" y="' + f(q.y + EDGE) + '" width="' + f(q.w) + '" height="' + f(q.h) + '"/>'; }).join('\n');
+      return new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="' + R + 'in" height="' + f(H) + 'in" viewBox="0 0 ' + R + ' ' + f(H) + '">\n<g id="Graphics">\n' + art + '\n</g>\n<g id="CutContour" fill="none" stroke="#EC008C" stroke-width="0.01">\n' + cut + '\n</g>\n</svg>\n'], { type: 'image/svg+xml' });
+    }
+    function artCutPdf(nr) {
+      var PL, doc, imgs, G = L.markers.graphics, PT = 72;
+      return getPdfLib().then(function (lib) { PL = lib; return PL.PDFDocument.create(); }).then(function (d) {
+        doc = d; return Promise.all(G.map(function (g) { return doc.embedPng(g.url); }));
+      }).then(function (em) {
+        imgs = em;
+        var ctx = doc.context, N = PL.PDFName.of;
+        var fn = ctx.register(ctx.obj({ FunctionType: 2, Domain: [0, 1], C0: [0, 0, 0, 0], C1: [0, 1, 0, 0], N: 1 }));
+        var cs = ctx.register(ctx.obj([N('Separation'), N('CutContour'), N('DeviceCMYK'), fn]));
+        for (var p = 0; p < nr.pages; p++) {
+          var y0 = p * nr.page, hIn = Math.min(nr.page, nr.len - y0) + 2 * EDGE, W = L.roll * PT, H = hIn * PT, pg = doc.addPage([W, H]);
+          var mine = nr.placed.filter(function (q) { return q.y >= y0 - 1e-6 && q.y < y0 + nr.page - 1e-6; });
+          mine.forEach(function (q) { pg.drawImage(imgs[q.g], { x: q.x * PT, y: H - (q.y - y0 + EDGE) * PT - q.h * PT, width: q.w * PT, height: q.h * PT }); });
+          var res = pg.node.Resources(), csd = res.lookup(N('ColorSpace'));
+          if (!csd) { csd = ctx.obj({}); res.set(N('ColorSpace'), csd); }
+          csd.set(N('CutContour'), cs);
+          var ops = [PL.pushGraphicsState(), PL.PDFOperator.of('CS', [N('CutContour')]), PL.PDFOperator.of('SCN', [PL.PDFNumber.of(1)]), PL.setLineWidth(0.25)];
+          mine.forEach(function (q) { ops.push(PL.rectangle(q.x * PT, H - (q.y - y0 + EDGE) * PT - q.h * PT, q.w * PT, q.h * PT), PL.stroke()); });
+          ops.push(PL.popGraphicsState());
+          pg.pushOperators.apply(pg, ops);
+        }
+        return doc.save();
+      }).then(function (bytes) { return new Blob([bytes], { type: 'application/pdf' }); });
+    }
 
     // ---- Mural panels as a true-size PDF, with labels and seam marks in the bleed ----
     function tilesPdf() {
@@ -2397,7 +2620,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     stage.addEventListener('pointerup', function () { if (seamDrag) { seamDrag = null; all(); } });
 
     // ---- State for undo, autosave and .dim files ----
-    function getState() { return JSON.parse(JSON.stringify(L, function (k, v) { return k === 'img' || k === 'imgBlob' || k === 'busy' || k === 'note' ? undefined : v; })); }
+    function getState() { return JSON.parse(JSON.stringify(L, function (k, v) { return k === 'img' || k === 'imgBlob' || k === 'busy' || k === 'note' || k === 'graphics' ? undefined : v; })); }
     function setState(st, imgBlob) {
       if (!st) return;
       var keepImg = L.mural.img, keepBlob = L.mural.imgBlob, keepName = L.mural.imgName;
@@ -2418,6 +2641,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         var f = el.files && el.files[0]; if (!f) return;
         var img = new Image(); img.onload = function () { L.mural.img = img; L.mural.imgName = f.name; L.mural.imgBlob = f; all(); Autosave.schedule(); }; img.onerror = function () { flash('Could not read that image.'); }; img.src = URL.createObjectURL(f); return;
       }
+      if (el.id === 'marker-art') { readGraphics(el.files); el.value = ''; return; }
       if (el.dataset.measure) {
         var mv = el.value.split(':');
         if (mv[0] === 'w') L.mural.w = parseFloat(mv[1]); else if (mv[0] === 'r') { L.mural.w = parseFloat(mv[1]); L.mural.h = parseFloat(mv[2]); }
@@ -2430,7 +2654,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var kind = el.dataset.kind, v;
       if (kind === 'len' || kind === 'in') { v = parseIn(el.value); if (!(v >= 0) || (kind === 'len' && !(v > 0))) { el.value = kind === 'len' ? fmtFt(get(k)) : fmtIn(get(k)); return; } }
       else if (kind === 'money') { v = parseFloat(String(el.value).replace(/[$,\s]/g, '')); if (!(v >= 0)) { el.value = Number(get(k)).toFixed(2); return; } }
-      else if (kind === 'sel') { v = el.value; if (k === 'roll' || k === 'mural.angle' || k === 'mural.dpi') v = Number(v); if (k === 'mural.balance') v = v === 'true'; }
+      else if (kind === 'sel') { v = el.value; if (k === 'roll' || k === 'mural.angle' || k === 'mural.dpi' || k === 'markers.useIdx') v = Number(v); if (k === 'mural.balance') v = v === 'true'; }
       else v = el.value;
       if (k === 'mural.overlap' && v >= printW()) v = printW() - 1;
       if (k === 'margin' && v > L.roll - 6) v = L.roll - 6;
@@ -2443,6 +2667,8 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     rightEl.addEventListener('keydown', function (e) { if (mode === 'layout' && e.key === 'Enter' && e.target.dataset.k) e.target.blur(); });
     rightEl.addEventListener('click', function (e) {
       if (mode !== 'layout') return;
+      var da = e.target.closest('[data-delart]');
+      if (da) { L.markers.graphics.splice(Number(da.dataset.delart), 1); L.markers.useIdx = 0; if (!L.markers.graphics.length) L.markers.pattern = 'squares'; all(); Autosave.schedule(); return; }
       var b = e.target.closest('[data-lact]'); if (!b) return;
       var a = b.dataset.lact;
       if (a === 'copy') copy();
@@ -2458,7 +2684,12 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         var fb = function () { var ta = $('lay-copy'); if (ta) { ta.value = text; ta.hidden = false; ta.focus(); ta.select(); } };
         try { navigator.clipboard.writeText(text).then(function () { flash('Quote copied.'); }, fb); } catch (err) { fb(); }
       }
-      else if (a === 'cutpdf' || a === 'cutsvg') { var nr = nest(cutPieces()); if (nr.placed.length) save(a === 'cutpdf' ? cutPdf(nr) : cutSvg(nr), cutName(a === 'cutpdf' ? 'pdf' : 'svg')); }
+      else if (a === 'cutpdf' || a === 'cutsvg') {
+        var nr = nest(cutPieces()); if (!nr.placed.length) return;
+        if (!isArt()) save(a === 'cutpdf' ? cutPdf(nr) : cutSvg(nr), cutName(a === 'cutpdf' ? 'pdf' : 'svg'));
+        else if (a === 'cutsvg') save(artCutSvg(nr), cutName('svg'));
+        else artCutPdf(nr).then(function (b) { save(b, cutName('pdf')); }).catch(function (err) { flash('Could not make the PDF: ' + (err && err.message ? err.message : err)); });
+      }
     });
     function rows() { return L.job === 'film' ? L.film.panes : L.markers.runs; }
     leftEl.addEventListener('change', function (e) {
@@ -2501,7 +2732,8 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       if (row && !/INPUT|BUTTON/.test(e.target.tagName)) { var k2 = L.job === 'film' ? L.film : L.markers; k2.sel = Number(row.dataset.row); left(); draw(); }
     });
 
-    return { enter: all, draw: draw, renderTo: renderTo, tools: tools, left: left, right: right, status: status, getState: getState, setState: setState,
+    function setMarkerArt(list) { if (Array.isArray(list)) L.markers.graphics = list.filter(function (g) { return g && g.url; }); }
+    return { enter: all, draw: draw, renderTo: renderTo, tools: tools, markerArt: function () { return L.markers.graphics || []; }, setMarkerArt: setMarkerArt, left: left, right: right, status: status, getState: getState, setState: setState,
       imageBlob: function () { return L.mural.imgBlob || null; }, imageName: function () { return L.mural.imgName || ''; } };
   })();
 
@@ -2665,7 +2897,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         var im = new Image();
         im.onload = function () { ctx.setTransform(f, 0, 0, f, -r.x * f, -r.y * f); ctx.drawImage(im, 0, 0, M.w, M.h); ctx.setTransform(1, 0, 0, 1, 0, 0); res(); };
         im.onerror = function () { res(); };
-        im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + M.w + ' ' + M.h + '" width="' + Math.round(M.w * f) + '" height="' + Math.round(M.h * f) + '">' + sampleSVG() + '</svg>');
+        im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + M.w + ' ' + M.h + '" width="' + Math.round(M.w * f) + '" height="' + Math.round(M.h * f) + '">' + baseSVG() + '</svg>');
       });
       return paint.then(function () {
         ctx.save(); ctx.translate(-r.x * f, -r.y * f); canvasMarkup(ctx, M.items.filter(function (it) { return it.page === M.page; }), f); ctx.restore();
@@ -2676,7 +2908,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     function sharpness(want, cap) { var F = geom().frame; return Math.min(want, Math.sqrt(cap / (F.w * F.h))); }
     function viewKey() {
       var F = geom().frame, r = region();
-      return JSON.stringify([S.src, F, r && [r.x, r.y, r.w, r.h].map(function (v) { return Math.round(v * 10); }), S.src === 'measure' ? [M.src, M.name, M.page, M.items.filter(function (it) { return it.page === M.page; }), M.scales[M.page]] : [Lay.getState(), Lay.imageName(), UNITS]]);
+      return JSON.stringify([S.src, F, r && [r.x, r.y, r.w, r.h].map(function (v) { return Math.round(v * 10); }), S.src === 'measure' ? [M.src, M.name, M.page, M.items.filter(function (it) { return it.page === M.page; }), M.scales[M.page]] : [Lay.getState(), Lay.imageName(), UNITS, Lay.markerArt().map(function (g) { return g.name + g.w; })]]);
     }
     function ensureView() {
       var key = viewKey(); if (key === view.key) return;
@@ -2844,10 +3076,10 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         h += '<textarea class="stext" data-sn="text" rows="3" aria-label="Text">' + esc(n.text) + '</textarea>';
         h += '<label class="sty"><span class="sty-l">Size</span><select data-sp="size">' + opts(SIZES, n.size, function (x) { return x + ' pt'; }) + '</select></label>';
         h += '<label class="sty"><span class="sty-l">Align</span><select data-sp="align">' + opts(['left', 'center', 'right'], n.align, function (x) { return x[0].toUpperCase() + x.slice(1); }) + '</select><label class="chk"><input type="checkbox" data-sp="bold"' + (n.bold ? ' checked' : '') + '> Bold</label></label>';
-        h += '<div class="sty"><span class="sty-l">Text</span>' + swatches('color', n.color) + '</div>';
+        h += '<div class="sty"><span class="sty-s">Text</span>' + swatches('color', n.color) + '</div>';
       }
-      h += '<div class="sty"><span class="sty-l">' + (n.k === 'line' || n.k === 'arrow' ? 'Color' : 'Outline') + '</span>' + swatches('stroke', n.stroke, n.k !== 'line' && n.k !== 'arrow') + '</div>';
-      if (n.k !== 'line' && n.k !== 'arrow') h += '<div class="sty"><span class="sty-l">Fill</span>' + swatches('fill', n.fill, true) + '</div>';
+      h += '<div class="sty"><span class="sty-s">Line</span>' + swatches('stroke', n.stroke, n.k !== 'line' && n.k !== 'arrow') + '</div>';
+      if (n.k !== 'line' && n.k !== 'arrow') h += '<div class="sty"><span class="sty-s">Fill</span>' + swatches('fill', n.fill, true) + '</div>';
       h += '<label class="sty"><span class="sty-l">Width</span><select data-sp="sw">' + opts(WIDTHS, n.sw, function (x) { return x + ' pt'; }) + '</select><label class="chk"><input type="checkbox" data-sp="dash"' + (n.dash ? ' checked' : '') + '> Dashed</label></label>';
       return h;
     }
