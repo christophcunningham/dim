@@ -2,7 +2,7 @@
 
 Open a floor plan or shop drawing, set its scale, and take quick measurements in the browser.
 
-**Measure**, **Layout** and **Shop drawing** work today. The **Cut** and **Print** modes are previews of what the tool could grow into: pictures only, not working yet.
+DIM opens on **Home**, with buttons to open a file, start a blank canvas or try the sample, and to jump to **Measure**, **Layout** or **Shop drawing**. The Home button (or the DIM logo) brings you back.
 
 ## Measure
 
@@ -15,7 +15,12 @@ Open a floor plan or shop drawing, set its scale, and take quick measurements in
 - **Opening a file:** DIM starts empty; use **Open file** or drop a file on the canvas. **Sample plan** in the Drawing panel loads a sample, and **Blank canvas** starts an empty canvas drawn at true size (set its width and height, with an optional 1 ft grid) for mocking up shapes, where every line shows its real dimension. Files start on Length (Dimension for photos), not Scale.
 - **Tools:** Length, Run (several segments), Curve (`K`: click points along it; 3 points make a true arc and show its radius, more points follow any curve), Area, Rectangle area (two corners), Count (click each item; Enter starts a new count), Angle (three clicks, corner in the middle) and Note (pin a note, type it in the list; rotate the text or flip it upside down).
 - **Color and ends:** the selected measurement can take any color, and its points can show as squares, dots, arrows, ticks, slashes or nothing. New measurements use the last color and ends you picked.
-- **Resize** (`Z`): select a measurement and drag a corner, or type its new length (width for areas); it scales evenly around its center. Setting the drawing's scale is its own tool (`S`).
+- **Circle** (`O`): click the center, then the edge; shows the diameter and area.
+- **Change a size from the readout:** click the big number on the left to type a new length, or width and height (Tab moves from width to height), or a diameter. Lines keep their start point; rectangles keep their first corner.
+- **Snapping:** **Round lengths to** the nearest 1/4" or whole inch (Drawing panel). On a blank canvas, **Snap to the grid** makes points stick to grid lines.
+- **Dimension** (`D`): hover an edge (a line of the drawing, or an edge of a measurement), then click and pull away; the dimension line and extension lines follow. Or click two points (hold Alt to ignore edges). In Edit, drag a dimension to move it closer or farther; Shift+drag moves it.
+- **Reset:** **Clear measurements** (or **Reset canvas**) in the Drawing panel removes everything drawn; Undo brings it back.
+- **Resize** (`Z`): select a measurement and drag a corner, or type its new length (width for areas), or scale it by a ratio (1:2, 1:4, 1:8, 1:10 smaller, or 2:1 to 10:1 larger); it scales evenly around its center. Setting the drawing's scale is its own tool (`S`).
 - **Edit** (`V`): drag points (rectangles stay rectangular), or drag a line or area to move all of it; drag a curve to bend it (a 3-point arc passes through the cursor), Shift+drag to move it; right-click any point to remove it, or the last point while drawing; Delete removes the selection; arrow keys nudge it (Shift for 10×); double-click an edge to add a point.
 - **On the selected measurement:** a category (Mural, Privacy film, Distraction markers, Signage) that Layout uses when it imports from Measure, and **Deduct** for areas such as doors and windows. Totals use typed sizes where you entered them, and show area, deductions and net area, counts, and subtotals per category.
 - **Undo / redo** with Ctrl+Z and Ctrl+Shift+Z (Cmd on a Mac), or the buttons in the top bar. Covers Measure and Layout.
@@ -26,7 +31,7 @@ Open a floor plan or shop drawing, set its scale, and take quick measurements in
 One sheet, ready to send for approval: the drawing, a title block, your logo and a scale bar.
 
 - **Sheet:** Letter (8.5 × 11), Tabloid (11 × 17, the default), Arch C (18 × 24) or Arch D (24 × 36), landscape or portrait. A thin black border runs around the sheet.
-- **Drawing:** the Measure drawing with its measurements (the whole page, or framed around the measurements), or any Layout job (mural, privacy film, distraction markers). Fit it to the frame or pick a scale such as 1/4" = 1'-0"; the hand tool (`H`) slides it in its frame. Layout's **Open as shop drawing** button jumps here with that job.
+- **Drawing:** the Measure drawing with its measurements (the whole page, or framed around the measurements), or any Layout job (mural, privacy film, distraction markers). Fit it to the frame or pick a scale such as 1/4" = 1'-0"; a blank canvas's grid can be shown or hidden; the hand tool (`H`) slides it in its frame. Layout's **Open as shop drawing** button jumps here with that job.
 - **Title block:** client name, project name, project location, date, sheet number and drawing title, plus your **company logo** (any image; DIM remembers it in this browser for the next job). The **scale bar** sits in the bottom right and can be turned off.
 - **Text and shapes:** text boxes (size, bold, alignment, color), rectangles, ellipses, lines and arrows, with outline and fill colors, line width and dashes. Click to drop one, or drag to size it; Shift keeps lines straight; drag the corner handles to resize; Delete removes; arrow keys nudge.
 - **Export PDF:** a true-size PDF. The drawing prints at up to 300 ppi; the title block, text and shapes are vector, so they stay sharp.
