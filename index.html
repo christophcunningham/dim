@@ -2294,7 +2294,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       mural: { w: 288, h: 108, bleed: 1, overlap: 1, orient: 'vertical', balance: true, custom: null, marks: true, art: 'gradient', color: '#5b8fbf', g1: '#1f3b57', g2: '#8fd0c8', angle: 0, img: null, imgName: '', fit: 'cover', tileW: 24, dpi: 50 },
       film: { allow: 1, defH: 96, mode: 'auto', look: 'gradient', c1: '#ffffff', c2: '#9cc8e8', sel: 0, fA: 36, fB: 72, d1: 24, d2: 36, d3: 60, d4: 72, dual: 'frost', person: 'none', sill: 0, balance: true,
         panes: [{ name: 'Conference 27-015', w: 60, h: 96, qty: 6 }, { name: 'Conference 27-016', w: 48, h: 96, qty: 4 }, { name: 'Office sidelite', w: 24, h: 96, qty: 6 }] },
-      markers: { bands: '30, 60', barH: 2, maxStrip: 96, pattern: 'squares', size: 2, tickW: 0.25, gap: 7.5, margin: 0, glassH: 96, spacing: 0.5, sel: 0, graphics: [], seq: 'all', useIdx: 0, seqText: 'A, B', start: 'center', perBand: false, bandSeq: [], mull: 2,
+      markers: { bands: '30, 60', barH: 2, maxStrip: 96, pattern: 'squares', size: 2, tickW: 0.25, gap: 7.5, margin: 0, glassH: 96, spacing: 0.5, sel: 0, graphics: [], seq: 'all', useIdx: 0, seqText: 'A, B', start: 'center', gapMode: 'min', perBand: false, bandSeq: [], mull: 2,
         curb: 0, fJamb: 2, fHead: 2, fSill: 2, seam: 0.375, fColor: 'black', doorStyle: 'medium', doorBottom: 10, hw: 'pull', hwH: 40, swing: true,
         runs: [{ name: 'Reception glass', len: 384 }, { name: 'Conference front', len: 240 }, { name: 'Office fronts, east', len: 1104 }] },
       quote: null, note: '', busy: false
@@ -2525,9 +2525,13 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var mine = [], flush = function () { mine.forEach(function (m, i) { m.q = fromRight ? mine.length - 1 - i : i; out.push(m); }); mine = []; };
       fr.panes.forEach(function (p, pi) {
         if (pi && !p.seam) flush();
-        var usable = p.gw - 2 * K.margin, n = usable >= sw ? Math.max(1, Math.floor(usable / (sw + K.gap) + 1e-9)) : 0, pitch = n ? usable / n : 0;
-        for (var i = 0; i < n; i++) mine.push({ x: p.gx + K.margin + (i + 0.5) * pitch - sw / 2, pane: pi });
-        p.n = n; p.gap = n > 1 ? pitch - sw : null; p.edge = n ? K.margin + (pitch - sw) / 2 : null;
+        // Each mark takes its width plus a gap, so marks sit at least half a gap in from the glass edges.
+        // Minimum gap spreads the marks to fill the pane; exact gap keeps the gap and leaves the rest at the edges, per Start pattern. A lone mark is centered.
+        var usable = p.gw - 2 * K.margin, n = usable >= sw ? Math.max(1, Math.floor(usable / (sw + K.gap) + 1e-9)) : 0;
+        var exact = K.gapMode === 'exact' && n > 1, pitch = n ? (exact ? sw + K.gap : usable / n) : 0, extra = n ? usable - n * pitch : 0;
+        var lead = !exact ? 0 : K.start === 'left' ? 0 : fromRight ? extra : extra / 2;
+        for (var i = 0; i < n; i++) mine.push({ x: p.gx + K.margin + lead + (i + 0.5) * pitch - sw / 2, pane: pi });
+        p.n = n; p.gap = n > 1 ? pitch - sw : null; p.edge = n ? K.margin + lead + (pitch - sw) / 2 : null; p.edgeR = n ? K.margin + extra - lead + (pitch - sw) / 2 : null;
       });
       flush();
       return out;
@@ -2841,6 +2845,8 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
           var a = inP(0), lastR = -1e9, gd = function (xa, xb) { if (xb - xa < 0.05) return; var r2 = smallDim(ctx, x0 + xa * s, x0 + xb * s, yb, fmtIn(xb - xa), lastR); if (r2) lastR = r2; };
           if (a.length) gd(p0.gx, a[0].x + (sw - markFor(hs.length - 1, a[0].q).w) / 2);
           if (a.length > 1) gd(a[0].x + sw, a[1].x);
+          // With an exact gap the leftover can sit on the right, so show that edge too when it differs.
+          var e0 = ms.panes[0]; if (a.length && e0 && Math.abs(e0.edge - e0.edgeR) > 0.01) { var aL = a[a.length - 1]; gd(aL.x + (sw + markFor(hs.length - 1, aL.q).w) / 2, p0.gx + p0.gw); }
           // Across the seam only when it differs from the gap between marks (it does with end clearance or a wide seam).
           if (p1 && p1.seam && a.length) { var b = inP(1); if (b.length && (a.length < 2 || Math.abs((b[0].x - a[a.length - 1].x) - (a[1].x - a[0].x)) > 0.01)) gd(a[a.length - 1].x + sw, b[0].x); }
         }
@@ -2899,7 +2905,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var seen = {}, out = [];
       ms.panes.forEach(function (p) {
         var k = p.w.toFixed(3) + (p.door ? 'd' + p.gw.toFixed(3) : ''); if (seen[k]) return; seen[k] = 1;
-        out.push('<b>' + esc(fmtIn(p.w)) + (p.name ? ' ' + esc(p.name) : '') + '</b> ' + (p.door ? '(glass ' + esc(fmtIn(p.gw)) + ') ' : '') + (p.n ? p.n + ' mark' + (p.n > 1 ? 's' : '') + (p.gap != null ? ', ' + esc(fmtIn(p.gap)) + ' apart' : '') + ', ' + esc(fmtIn(p.edge)) + ' from glass edges' : 'too narrow for a mark'));
+        out.push('<b>' + esc(fmtIn(p.w)) + (p.name ? ' ' + esc(p.name) : '') + '</b> ' + (p.door ? '(glass ' + esc(fmtIn(p.gw)) + ') ' : '') + (p.n ? p.n + ' mark' + (p.n > 1 ? 's' : '') + (p.gap != null ? ', ' + esc(fmtIn(p.gap)) + ' apart' : '') + ', ' + (Math.abs(p.edge - p.edgeR) < 0.01 ? esc(fmtIn(p.edge)) + ' from glass edges' : esc(fmtIn(p.edge)) + ' from left glass edge, ' + esc(fmtIn(p.edgeR)) + ' from right') : 'too narrow for a mark'));
       });
       return '<div class="ed-out spacing">' + out.join('<br>') + '</div>';
     }
@@ -3016,10 +3022,11 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
             bnd += '<p class="hint" style="margin:0">Each band repeats its own sequence; blank uses the pattern above. ' + SEQ_HINT + ' <b>q, b</b> alternates light and dark squares.</p>';
           }
           bnd += selectF('Start pattern', 'markers.start', [['center', 'Centered on run'], ['left', 'From left edge'], ['right', 'From right edge']]);
+          if (K.runs.some(runBays)) bnd += selectF('Spacing on panes', 'markers.gapMode', [['min', 'Minimum gap, fill each pane'], ['exact', 'Exact gap, extra at the edges']]);
         }
         var anyBar = K.pattern === 'solid' || seqHas('square') || seqHas('dark') || seqHas('tick'), anySize = K.pattern !== 'solid' && bandSeqs().some(function (t) { return t !== 'tick'; });
         if (anyBar) bnd += field(K.pattern === 'solid' ? 'Band height' : seqHas('tick') && !seqHas('square') && !seqHas('dark') ? 'Tick height' : seqHas('tick') ? 'Square and tick height' : 'Square height', 'markers.barH', 'in');
-        if (K.pattern !== 'solid') bnd += '<div class="row2">' + (anySize ? field(K.pattern === 'dots' && !K.perBand ? 'Dot size' : isArt() ? 'Graphic width' : K.perBand ? 'Mark width' : 'Square size', 'markers.size', 'in') : field('Tick width', 'markers.tickW', 'in')) + field('Gap', 'markers.gap', 'in') + '</div>' + (anySize && seqHas('tick') ? field('Tick width', 'markers.tickW', 'in') : '') + (isArt() ? '<p class="hint" style="margin:0">Each graphic keeps its own shape; its height follows the width. The band height is where each graphic’s bottom edge sits.</p>' : '');
+        if (K.pattern !== 'solid') bnd += '<div class="row2">' + (anySize ? field(K.pattern === 'dots' && !K.perBand ? 'Dot size' : isArt() ? 'Graphic width' : K.perBand ? 'Mark width' : 'Square size', 'markers.size', 'in') : field('Tick width', 'markers.tickW', 'in')) + field(K.pattern !== 'solid' && K.gapMode !== 'exact' && K.runs.some(runBays) ? 'Min gap' : 'Gap', 'markers.gap', 'in') + '</div>' + (anySize && seqHas('tick') ? field('Tick width', 'markers.tickW', 'in') : '') + (isArt() ? '<p class="hint" style="margin:0">Each graphic keeps its own shape; its height follows the width. The band height is where each graphic’s bottom edge sits.</p>' : '');
         bnd += field('End clearance', 'markers.margin', 'in');
         var anyFrame = K.runs.some(runBays);
         if (K.runs.some(function (r) { return !runBays(r); })) bnd += field('Glass height (preview)', 'markers.glassH', 'in');
