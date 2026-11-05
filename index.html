@@ -3642,8 +3642,9 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         else if (b.dataset.pdel) list.splice(Number(b.dataset.pdel), 1);
         else {
           var last = list[list.length - 1], door = b.dataset.padd === 'door';
-          // The first pane fills the run, so its length stays put until you size the panes.
-          var np = door ? { w: 36, flex: false, name: 'Door' } : !list.length ? { w: 0, flex: true, name: '' } : { w: last && !last.flex && !doorOf(last.name) ? last.w : 48, flex: false, name: '' };
+          // The first glass pane takes the run's length less the jambs, so the run keeps its size; after that the run grows with each pane.
+          var first = Math.round((it.len - 2 * L.markers.fJamb) * 8) / 8;
+          var np = door ? { w: 36, flex: false, name: 'Door' } : !list.length ? { w: first > 1 ? first : 48, flex: false, name: '' } : { w: last && !last.flex && !doorOf(last.name) ? last.w : 48, flex: false, name: '' };
           np.joint = list.length ? (door || (last && doorOf(last.name)) ? 'mull' : 'seam') : null;
           list.push(np);
         }
@@ -3689,7 +3690,8 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         all(); flash(added ? 'Added ' + added + ' measured length' + (added === 1 ? '' : 's') + '.' : 'Those measurements are already in the list.'); return;
       }
       var row = e.target.closest('[data-row]');
-      if (row && !/INPUT|BUTTON/.test(e.target.tagName)) { var k2 = L.job === 'film' ? L.film : L.markers; k2.sel = Number(row.dataset.row); left(); draw(); }
+      // Clicking a row selects it. Leave fields, buttons and dropdowns alone (redrawing would close an open dropdown), and only redraw for a new row.
+      if (row && !e.target.closest('input, button, select, label')) { var k2 = L.job === 'film' ? L.film : L.markers, ri = Number(row.dataset.row); if (k2.sel !== ri) { k2.sel = ri; left(); draw(); } }
     });
 
     function setMarkerArt(list) { if (Array.isArray(list)) L.markers.graphics = list.filter(function (g) { return g && g.url; }); }
