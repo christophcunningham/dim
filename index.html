@@ -185,6 +185,7 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
 .sty { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; flex: 1 1 100%; font-size: 11px; color: var(--b01); }
 .sty-l { width: 44px; flex: none; }
 .sty-s { width: 44px; flex: none; }
+.sty select { flex: 1 1 0; min-width: 0; }
 .item .sw { width: 14px; height: 14px; border: 1px solid var(--line); border-radius: 3px; padding: 0; flex: none; }
 .item .sw.on { outline: 2px solid var(--line); outline-offset: 1px; }
 .item .sw.auto { background: linear-gradient(135deg, var(--green) 0 33%, var(--blue) 33% 66%, var(--purple) 66%); }
@@ -239,6 +240,7 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
 .ib + .ib { border-left: 1px solid var(--line); }
 .ib:hover { background: var(--b08); }
 .ib.on { background: var(--yellow); color: var(--on-yellow); }
+.ib:disabled { opacity: .35; cursor: default; background: var(--b07); }
 
 /* Layout */
 .lay-canvas { display: block; margin: auto; flex: none; }
@@ -262,6 +264,11 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
 .ed-nums label { display: grid; gap: 2px; font-size: 10.5px; color: var(--b01); }
 .ed-out { padding-left: 21px; font-size: 11px; color: var(--b01); }
 .ed-nums .ed-out { padding: 0 0 4px; }
+.ed-nums.one { grid-template-columns: minmax(0, 1fr); }
+.ed-out.spacing { line-height: 1.5; }
+.ed-out.warn { color: var(--red); line-height: 1.5; }
+.ed-out.spacing b { font-weight: 600; color: var(--b00); }
+.ed input:disabled { opacity: .6; }
 .row2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .field.color input { width: 100%; height: 30px; padding: 2px; background: var(--b08); border: 1px solid var(--line); border-radius: 4px; cursor: pointer; }
 .copybox { width: 100%; min-height: 110px; background: var(--b08); color: var(--b00); border: 1px solid var(--line); border-radius: 4px; font-family: var(--mono); font-size: 11px; }
@@ -2287,11 +2294,12 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       mural: { w: 288, h: 108, bleed: 1, overlap: 1, orient: 'vertical', balance: true, custom: null, marks: true, art: 'gradient', color: '#5b8fbf', g1: '#1f3b57', g2: '#8fd0c8', angle: 0, img: null, imgName: '', fit: 'cover', tileW: 24, dpi: 50 },
       film: { allow: 1, defH: 96, mode: 'auto', look: 'gradient', c1: '#ffffff', c2: '#9cc8e8', sel: 0, fA: 36, fB: 72, d1: 24, d2: 36, d3: 60, d4: 72, dual: 'frost', person: 'none', sill: 0, balance: true,
         panes: [{ name: 'Conference 27-015', w: 60, h: 96, qty: 6 }, { name: 'Conference 27-016', w: 48, h: 96, qty: 4 }, { name: 'Office sidelite', w: 24, h: 96, qty: 6 }] },
-      markers: { bands: '30, 60', barH: 2, maxStrip: 96, pattern: 'squares', size: 2, tickW: 0.25, gap: 7.5, margin: 0, glassH: 96, spacing: 0.5, sel: 0, graphics: [], seq: 'all', useIdx: 0, seqText: 'A, B',
+      markers: { bands: '30, 60', barH: 2, maxStrip: 96, pattern: 'squares', size: 2, tickW: 0.25, gap: 7.5, margin: 0, glassH: 96, spacing: 0.5, sel: 0, graphics: [], seq: 'all', useIdx: 0, seqText: 'A, B', start: 'center', perBand: false, bandSeq: [], mull: 2,
+        curb: 0, fJamb: 2, fHead: 2, fSill: 2, seam: 0.375, fColor: 'black', doorStyle: 'medium', doorBottom: 10, hw: 'pull', hwH: 40, swing: true,
         runs: [{ name: 'Reception glass', len: 384 }, { name: 'Conference front', len: 240 }, { name: 'Office fronts, east', len: 1104 }] },
       quote: null, note: '', busy: false
     };
-    var open = { l_size: true, l_roll: true, l_art: true, l_res: true, l_exp: false, f_roll: true, f_look: false, f_res: true, f_exp: false, m_bands: true, m_cut: true, m_res: true, m_exp: false };
+    var open = { m_frame: true, l_size: true, l_roll: true, l_art: true, l_res: true, l_exp: false, f_roll: true, f_look: false, f_res: true, f_exp: false, m_bands: true, m_cut: true, m_res: true, m_exp: false };
     var canvas = null, nextRow = 100, geo = null, offTarget = null, lastScale = NaN, noSel = false;
     open.q_mural = open.q_film = open.q_markers = open.l_shop = true;
     var PRICE_DEFAULTS = { mural: { rate: 9.5, basis: 'printed', install: 3, setup: 0, min: 150, rush: 25 }, film: { rate: 7.25, basis: 'glass', install: 2.5, setup: 0, min: 125, rush: 25 }, markers: { rate: 2.5, basis: 'lf', install: 1.25, setup: 25, min: 90, rush: 25 } };
@@ -2343,10 +2351,11 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       return { W: W, H: H, dir: pick.dir, strips: pick.strips, len: pick.len, lf: pick.lf, widths: widths, seams: pick.strips - 1 };
     }
     // Strip widths, grouped for reading: (3) drops @ 43 5/8", or (2) drops @ 48" + (1) @ 26".
-    function dropsText(r) {
-      var groups = [];
+    // Strips for every pane of this size: 3 panes of 1 drop each read (3) drops.
+    function dropsText(r, qty) {
+      var groups = [], k = qty > 1 ? qty : 1;
       r.widths.forEach(function (w) { var t = fmtIn(w), g = groups[groups.length - 1]; if (g && g.t === t) g.n++; else groups.push({ t: t, n: 1 }); });
-      return groups.map(function (g, i) { return '(' + g.n + ') ' + (i ? '' : (r.dir === 'vertical' ? 'drop' : 'row') + (r.strips > 1 ? 's' : '') + ' ') + '@ ' + g.t; }).join(' + ');
+      return groups.map(function (g, i) { return '(' + g.n * k + ') ' + (i ? '' : (r.dir === 'vertical' ? 'drop' : 'row') + (r.strips * k > 1 ? 's' : '') + ' ') + '@ ' + g.t; }).join(' + ');
     }
     function filmTotals() {
       // run = linear feet of glass (horizontal width x qty), the way film is quoted; lf = feet of roll used
@@ -2366,35 +2375,49 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     }
     function letter(i) { return String.fromCharCode(65 + i); }
     // Which graphic each marker in a band uses, in order: the same one every time, A B C… repeating, or your own sequence.
-    // In your own sequence, capitals are your graphics and lowercase q, o and l are a square, a dot and a vertical tick.
-    var SEQ_SHAPES = { q: 'square', o: 'dot', l: 'tick', '|': 'tick', '.': 'dot', '#': 'square' };
+    // In a typed sequence, capitals are your graphics; lowercase q, b, o, d and l are a square, a dark square, a dot, a dark dot and a vertical tick.
+    var SEQ_HINT = 'Capitals are your graphics; lowercase <b>q</b> is a square, <b>b</b> a dark square, <b>o</b> a dot, <b>d</b> a dark dot and <b>l</b> a vertical tick.';
+    var SEQ_SHAPES = { q: 'square', b: 'dark', o: 'dot', d: 'darkdot', l: 'tick', '|': 'tick', '.': 'dot', '#': 'square' };
+    function parseSeq(text) {
+      var G = L.markers.graphics || [], out = [];
+      String(text || '').replace(/(black|dark) ?square/gi, 'b').replace(/(black|dark) ?dot/gi, 'd').replace(/square/gi, 'q').replace(/dot/gi, 'o').replace(/tick|line/gi, 'l').split('').forEach(function (c) {
+        if (SEQ_SHAPES[c]) out.push(SEQ_SHAPES[c]);
+        else if (/[A-Za-z]/.test(c)) { var i = c.toUpperCase().charCodeAt(0) - 65; if (i < G.length) out.push(i); }
+      });
+      return out;
+    }
     function seqList() {
       var K = L.markers, G = K.graphics || [];
-      if (K.seq === 'custom') {
-        var out = [], txt = String(K.seqText || '').replace(/square/gi, 'q').replace(/dot/gi, 'o').replace(/tick|line/gi, 'l');
-        txt.split('').forEach(function (c) {
-          if (SEQ_SHAPES[c]) out.push(SEQ_SHAPES[c]);
-          else if (/[A-Za-z]/.test(c)) { var i = c.toUpperCase().charCodeAt(0) - 65; if (i < G.length) out.push(i); }
-        });
-        if (out.length) return out;
-      }
+      if (K.seq === 'custom') { var out = parseSeq(K.seqText); if (out.length) return out; }
       if (!G.length) return [];
       if (K.seq === 'order') return G.map(function (g, i) { return i; });
       if (K.seq === 'custom') return [0];
       return [Math.min(K.useIdx || 0, G.length - 1)];
     }
-    // One marker in a graphics band and its size in inches: a graphic, or a built-in square, dot or tick.
-    function markAt(q) {
-      var K = L.markers, l = seqList(), t = l.length ? l[q % l.length] : null;
+    // The marks one band repeats (bands count from the bottom): its own sequence when each band has one, otherwise the pattern.
+    var BASE_SHAPE = { squares: 'square', dots: 'dot', ticks: 'tick' };
+    function seqFor(bi) {
+      var K = L.markers;
+      if (K.pattern === 'solid') return [];
+      if (K.perBand) { var own = parseSeq((K.bandSeq || [])[bi]); if (own.length) return own; }
+      if (K.pattern === 'graphic') { var l = seqList(); return l.length ? l : [null]; }
+      return [BASE_SHAPE[K.pattern] || 'square'];
+    }
+    function baseSeqText() { var K = L.markers; return K.pattern === 'dots' ? 'o' : K.pattern === 'ticks' ? 'l' : K.pattern === 'graphic' ? (K.seq === 'custom' ? K.seqText : seqList().map(letter).join(', ')) || 'A' : 'q'; }
+    // One mark and its size in inches: a graphic, or a built-in square, dot or tick (light or dark).
+    function markOf(t) {
+      var K = L.markers;
       if (typeof t === 'number') { var g = K.graphics[t]; return { g: g, gi: t, w: K.size, h: graphicH(g) }; }
-      if (t === 'dot') return { shape: 'dot', w: K.size, h: K.size };
+      if (t === 'dot' || t === 'darkdot') return { shape: 'dot', dark: t === 'darkdot', w: K.size, h: K.size };
       if (t === 'tick') return { shape: 'tick', w: K.tickW, h: K.barH };
-      if (t === 'square') return { shape: 'square', w: K.size, h: K.barH };
+      if (t === 'square' || t === 'dark') return { shape: 'square', dark: t === 'dark', w: K.size, h: K.barH };
       return { w: K.size, h: K.size };
     }
-    function seqHas(shape) { return seqList().indexOf(shape) >= 0; }
-    // Width of one marker's slot along the band.
-    function slotW() { return L.markers.pattern === 'ticks' ? L.markers.tickW : L.markers.size; }
+    function markFor(bi, q) { var l = seqFor(bi); return markOf(l.length ? l[q % l.length] : null); }
+    function bandSeqs() { var out = [], nb = Math.max(1, bands().length); for (var i = 0; i < nb; i++) out = out.concat(seqFor(i)); return out; }
+    function seqHas(shape) { return bandSeqs().indexOf(shape) >= 0; }
+    // Width of one marker's slot along the band. Every band shares the slots, so marks line up from band to band.
+    function slotW() { var all = bandSeqs(); return all.length && all.every(function (t) { return t === 'tick'; }) ? L.markers.tickW : L.markers.size; }
     function graphicH(g) { return g ? L.markers.size * g.h / g.w : L.markers.size; }
     function isArt() { return L.markers.pattern === 'graphic'; }
     function readGraphics(files) {
@@ -2426,23 +2449,129 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       }, Promise.resolve()).then(function () { if (L.markers.graphics.length) L.markers.pattern = 'graphic'; all(); Autosave.schedule(); });
     }
     function bands() { return String(L.markers.bands).split(/[,\s]+/).map(parseIn).filter(function (x) { return isFinite(x) && x >= 0; }).sort(function (a, b) { return a - b; }); }
-    function markerCount(len) {
-      var K = L.markers; if (K.pattern === 'solid') return 0;
-      var usable = len - 2 * K.margin, sw = slotW(); if (usable < sw) return 0;
-      return Math.floor((usable + K.gap) / (sw + K.gap));
+    // A run's glass, typed left to right: "34.5, 34.5 | 36 Door | 8". Commas are butt-glazed seams, bars are mullions, 3@48 is three
+    // 48" panes, and * is a pane that takes whatever the run's length leaves (shared equally when there are several).
+    function runBays(r) {
+      if (!r || !r.panes || !String(r.panes).trim()) return null;
+      var bays = String(r.panes).split('|').map(function (b) {
+        var out = [];
+        b.split(',').forEach(function (t) {
+          t = t.trim(); if (!t) return;
+          var rep = 1, m = /^(\d+)\s*[@×]\s*(.+)$/.exec(t) || /^(\d+)\s*\*\s*([\d.'"].*)$/.exec(t); if (m) { rep = Math.min(50, parseInt(m[1], 10)); t = m[2].trim(); }
+          var fl = /^\*\s*(.*)$/.exec(t), w = 0, name = '';
+          if (fl) name = fl[1].trim();
+          else { var m2 = /^([\d\s.\/'"\-]*[\d'"])\s*(.*)$/.exec(t); if (!m2) return; w = parseIn(m2[1].trim()); if (!(w > 0)) return; name = m2[2].trim(); }
+          for (var i = 0; i < rep; i++) out.push({ w: w, flex: !!fl, name: name });
+        });
+        return out;
+      }).filter(function (b) { return b.length; });
+      return bays.length ? bays : null;
+    }
+    // Door styles: stile width (each side) and top rail. The bottom rail is its own setting (10" gives a smooth push surface).
+    var DOORS = { narrow: { label: 'Narrow stile, 2 1/8"', stile: 2.125, top: 2.25 }, medium: { label: 'Medium stile, 3 1/2"', stile: 3.5, top: 3.5 }, wide: { label: 'Wide stile, 5"', stile: 5, top: 5 } };
+    var FRAME_COLORS = { black: ['Black', '#26282b'], bronze: ['Dark bronze', '#4a3e33'], clear: ['Clear anodized', '#b4bac0'] };
+    function doorOf(name) {
+      if (!/\bdoor\b/i.test(name || '')) return null;
+      var st = /\bwide\b/i.test(name) ? 'wide' : /\bmedium\b/i.test(name) ? 'medium' : /\bnarrow\b/i.test(name) ? 'narrow' : L.markers.doorStyle;
+      return { style: st, d: DOORS[st] || DOORS.medium, hinge: /\bRH\b/i.test(name) ? 'right' : 'left' };
+    }
+    // The whole storefront, in inches from the frame's outside left edge and up from the floor.
+    // Each pane has its opening (x, w) and its visible glass (gx, gw, gy0 to gy1); a door's glass sits inside its stiles and rails.
+    function runFrame(r) {
+      var bays = runBays(r); if (!bays) return null;
+      var K = L.markers, flex = 0, fixed = 2 * K.fJamb + K.mull * (bays.length - 1);
+      bays.forEach(function (b) { b.forEach(function (p, i) { if (p.flex) flex++; else fixed += p.w; if (i) fixed += K.seam; }); });
+      var fw = flex ? (r.len - fixed) / flex : 0, x = K.fJamb, panes = [], top = K.curb + K.glassH;
+      bays.forEach(function (b, bi) {
+        b.forEach(function (p, pi) {
+          if (pi) x += K.seam;
+          var w = p.flex ? Math.max(0, fw) : p.w, d = doorOf(p.name), st = d ? d.d.stile : 0;
+          panes.push({ x: x, w: w, name: p.name, bay: bi, seam: pi > 0, door: d, gx: x + st, gw: Math.max(0, w - 2 * st),
+            gy0: d ? K.doorBottom : K.curb + K.fSill, gy1: top - K.fHead - (d ? d.d.top : 0) });
+          x += w;
+        });
+        x += K.mull;
+      });
+      return { len: flex ? r.len : x - K.mull + K.fJamb, panes: panes, flex: flex, short: flex && fw <= 0, top: top };
+    }
+    // Runs typed as panes get their length from the panes and frame, unless a * pane fills a length you typed.
+    function syncLens() { L.markers.runs.forEach(function (r) { var f = runFrame(r); if (f && !f.flex) r.len = f.len; }); }
+    // Door hardware as a box (inches, x along the run, y up from the floor), on the latch side: a pull on the stile, or a bar across the door.
+    function hardware(p) {
+      var K = L.markers; if (!p.door || K.hw === 'none') return null;
+      if (K.hw === 'pull') { var off = Math.max(p.door.d.stile / 2, 2), cx = p.door.hinge === 'right' ? p.x + off : p.x + p.w - off; return { x0: cx - 0.5, x1: cx + 0.5, y0: K.hwH - 6, y1: K.hwH + 6, kind: 'pull' }; }
+      var t = K.hw === 'panic' ? 3 : 1.5; return { x0: p.gx, x1: p.gx + p.gw, y0: K.hwH - t / 2, y1: K.hwH + t / 2, kind: K.hw };
+    }
+    // Does this mark, on band bi, sit within an inch of the door's hardware?
+    function hitsHardware(p, bi, m) {
+      var hw = hardware(p); if (!hw) return false;
+      var mk = markFor(bi, m.q), sw = slotW(), bh = bands()[bi], mx = m.x + (sw - mk.w) / 2;
+      return mx < hw.x1 + 1 && mx + mk.w > hw.x0 - 1 && bh < hw.y1 + 1 && bh + mk.h > hw.y0 - 1;
+    }
+    // Where the marks go along a run: x is the left edge of each mark's slot, in inches from the run's left end, and q is its place in the sequence.
+    // A plain run spaces marks at the gap, centered or from one end. A run with panes spreads marks evenly through each pane's glass, half a gap
+    // at each edge, so none lands on a seam, mullion or door stile; the sequence carries on across seams and starts again after each mullion.
+    function runMarks(r) {
+      var K = L.markers, sw = slotW(), out = [], fr = runFrame(r), fromRight = K.start === 'right';
+      out.panes = fr ? fr.panes : [];
+      if (K.pattern === 'solid') return out;
+      if (!fr) {
+        var usable = r.len - 2 * K.margin; if (usable < sw) return out;
+        var n = Math.floor((usable + K.gap) / (sw + K.gap)), used = n * sw + (n - 1) * K.gap;
+        var start = K.start === 'left' ? K.margin : fromRight ? r.len - K.margin - used : (r.len - used) / 2;
+        for (var q = 0; q < n; q++) out.push({ x: start + q * (sw + K.gap), q: fromRight ? n - 1 - q : q });
+        return out;
+      }
+      var mine = [], flush = function () { mine.forEach(function (m, i) { m.q = fromRight ? mine.length - 1 - i : i; out.push(m); }); mine = []; };
+      fr.panes.forEach(function (p, pi) {
+        if (pi && !p.seam) flush();
+        var usable = p.gw - 2 * K.margin, n = usable >= sw ? Math.max(1, Math.floor(usable / (sw + K.gap) + 1e-9)) : 0, pitch = n ? usable / n : 0;
+        for (var i = 0; i < n; i++) mine.push({ x: p.gx + K.margin + (i + 0.5) * pitch - sw / 2, pane: pi });
+        p.n = n; p.gap = n > 1 ? pitch - sw : null; p.edge = n ? K.margin + (pitch - sw) / 2 : null;
+      });
+      flush();
+      return out;
+    }
+    // Lengths of solid band, as [from, to] along the run: one per pane of glass when the run has panes.
+    function runSpans(r) {
+      var K = L.markers, fr = runFrame(r);
+      if (!fr) return r.len - 2 * K.margin > 0 ? [[K.margin, r.len - K.margin]] : [];
+      return fr.panes.filter(function (p) { return p.gw - 2 * K.margin > 0; }).map(function (p) { return [p.gx + K.margin, p.gx + p.gw - K.margin]; });
+    }
+    // Problems worth flagging on a run: panes that don't fit, bands that miss the glass, marks in the way of door hardware.
+    function runWarnings(r) {
+      var K = L.markers, fr = runFrame(r), out = []; if (!fr) return out;
+      if (fr.short) out.push('Panes don’t fit in ' + fmtFt(r.len) + '.');
+      var hs = bands(), ms = runMarks(r);
+      hs.forEach(function (bh, bi) {
+        var seq = seqFor(bi), mh = K.pattern === 'solid' ? K.barH : seq.reduce(function (a, t) { return Math.max(a, markOf(t).h); }, 0), low = [], high = [];
+        fr.panes.forEach(function (p) {
+          var nm = p.door ? 'door' : 'glass';
+          if (bh < p.gy0 - 1e-6 && low.indexOf(nm) < 0) low.push(nm);
+          if (bh + mh > p.gy1 + 1e-6 && high.indexOf(nm) < 0) high.push(nm);
+        });
+        if (low.length) out.push(fmtIn(bh) + ' band is below the ' + low.join(' and ') + (low.indexOf('door') >= 0 ? ' (bottom rail ' + fmtIn(K.doorBottom) + ')' : ' (glass starts ' + fmtIn(K.curb + K.fSill) + ')') + '.');
+        if (high.length) out.push(fmtIn(bh) + ' band is above the ' + high.join(' and ') + '.');
+        var hits = ms.filter(function (m) { var p = fr.panes[m.pane]; return p && p.door && hitsHardware(p, bi, m); }).length;
+        if (hits) out.push(fmtIn(bh) + ' band: ' + hits + ' mark' + (hits > 1 ? 's' : '') + ' within 1" of the door ' + (K.hw === 'pull' ? 'pull' : K.hw === 'panic' ? 'panic bar' : 'push bar') + '.');
+      });
+      return out;
     }
     function markerTotals() {
-      var K = L.markers, nb = bands().length, t = { lf: 0, pieces: 0, nb: nb, runLen: 0 };
-      K.runs.forEach(function (r) { t.runLen += r.len; t.pieces += markerCount(r.len) * nb; });
+      syncLens();
+      var K = L.markers, nb = bands().length, t = { lf: 0, pieces: 0, dark: 0, nb: nb, runLen: 0, solidLen: 0 }, hSum = 0;
+      K.runs.forEach(function (r) {
+        t.runLen += r.len;
+        runSpans(r).forEach(function (sp) { t.solidLen += sp[1] - sp[0]; });
+        var ms = runMarks(r);
+        for (var b = 0; b < nb; b++) ms.forEach(function (m) { var mk = markFor(b, m.q); t.pieces++; hSum += mk.h; if (mk.dark) t.dark++; });
+      });
       t.lf = t.runLen * nb / 12;
       var R = L.roll;
-      if (K.pattern === 'solid') { t.lanes = Math.max(1, Math.floor(R / (K.barH + K.spacing))); t.rollFt = t.lf / t.lanes; }
+      if (K.pattern === 'solid') { t.lanes = Math.max(1, Math.floor(R / (K.barH + K.spacing))); t.rollFt = t.solidLen * nb / 12 / t.lanes; }
       else {
         t.lanes = Math.max(1, Math.floor(R / (slotW() + K.spacing)));
-        var ph = K.size;
-        if (K.pattern === 'graphic') { var sl = seqList(); ph = sl.length ? sl.reduce(function (a, x, i) { return a + markAt(i).h; }, 0) / sl.length : K.size; }
-        else if (K.pattern === 'squares' || K.pattern === 'ticks') ph = K.barH;
-        t.rollFt = Math.ceil(t.pieces / t.lanes) * (ph + K.spacing) / 12;
+        t.rollFt = Math.ceil(t.pieces / t.lanes) * ((t.pieces ? hSum / t.pieces : K.size) + K.spacing) / 12;
       }
       return t;
     }
@@ -2607,7 +2736,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
           r.widths.forEach(function (sw) { dimLine(ctx, x - 8, y + p0 * s, x - 8, y + (p0 + sw) * s, fits ? fmtIn(sw) : ''); p0 += sw; });
         }
         ctx.font = '400 10.5px "JetBrains Mono", ui-monospace, monospace';
-        var dt = dropsText(r); if (ctx.measureText(dt).width > w + gapIn * s - 6) dt = r.strips + (r.dir === 'vertical' ? ' drop' : ' row') + (r.strips > 1 ? 's' : '');
+        var dt = dropsText(r, p.qty), nq = r.strips * (p.qty > 1 ? p.qty : 1); if (ctx.measureText(dt).width > w + gapIn * s - 6) dt = nq + (r.dir === 'vertical' ? ' drop' : ' row') + (nq > 1 ? 's' : '');
         var sz = fmtIn(p.w) + ' × ' + fmtIn(p.h) + ' ×' + p.qty; if (ctx.measureText(sz).width > w + gapIn * s - 6) sz = '×' + p.qty;
         ctx.font = '500 11px "JetBrains Mono", ui-monospace, monospace';
         var nm = p.name, room = w + gapIn * s - 8; while (nm.length > 2 && ctx.measureText(nm).width > room) nm = nm.slice(0, -2) + '…';
@@ -2632,48 +2761,105 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       lastScale = NaN;
       if (!list.length && !runIdx && K.runs[0]) list = [K.runs[0]];
       if (!list.length) { txt(ctx, runIdx && K.runs.length ? 'Pick at least one glass run' : 'Add a glass run in the left panel', c.cw / 2, c.ch / 2, { size: 13 }); return; }
-      var H = K.glassH, maxShown = Math.max.apply(null, list.map(function (r) { return Math.min(r.len, 240); })), best = null;
+      syncLens();
+      var H = Math.max.apply(null, list.map(runTop)), maxShown = Math.max.apply(null, list.map(shownLen)), best = null;
       for (var cols = 1; cols <= list.length; cols++) {
-        var rows = Math.ceil(list.length / cols), sc = Math.min((c.cw - cols * 130) / (cols * maxShown), (c.ch - rows * 90) / (rows * H));
+        var rows = Math.ceil(list.length / cols), sc = Math.min((c.cw - cols * 130) / (cols * maxShown), (c.ch - rows * 110) / (rows * H));
         if (!best || sc > best.s) best = { s: sc, cols: cols, rows: rows };
       }
       var s = best.s; if (!(s > 0)) return; lastScale = s;
       var cellW = c.cw / best.cols, cellH = c.ch / best.rows;
       list.forEach(function (run, i) {
         var col = i % best.cols, row = Math.floor(i / best.cols), h = H * s;
-        drawRun(ctx, run, col * cellW + 90 + (cellW - 130 - maxShown * s) / 2, row * cellH + 30 + h + (cellH - 90 - h) / 2, s);
+        drawRun(ctx, run, col * cellW + 90 + (cellW - 130 - maxShown * s) / 2, row * cellH + 30 + h + (cellH - 110 - h) / 2, s);
       });
       canvas.setAttribute('aria-label', 'Distraction marker elevation for ' + list.map(function (r) { return r.name; }).join(', '));
     }
+    // Runs with panes show whole; plain runs show their first 20 ft.
+    function shownLen(r) { return runBays(r) ? r.len : Math.min(r.len, 240); }
+    function runTop(r) { return runBays(r) ? L.markers.curb + L.markers.glassH : L.markers.glassH; }
+    var GLASS = '#d9ecf7', DARK_MARK = '#262626', SEAM = '#6f7b84', WALL = '#cfc9bf', HW = '#d6d9dc', WARN = '#d0342c';
     function drawRun(ctx, run, x0, floor, s) {
-      var K = L.markers, shown = Math.min(run.len, 240), H = K.glassH, hs = bands(), w = shown * s, h = H * s;
-      ctx.fillStyle = '#d9ecf7'; ctx.fillRect(x0, floor - h, w, h);
-      ctx.strokeStyle = INK; ctx.lineWidth = 1; ctx.strokeRect(x0 + .5, floor - h + .5, w - 1, h - 1);
-      ctx.strokeStyle = SINK2; ctx.beginPath(); ctx.moveTo(x0 - 70, floor + .5); ctx.lineTo(x0 + w + 20, floor + .5); ctx.stroke(); ctx.strokeStyle = INK;
-      txt(ctx, 'FLOOR', x0 - 40, floor + 14, { size: 10, color: SINK2 });
-      var n = markerCount(run.len), sw = slotW(), used = n * sw + (n - 1) * K.gap, start = (run.len - used) / 2;
-      hs.forEach(function (bh, bi) {
-        var y = floor - (bh + K.barH) * s, bhPx = Math.max(1.5, K.barH * s);
-        ctx.fillStyle = 'rgba(255,255,255,.95)'; ctx.strokeStyle = INK; ctx.lineWidth = .75;
-        if (K.pattern === 'solid') { ctx.fillRect(x0 + K.margin * s, y, (shown - 2 * K.margin) * s, bhPx); ctx.strokeRect(x0 + K.margin * s, y, (shown - 2 * K.margin) * s, bhPx); }
-        else for (var q = 0; q < n; q++) {
-          var px = start + q * (sw + K.gap); if (px > shown) break;
-          var sz = sw * s;
-          if (K.pattern === 'graphic') {
-            // Every mark sits on the band height, centered in its slot.
-            var mk = markAt(q), mw = Math.max(1, mk.w * s), mh = Math.max(1, mk.h * s), mx = x0 + (px + (K.size - mk.w) / 2) * s, my = floor - bh * s - mh, gim = mk.g && artImg(mk.g);
-            if (gim) drawOutlined(ctx, gim, mx, my, mw, mh);
-            else if (mk.shape === 'dot') { ctx.beginPath(); ctx.arc(mx + mw / 2, my + mh / 2, mw / 2, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
-            else if (mk.shape) { ctx.fillRect(mx, my, mw, mh); ctx.strokeRect(mx, my, mw, mh); }
-            else ctx.strokeRect(mx, my, mw, mh);
+      var K = L.markers, ms = runMarks(run), fr = runFrame(run), shown = shownLen(run), hs = bands(), w = shown * s, h = runTop(run) * s, sw = slotW();
+      var Y = function (inch) { return floor - inch * s; };
+      ctx.lineWidth = .75; ctx.strokeStyle = INK2;
+      var box = function (x, y0, bw, y1, fill) { ctx.fillStyle = fill; ctx.fillRect(x0 + x * s, Y(y1), bw * s, (y1 - y0) * s); ctx.strokeRect(x0 + x * s + .25, Y(y1) + .25, bw * s - .5, (y1 - y0) * s - .5); };
+      if (fr) {
+        // Storefront elevation: curb, frame (jambs, head, sill and mullions show as the frame color around the glass), butt seams, doors.
+        var FC = (FRAME_COLORS[K.fColor] || FRAME_COLORS.black)[1];
+        if (K.curb > 0) box(0, 0, shown, K.curb, WALL);
+        box(0, K.curb, shown, fr.top, FC);
+        fr.panes.forEach(function (p, i) {
+          if (p.door) box(p.x, 0, p.w, fr.top - K.fHead, FC);
+          if (p.gw > 0 && p.gy1 > p.gy0) box(p.gx, p.gy0, p.gw, p.gy1, GLASS);
+          var q = fr.panes[i - 1];
+          if (p.seam && q && p.x > q.x + q.w) box(q.x + q.w, Math.max(p.gy0, q.gy0), p.x - q.x - q.w, Math.min(p.gy1, q.gy1), SEAM);
+        });
+        fr.panes.forEach(function (p) {
+          if (!p.door) return;
+          if (K.swing) {   // dashed lines meet at the hinge side
+            var hx = p.door.hinge === 'right' ? p.x + p.w : p.x, lx = p.door.hinge === 'right' ? p.x : p.x + p.w, ty = fr.top - K.fHead;
+            ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = '#55616b'; ctx.lineWidth = .9; ctx.beginPath();
+            ctx.moveTo(x0 + lx * s, Y(ty)); ctx.lineTo(x0 + hx * s, Y(ty / 2)); ctx.lineTo(x0 + lx * s, Y(0)); ctx.stroke(); ctx.restore();
           }
-          else if (K.pattern === 'dots') { ctx.beginPath(); ctx.arc(x0 + (px + K.size / 2) * s, y + bhPx / 2, Math.max(1, sz / 2), 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
-          else { ctx.fillRect(x0 + px * s, y, Math.max(1, sz), bhPx); ctx.strokeRect(x0 + px * s, y, Math.max(1, sz), bhPx); }
-        }
+          var hw = hardware(p); if (hw) box(hw.x0, hw.y0, hw.x1 - hw.x0, hw.y1, K.fColor === 'clear' ? '#6c737a' : HW);
+        });
+        fr.panes.forEach(function (p) { var nm = p.door ? p.name.replace(/\s*\b(narrow|medium|wide|RH|LH)\b/gi, '').trim() : p.name; if (nm && p.gw > 0) txt(ctx, nm.toUpperCase(), x0 + (p.gx + p.gw / 2) * s, Y(p.gy1 - (p.gy1 - p.gy0) * 0.15), { size: 12, w: 500, color: INK2 }); });
+      } else box(0, 0, shown, K.glassH, GLASS);
+      ctx.strokeStyle = SINK2; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x0 - 70, floor + .5); ctx.lineTo(x0 + w + 20, floor + .5); ctx.stroke();
+      txt(ctx, 'FLOOR', x0 - 40, floor + 14, { size: 10, color: SINK2 });
+      hs.forEach(function (bh, bi) {
+        ctx.strokeStyle = INK; ctx.lineWidth = .75;
+        if (K.pattern === 'solid') runSpans(run).forEach(function (sp) {
+          if (sp[0] >= shown) return;
+          var y = floor - (bh + K.barH) * s, bhPx = Math.max(1.5, K.barH * s), a = x0 + sp[0] * s, bw = (Math.min(sp[1], shown) - sp[0]) * s;
+          ctx.fillStyle = 'rgba(255,255,255,.95)'; ctx.fillRect(a, y, bw, bhPx); ctx.strokeRect(a, y, bw, bhPx);
+        });
+        else ms.forEach(function (m) {
+          if (m.x > shown) return;
+          // Every mark sits on the band height, centered in its slot. Marks off the glass or in the way of door hardware are outlined red.
+          var mk = markFor(bi, m.q), mw = Math.max(1, mk.w * s), mh = Math.max(1, mk.h * s), mx = x0 + (m.x + (sw - mk.w) / 2) * s, my = floor - bh * s - mh, gim = mk.g && artImg(mk.g);
+          var pn = fr && fr.panes[m.pane], bad = pn && ((pn.door && hitsHardware(pn, bi, m)) || bh < pn.gy0 - 1e-6 || bh + mk.h > pn.gy1 + 1e-6);
+          ctx.fillStyle = mk.dark ? DARK_MARK : 'rgba(255,255,255,.95)'; ctx.strokeStyle = bad ? WARN : INK; ctx.lineWidth = bad ? 1.5 : .75;
+          if (gim) drawOutlined(ctx, gim, mx, my, mw, mh);
+          else if (mk.shape === 'dot') { ctx.beginPath(); ctx.arc(mx + mw / 2, my + mh / 2, mw / 2, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
+          else if (mk.shape) { ctx.fillRect(mx, my, mw, mh); ctx.strokeRect(mx, my, mw, mh); }
+          else ctx.strokeRect(mx, my, mw, mh);
+          if (bad && gim) { ctx.strokeRect(mx - 1, my - 1, mw + 2, mh + 2); }
+        });
         var xd = x0 - 28 - bi * 24;
         dimLine(ctx, xd, floor, xd, floor - bh * s, fmtIn(bh));
       });
+      if (fr) {
+        // Openings under the floor line, the overall frame below them, where the glass starts on the right, and the spacing in the first pane.
+        ctx.font = '400 11px "JetBrains Mono", ui-monospace, monospace';
+        fr.panes.forEach(function (p) { var lab = fmtIn(p.w); dimLine(ctx, x0 + p.x * s, floor + 22, x0 + (p.x + p.w) * s, floor + 22, ctx.measureText(lab).width + 6 < p.w * s ? lab : '', 'below'); });
+        dimLine(ctx, x0, floor + 52, x0 + w, floor + 52, fmtFt(run.len), 'below');
+        var gb = K.curb + K.fSill; if (gb > 0 && fr.panes.some(function (p) { return !p.door; })) dimLine(ctx, x0 + w + 22, floor, x0 + w + 22, Y(gb), fmtIn(gb));
+        if (hs.length && K.pattern !== 'solid') {
+          var yb = floor - hs[hs.length - 1] * s + 16, p0 = fr.panes[0], p1 = fr.panes[1], inP = function (pi) { return ms.filter(function (m) { return m.pane === pi; }); };
+          var a = inP(0), lastR = -1e9, gd = function (xa, xb) { if (xb - xa < 0.05) return; var r2 = smallDim(ctx, x0 + xa * s, x0 + xb * s, yb, fmtIn(xb - xa), lastR); if (r2) lastR = r2; };
+          if (a.length) gd(p0.gx, a[0].x + (sw - markFor(hs.length - 1, a[0].q).w) / 2);
+          if (a.length > 1) gd(a[0].x + sw, a[1].x);
+          // Across the seam only when it differs from the gap between marks (it does with end clearance or a wide seam).
+          if (p1 && p1.seam && a.length) { var b = inP(1); if (b.length && (a.length < 2 || Math.abs((b[0].x - a[a.length - 1].x) - (a[1].x - a[0].x)) > 0.01)) gd(a[a.length - 1].x + sw, b[0].x); }
+        }
+      }
       txt(ctx, run.name + ' · ' + fmtFt(run.len) + (run.len > shown ? ' (first 20\'-0" shown)' : ''), x0 + w / 2, floor - h - 10, { size: 11.5, w: 500 });
+    }
+    // A short dimension with its label underneath, for gaps between marks.
+    // Skips it (returns null) when its label would run into the one before, which ends at minX; otherwise returns where this label ends.
+    function smallDim(ctx, x1, x2, y, label, minX) {
+      ctx.font = '400 9.5px "JetBrains Mono", ui-monospace, monospace';
+      var lw = ctx.measureText(label).width, lc = Math.max((x1 + x2) / 2, x1 + lw / 2 - 2);
+      if (lc - lw / 2 - 2 < minX + 3) return null;
+      ctx.save(); ctx.strokeStyle = '#b0127a'; ctx.lineWidth = .75; ctx.beginPath();
+      ctx.moveTo(x1, y); ctx.lineTo(x2, y); ctx.moveTo(x1, y - 3); ctx.lineTo(x1, y + 3); ctx.moveTo(x2, y - 3); ctx.lineTo(x2, y + 3); ctx.stroke(); ctx.restore();
+      ctx.font = '400 9.5px "JetBrains Mono", ui-monospace, monospace';
+      var tw2 = ctx.measureText(label).width, cx = Math.max((x1 + x2) / 2, x1 + tw2 / 2 - 2);
+      ctx.fillStyle = 'rgba(217,236,247,.92)'; ctx.fillRect(cx - tw2 / 2 - 2, y + 4, tw2 + 4, 11);
+      txt(ctx, label, cx, y + 12.5, { size: 9.5, color: '#b0127a' });
+      return cx + tw2 / 2 + 2;
     }
     function draw() { if (L.job === 'mural') drawMural(); else if (L.job === 'film') drawFilm(); else drawMarkers(offTarget && offTarget.runs); }
     // Draw one job into someone else's canvas (Shop drawing), w × h in points at r pixels per point. Returns real inches per point.
@@ -2707,6 +2893,16 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       if (cat) { var only = list.filter(function (it) { return it.cat === cat; }); list = only.length ? only : list.filter(function (it) { return !it.cat; }); }
       return list.map(function (it) { return { id: it.id, name: it.name, w: lenIn(Math.abs(it.pts[1].x - it.pts[0].x), it.page), h: lenIn(Math.abs(it.pts[2].y - it.pts[1].y), it.page) }; });
     }
+    // Mark spacing per pane size, so an installer can set out each pane: marks, gap between them, and distance from the edges.
+    function spacingNote(ms) {
+      if (L.markers.pattern === 'solid') return '';
+      var seen = {}, out = [];
+      ms.panes.forEach(function (p) {
+        var k = p.w.toFixed(3) + (p.door ? 'd' + p.gw.toFixed(3) : ''); if (seen[k]) return; seen[k] = 1;
+        out.push('<b>' + esc(fmtIn(p.w)) + (p.name ? ' ' + esc(p.name) : '') + '</b> ' + (p.door ? '(glass ' + esc(fmtIn(p.gw)) + ') ' : '') + (p.n ? p.n + ' mark' + (p.n > 1 ? 's' : '') + (p.gap != null ? ', ' + esc(fmtIn(p.gap)) + ' apart' : '') + ', ' + esc(fmtIn(p.edge)) + ' from glass edges' : 'too narrow for a mark'));
+      });
+      return '<div class="ed-out spacing">' + out.join('<br>') + '</div>';
+    }
     function fromMeasureCount() { return L.job === 'film' ? measuredLengths('film').length + measuredRects('film').length : measuredLengths('markers').length; }
 
     function tools() {
@@ -2727,20 +2923,23 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         var t = filmTotals();
         var sp = L.film.panes[L.film.sel] || L.film.panes[0], sr = sp && filmPane(sp);
         h += '<div class="block"><div class="label">Privacy film · ' + (filmByLf() ? 'linear feet of glass' : 'glass area') + '</div><div class="readout">' + (filmByLf() ? num(t.run) + ' LF' : num(t.net) + ' sq ft') + '</div>' +
-          (sr ? '<p class="drops">' + esc(dropsText(sr)) + '<small>' + esc(sp.name) + ' · ' + fmtIn(sp.w) + ' × ' + fmtIn(sp.h) + ' glass · strips ' + fmtIn(sr.len) + ' long</small></p>' : '') +
+          (sr ? '<p class="drops">' + esc(dropsText(sr, sp.qty)) + '<small>' + esc(sp.name) + ' · ' + fmtIn(sp.w) + ' × ' + fmtIn(sp.h) + ' glass · strips ' + fmtIn(sr.len) + ' long</small></p>' : '') +
           '<p class="hint">' + t.panes + ' pane' + (t.panes === 1 ? '' : 's') + ', ' + (filmByLf() ? num(t.net) + ' sq ft of glass' : num(t.run) + ' LF of glass') + ', ' + num(t.lf) + ' ft of ' + L.roll + '" roll</p></div>';
         h += '<div class="block"><div class="label">Glass panes (inches, or 8\' / 2\'-6")</div><div class="list">' + L.film.panes.map(function (p, i) {
           var r = filmPane(p);
           return '<div class="ed' + (i === L.film.sel ? ' sel' : '') + '" data-row="' + i + '"><div class="ed-top"><span class="chip" style="background:var(--blue)"></span><input type="text" data-f="name" value="' + esc(p.name) + '" aria-label="Pane name"><button type="button" data-delrow="' + i + '" aria-label="Delete ' + esc(p.name) + '">×</button></div>' +
             '<div class="ed-nums"><label>W<input type="text" data-f="w" value="' + esc(fmtIn(p.w)) + '"></label><label>H<input type="text" data-f="h" value="' + esc(fmtIn(p.h)) + '"></label><label>Qty<input type="text" data-f="qty" value="' + p.qty + '"></label></div>' +
-            '<div class="ed-out">' + (filmByLf() ? num(p.w * p.qty / 12) + ' LF' : num(p.w * p.h * p.qty / 144) + ' sq ft') + ' · ' + esc(dropsText(r)) + ' · ' + num(r.lf * p.qty) + ' ft of roll</div></div>';
+            '<div class="ed-out">' + (filmByLf() ? num(p.w * p.qty / 12) + ' LF' : num(p.w * p.h * p.qty / 144) + ' sq ft') + ' · ' + esc(dropsText(r, p.qty)) + ' · ' + num(r.lf * p.qty) + ' ft of roll</div></div>';
         }).join('') + '</div><div class="row" style="margin-top:8px"><button type="button" class="btn" data-addrow="1">+ Add pane</button>' + (fromMeasureCount() ? '<button type="button" class="btn" data-frommeasure="1">Add from Measure</button>' : '') + '</div></div>';
       } else {
         var mt = markerTotals();
         h += '<div class="block"><div class="label">Distraction markers · ' + mt.nb + ' band' + (mt.nb === 1 ? '' : 's') + '</div><div class="readout">' + num(Math.ceil(mt.lf), 0) + ' LF</div><p class="hint">' + num(mt.runLen / 12) + ' ft of glass' + (L.markers.pattern !== 'solid' ? ', ' + num(mt.pieces, 0) + ' pieces' : '') + '</p></div>';
         h += '<div class="block"><div class="label">Glass runs (24\', 98\'-5", or inches)</div><div class="list">' + L.markers.runs.map(function (r, i) {
-          return '<div class="ed' + (i === L.markers.sel ? ' sel' : '') + '" data-row="' + i + '"><div class="ed-top"><span class="chip" style="background:var(--yellow)"></span><input type="text" data-f="name" value="' + esc(r.name) + '" aria-label="Run name"><button type="button" data-delrow="' + i + '" aria-label="Delete ' + esc(r.name) + '">×</button></div>' +
-            '<div class="ed-nums two"><label>Length<input type="text" data-f="len" value="' + esc(fmtFt(r.len)) + '"></label><span class="ed-out">' + (L.markers.pattern === 'solid' ? num(r.len * mt.nb / 12) + ' LF' : markerCount(r.len) * mt.nb + ' pcs') + '</span></div></div>';
+          var fr = runFrame(r), bays = fr && !fr.flex, ms = runMarks(r), on = i === L.markers.sel, warn = runWarnings(r);
+          return '<div class="ed' + (on ? ' sel' : '') + '" data-row="' + i + '"><div class="ed-top"><span class="chip" style="background:var(--yellow)"></span><input type="text" data-f="name" value="' + esc(r.name) + '" aria-label="Run name"><button type="button" data-delrow="' + i + '" aria-label="Delete ' + esc(r.name) + '">×</button></div>' +
+            '<div class="ed-nums two"><label>Length<input type="text" data-f="len" value="' + esc(fmtFt(r.len)) + '"' + (bays ? ' disabled title="Set by the panes"' : '') + '></label><span class="ed-out">' + (L.markers.pattern === 'solid' ? num(r.len * mt.nb / 12) + ' LF' : ms.length * mt.nb + ' pcs') + '</span></div>' +
+            (on || fr ? '<div class="ed-nums one"><label>Panes, left to right<input type="text" data-f="panes" value="' + esc(r.panes || '') + '" placeholder="34.5, 34.5 | 36 Door | 8"></label></div>' : '') +
+            (on && fr ? spacingNote(ms) : '') + (warn.length ? '<div class="ed-out warn">' + warn.map(esc).join('<br>') + '</div>' : '') + '</div>';
         }).join('') + '</div><div class="row" style="margin-top:8px"><button type="button" class="btn" data-addrow="1">+ Add run</button>' + (fromMeasureCount() ? '<button type="button" class="btn" data-frommeasure="1">Add from Measure</button>' : '') + '</div></div>';
       }
       leftEl.innerHTML = h;
@@ -2798,7 +2997,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       } else {
         var K = L.markers, mt = markerTotals();
         var bnd = '<label class="field">Band heights, bottom edge<input type="text" data-k="markers.bands" data-kind="raw" value="' + esc(K.bands) + '"></label><p class="hint" style="margin:0">Measured up from floor. Separate with commas, e.g. 30, 60. Check local code and spec.</p>' +
-          (isArt() && !seqHas('square') && !seqHas('tick') ? '' : field(isArt() ? 'Square and tick height' : 'Band height', 'markers.barH', 'in')) + selectF('Pattern', 'markers.pattern', [['squares', 'Squares'], ['dots', 'Dots'], ['ticks', 'Vertical ticks'], ['solid', 'Solid line'], ['graphic', 'Your graphics (PNG or SVG)']]);
+          selectF('Pattern', 'markers.pattern', [['squares', 'Squares'], ['dots', 'Dots'], ['ticks', 'Vertical ticks'], ['solid', 'Solid line'], ['graphic', 'Your graphics (PNG or SVG)']]);
         if (isArt()) {
           var G = K.graphics || [];
           bnd += '<div class="label">Graphics</div>' + (G.length ? '<div class="list">' + G.map(function (g, i) { return '<div class="item ro"><span class="chip art" style="--art:url(' + g.url + ')"></span><span>' + letter(i) + ' · ' + esc(g.name) + '</span><b></b><button type="button" data-delart="' + i + '" aria-label="Remove ' + esc(g.name) + '">×</button></div>'; }).join('') + '</div>' : '<p class="hint" style="margin:0">Upload one or more PNG or SVG files. Each is labeled A, B, C… in the order you add them.</p>') +
@@ -2806,14 +3005,40 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
           if (G.length) {
             bnd += selectF('Use', 'markers.seq', [['all', 'The same graphic on every marker'], ['order', 'Each graphic in turn (A, B, C…)'], ['custom', 'My own sequence']]);
             if (K.seq === 'all' && G.length > 1) bnd += selectF('Graphic', 'markers.useIdx', G.map(function (g, i) { return [i, letter(i) + ' · ' + g.name]; }));
-            if (K.seq === 'custom') bnd += '<label class="field">Sequence<input type="text" data-k="markers.seqText" data-kind="raw" value="' + esc(K.seqText) + '"></label><p class="hint" style="margin:0">Repeats along each band. Capitals are your graphics; lowercase <b>q</b> is a square, <b>o</b> a dot and <b>l</b> a vertical tick. A, l, l, l puts your logo then three ticks.</p>';
+            if (K.seq === 'custom') bnd += '<label class="field">Sequence<input type="text" data-k="markers.seqText" data-kind="raw" value="' + esc(K.seqText) + '"></label><p class="hint" style="margin:0">Repeats along each band. ' + SEQ_HINT + ' A, l, l, l puts your logo then three ticks.</p>';
           }
         }
-        if (K.pattern !== 'solid') bnd += '<div class="row2">' + (K.pattern === 'ticks' ? field('Tick width', 'markers.tickW', 'in') : field(K.pattern === 'dots' ? 'Dot size' : isArt() ? 'Graphic width' : 'Square size', 'markers.size', 'in')) + field('Gap', 'markers.gap', 'in') + '</div>' + (isArt() && seqHas('tick') ? field('Tick width', 'markers.tickW', 'in') : '') + (isArt() ? '<p class="hint" style="margin:0">Each graphic keeps its own shape; its height follows the width. The band height is where each graphic’s bottom edge sits.</p>' : '');
-        bnd += field('End clearance', 'markers.margin', 'in') + field('Glass height (preview)', 'markers.glassH', 'in');
+        if (K.pattern !== 'solid') {
+          bnd += selectF('Bands', 'markers.perBand', [['false', 'Same pattern on every band'], ['true', 'Own pattern on each band']]);
+          if (K.perBand) {
+            var bl = bands(), base = baseSeqText();
+            bl.slice().reverse().forEach(function (bh) { var bi = bl.indexOf(bh); bnd += '<label class="field">Band at ' + esc(fmtIn(bh)) + '<input type="text" data-k="markers.bandSeq.' + bi + '" data-kind="raw" value="' + esc((K.bandSeq || [])[bi] || '') + '" placeholder="' + esc(base) + '"></label>'; });
+            bnd += '<p class="hint" style="margin:0">Each band repeats its own sequence; blank uses the pattern above. ' + SEQ_HINT + ' <b>q, b</b> alternates light and dark squares.</p>';
+          }
+          bnd += selectF('Start pattern', 'markers.start', [['center', 'Centered on run'], ['left', 'From left edge'], ['right', 'From right edge']]);
+        }
+        var anyBar = K.pattern === 'solid' || seqHas('square') || seqHas('dark') || seqHas('tick'), anySize = K.pattern !== 'solid' && bandSeqs().some(function (t) { return t !== 'tick'; });
+        if (anyBar) bnd += field(K.pattern === 'solid' ? 'Band height' : seqHas('tick') && !seqHas('square') && !seqHas('dark') ? 'Tick height' : seqHas('tick') ? 'Square and tick height' : 'Square height', 'markers.barH', 'in');
+        if (K.pattern !== 'solid') bnd += '<div class="row2">' + (anySize ? field(K.pattern === 'dots' && !K.perBand ? 'Dot size' : isArt() ? 'Graphic width' : K.perBand ? 'Mark width' : 'Square size', 'markers.size', 'in') : field('Tick width', 'markers.tickW', 'in')) + field('Gap', 'markers.gap', 'in') + '</div>' + (anySize && seqHas('tick') ? field('Tick width', 'markers.tickW', 'in') : '') + (isArt() ? '<p class="hint" style="margin:0">Each graphic keeps its own shape; its height follows the width. The band height is where each graphic’s bottom edge sits.</p>' : '');
+        bnd += field('End clearance', 'markers.margin', 'in');
+        var anyFrame = K.runs.some(runBays);
+        if (K.runs.some(function (r) { return !runBays(r); })) bnd += field('Glass height (preview)', 'markers.glassH', 'in');
         h += lsec('m_bands', 'Bands', bnd);
+        // Storefront frame for runs typed as panes.
+        var fm = '<p class="hint" style="margin:0">For runs with panes. Pane sizes are visible glass; a door\u2019s size is its opening.</p>' +
+          '<div class="row2">' + field('Frame height', 'markers.glassH', 'in') + field('Curb or wall', 'markers.curb', 'in') + '</div>' +
+          '<div class="row2">' + field('Jambs', 'markers.fJamb', 'in') + field('Mullions', 'markers.mull', 'in') + '</div>' +
+          '<div class="row2">' + field('Head', 'markers.fHead', 'in') + field('Sill', 'markers.fSill', 'in') + '</div>' +
+          field('Butt seam', 'markers.seam', 'in') + '<p class="hint" style="margin:0">Glass starts ' + esc(fmtIn(K.curb + K.fSill)) + ' above floor. Curb is any wall or base under the frame.</p>' +
+          selectF('Color', 'markers.fColor', Object.keys(FRAME_COLORS).map(function (k) { return [k, FRAME_COLORS[k][0]]; })) +
+          '<div class="label" style="margin-top:4px">Doors</div>' +
+          selectF('Style', 'markers.doorStyle', Object.keys(DOORS).map(function (k) { return [k, DOORS[k].label]; })) + field('Bottom rail', 'markers.doorBottom', 'in') +
+          selectF('Hardware', 'markers.hw', [['pull', 'Pull'], ['push', 'Push bar'], ['panic', 'Panic bar'], ['none', 'None']]) + (K.hw !== 'none' ? field('Hardware height, center', 'markers.hwH', 'in') : '') +
+          selectF('Swing', 'markers.swing', [['true', 'Show on drawing'], ['false', 'Hide']]) +
+          '<p class="hint" style="margin:0">Put <b>Door</b> in a pane\u2019s name to make it a door; add <b>narrow</b>, <b>medium</b> or <b>wide</b> for its style and <b>RH</b> for hinges on the right. A <b>*</b> pane takes whatever the run\u2019s length leaves, e.g. <b>*, * | 36 Door</b> on a 120" run.</p>';
+        if (anyFrame) h += lsec('m_frame', 'Frame', fm);
         h += lsec('m_cut', 'Cutting', rollSel(true) + field('Piece spacing on roll', 'markers.spacing', 'in'));
-        h += lsec('m_res', 'Results', '<dl class="kv"><dt>Glass</dt><dd>' + num(mt.runLen / 12) + ' ft</dd><dt>Bands</dt><dd>' + mt.nb + '</dd><dt>Marker length</dt><dd>' + num(mt.lf) + ' LF</dd>' + (K.pattern !== 'solid' ? '<dt>Pieces</dt><dd>' + num(mt.pieces, 0) + '</dd>' : '') + '<dt>Across the roll</dt><dd>' + mt.lanes + ' ' + (K.pattern === 'solid' ? 'strips' : 'pieces') + '</dd><dt>Vinyl needed</dt><dd>' + num(Math.ceil(mt.rollFt * 10) / 10) + ' ft of ' + L.roll + '"</dd></dl><p class="hint" style="margin:0">Vinyl needed assumes pieces nest across the roll with the spacing above. Add a site-survey allowance before ordering.</p>');
+        h += lsec('m_res', 'Results', '<dl class="kv"><dt>Glass</dt><dd>' + num(mt.runLen / 12) + ' ft</dd><dt>Bands</dt><dd>' + mt.nb + '</dd><dt>Marker length</dt><dd>' + num(mt.lf) + ' LF</dd>' + (K.pattern !== 'solid' ? '<dt>Pieces</dt><dd>' + num(mt.pieces, 0) + (mt.dark ? ' (' + num(mt.dark, 0) + ' dark)' : '') + '</dd>' : '') + '<dt>Across the roll</dt><dd>' + mt.lanes + ' ' + (K.pattern === 'solid' ? 'strips' : 'pieces') + '</dd><dt>Vinyl needed</dt><dd>' + num(Math.ceil(mt.rollFt * 10) / 10) + ' ft of ' + L.roll + '"</dd></dl><p class="hint" style="margin:0">Vinyl needed assumes pieces nest across the roll with the spacing above. Add a site-survey allowance before ordering.</p>');
         h += quoteSec();
         var nr = nest(cutPieces());
         h += lsec('m_exp', 'Export', '<div class="row"><button type="button" class="btn strong" data-lact="copy">Copy run list</button><button type="button" class="btn" data-lact="csv" data-dl>CSV</button></div>' +
@@ -2845,13 +3070,13 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var rows;
       if (L.job === 'mural') { var m = muralPanels(); rows = [['Panel', 'Width (in)', 'Height (in)', 'Start (in)', 'Roll']].concat(m.rects.map(function (r, i) { return [i + 1, m.widths[i].toFixed(3), m.len.toFixed(3), (m.vert ? r.x : r.y).toFixed(3), L.roll]; })); }
       else if (L.job === 'film') rows = [['Pane', 'Width (in)', 'Height (in)', 'Qty', 'Linear feet (glass)', 'Sq ft (glass)', 'Direction', 'Strips each', 'Strip length (in)', 'Roll used (ft)']].concat(L.film.panes.map(function (p) { var r = filmPane(p); return [p.name, p.w, p.h, p.qty, (p.w * p.qty / 12).toFixed(2), (p.w * p.h * p.qty / 144).toFixed(2), r.dir, r.strips, r.len.toFixed(2), (r.lf * p.qty).toFixed(2)]; }));
-      else { var nb = bands().length; rows = [['Run', 'Length (in)', 'Bands', 'Marker LF', 'Pieces']].concat(L.markers.runs.map(function (r) { return [r.name, r.len.toFixed(2), nb, (r.len * nb / 12).toFixed(2), L.markers.pattern === 'solid' ? '' : markerCount(r.len) * nb]; })); }
+      else { syncLens(); var nb = bands().length; rows = [['Run', 'Length (in)', 'Panes', 'Bands', 'Marker LF', 'Pieces']].concat(L.markers.runs.map(function (r) { return [r.name, r.len.toFixed(2), r.panes || '', nb, (r.len * nb / 12).toFixed(2), L.markers.pattern === 'solid' ? '' : runMarks(r).length * nb]; })); }
       return rows.map(function (r) { return r.map(q).join(','); }).join('\n');
     }
     function rowsText() {
       if (L.job === 'mural') { var m = muralPanels(); return 'Mural ' + fmtFt(L.mural.w) + ' x ' + fmtFt(L.mural.h) + ', ' + L.roll + '" roll, ' + fmtIn(L.mural.bleed) + ' bleed, ' + fmtIn(m.ov) + ' overlap\n' + m.widths.map(function (w, i) { return 'Panel ' + (i + 1) + '\t' + fmtIn(w) + ' x ' + fmtIn(m.len); }).join('\n') + '\nPrinted\t' + num(m.printed) + ' sq ft'; }
       if (L.job === 'film') { var t = filmTotals(); return L.film.panes.map(function (p) { var r = filmPane(p); return p.name + '\t' + fmtIn(p.w) + ' x ' + fmtIn(p.h) + ' x' + p.qty + '\t' + num(p.w * p.qty / 12) + ' LF\t' + r.strips + ' ' + r.dir + '\t' + num(r.lf * p.qty) + ' ft of roll'; }).join('\n') + '\nTotal\t' + num(t.run) + ' LF of glass, ' + num(t.net) + ' sq ft\nRoll used\t' + num(t.lf) + ' ft of ' + L.roll + '" (' + fmtIn(printW()) + ' printable)'; }
-      var mt = markerTotals(); return L.markers.runs.map(function (r) { return r.name + '\t' + fmtFt(r.len); }).join('\n') + '\nBands at ' + bands().map(fmtIn).join(', ') + ' (bottom edge), ' + fmtIn(L.markers.barH) + ' high, ' + L.markers.pattern + '\nTotal\t' + num(Math.ceil(mt.lf), 0) + ' LF' + (L.markers.pattern !== 'solid' ? ', ' + mt.pieces + ' pieces' : '');
+      var mt = markerTotals(); return L.markers.runs.map(function (r) { return r.name + '\t' + fmtFt(r.len) + (runBays(r) ? '\t' + r.panes : ''); }).join('\n') + '\nBands at ' + bands().map(fmtIn).join(', ') + ' (bottom edge), ' + fmtIn(L.markers.barH) + ' high, ' + L.markers.pattern + '\nTotal\t' + num(Math.ceil(mt.lf), 0) + ' LF' + (L.markers.pattern !== 'solid' ? ', ' + mt.pieces + ' pieces' : '');
     }
     function flash(t) { L.note = t; right(); setTimeout(function () { L.note = ''; if (mode === 'layout') right(); }, 2200); }
     function copy() {
@@ -2941,16 +3166,25 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     function cutPieces() {
       var K = L.markers, nb = bands().length, pcs = [];
       if (!nb) return pcs;
+      syncLens();
       if (K.pattern === 'solid') K.runs.forEach(function (r) {
-        var len = r.len - 2 * K.margin; if (len <= 0) return;
-        var max = Math.min(Math.max(6, K.maxStrip), CUT_PAGE - 2), parts = Math.ceil(len / max), each = len / parts;
-        for (var b = 0; b < nb; b++) for (var q = 0; q < parts; q++) pcs.push({ w: K.barH, h: each, shape: 'rect' });
+        runSpans(r).forEach(function (sp) {
+          var len = sp[1] - sp[0], max = Math.min(Math.max(6, K.maxStrip), CUT_PAGE - 2), parts = Math.ceil(len / max), each = len / parts;
+          for (var b = 0; b < nb; b++) for (var q = 0; q < parts; q++) pcs.push({ w: K.barH, h: each, shape: 'rect' });
+        });
       });
-      else if (K.pattern === 'graphic') K.runs.forEach(function (r) {
-        var n = markerCount(r.len); if (!seqList().length) return;
-        for (var b = 0; b < nb; b++) for (var q = 0; q < n; q++) { var mk = markAt(q); pcs.push({ w: mk.w, h: mk.h, shape: mk.shape === 'dot' ? 'circle' : 'rect', g: mk.g ? mk.gi : undefined }); }
-      });
-      else { var t = markerTotals(); for (var i = 0; i < t.pieces; i++) pcs.push({ w: slotW(), h: K.pattern === 'dots' ? K.size : K.barH, shape: K.pattern === 'dots' ? 'circle' : 'rect' }); }
+      else {
+        // Light pieces first, then dark ones, so each color nests together on the roll.
+        var dark = [];
+        K.runs.forEach(function (r) {
+          var ms = runMarks(r);
+          for (var b = 0; b < nb; b++) ms.forEach(function (m) {
+            var mk = markFor(b, m.q); if (!mk.shape && !mk.g) return;
+            (mk.dark ? dark : pcs).push({ w: mk.w, h: mk.h, shape: mk.shape === 'dot' ? 'circle' : 'rect', g: mk.g ? mk.gi : undefined, dark: mk.dark });
+          });
+        });
+        pcs = pcs.concat(dark);
+      }
       return pcs;
     }
     function nest(pcs) {
@@ -3147,7 +3381,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var kind = el.dataset.kind, v;
       if (kind === 'len' || kind === 'in') { v = parseIn(el.value); if (!(v >= 0) || (kind === 'len' && !(v > 0))) { el.value = kind === 'len' ? fmtFt(get(k)) : fmtIn(get(k)); return; } }
       else if (kind === 'money') { v = parseFloat(String(el.value).replace(/[$,\s]/g, '')); if (!(v >= 0)) { el.value = Number(get(k)).toFixed(2); return; } }
-      else if (kind === 'sel') { v = el.value; if (k === 'roll' || k === 'mural.angle' || k === 'mural.dpi' || k === 'markers.useIdx') v = Number(v); if (k === 'mural.balance' || k === 'film.balance') v = v === 'true'; }
+      else if (kind === 'sel') { v = el.value; if (k === 'roll' || k === 'mural.angle' || k === 'mural.dpi' || k === 'markers.useIdx') v = Number(v); if (k === 'mural.balance' || k === 'film.balance' || k === 'markers.perBand' || k === 'markers.swing') v = v === 'true'; }
       else v = el.value;
       if (k === 'mural.overlap' && v >= printW()) v = printW() - 1;
       if (k === 'margin' && v > L.roll - 6) v = L.roll - 6;
@@ -3190,6 +3424,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var row = e.target.closest('[data-row]'), f = e.target.dataset.f; if (!row || !f) return;
       var it = rows()[Number(row.dataset.row)]; if (!it) return;
       if (f === 'name') it.name = e.target.value || it.name;
+      else if (f === 'panes') { it.panes = e.target.value.trim(); var fr0 = runFrame(it); if (fr0 && !fr0.flex) it.len = fr0.len; }
       else if (f === 'qty') { var q = parseInt(e.target.value, 10); if (q > 0) it.qty = q; }
       else { var v = parseIn(e.target.value); if (v > 0) it[f] = v; }
       refocusAfter(leftEl, function (a) { var r = a.closest && a.closest('[data-row]'); return r && a.dataset.f ? '[data-row="' + r.dataset.row + '"] [data-f="' + a.dataset.f + '"]' : null; });
@@ -3226,7 +3461,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     });
 
     function setMarkerArt(list) { if (Array.isArray(list)) L.markers.graphics = list.filter(function (g) { return g && g.url; }); }
-    return { markerRuns: function () { return L.markers.runs.map(function (r) { return r.name + ' · ' + fmtFt(r.len); }); },
+    return { markerRuns: function () { syncLens(); return L.markers.runs.map(function (r) { return r.name + ' · ' + fmtFt(r.len); }); },
       enter: all, draw: draw, renderTo: renderTo, tools: tools, markerArt: function () { return L.markers.graphics || []; }, setMarkerArt: setMarkerArt, left: left, right: right, status: status, getState: getState, setState: setState,
       imageBlob: function () { return L.mural.imgBlob || null; }, imageName: function () { return L.mural.imgName || ''; } };
   })();
@@ -3247,7 +3482,17 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       center: '<path d="M3 4.5h12M5 8h8M3 11.5h12M5 15h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
       right: '<path d="M3 4.5h12M7 8h8M3 11.5h12M7 15h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
       bold: '<path d="M5.5 3.5h4.2a2.9 2.9 0 0 1 0 5.8H5.5zM5.5 9.3h5a3 3 0 0 1 0 6h-5z" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"/>',
-      dash: '<path d="M2 9h3.2M7.4 9h3.2M12.8 9H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' };
+      dash: '<path d="M2 9h3.2M7.4 9h3.2M12.8 9H16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>',
+      ital: '<path d="M8 3.5h6M4 14.5h6M11.4 3.5 6.6 14.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>',
+      front: '<path d="M5 8.5H1.5v-7h7V5M13 9.5h3.5v7h-7V13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><rect x="5" y="5" width="8" height="8" fill="currentColor"/>',
+      fwd: '<path d="M7.5 10.5h-5v-8h8v5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><rect x="7.5" y="7.5" width="8" height="8" fill="currentColor"/>',
+      bwd: '<path d="M2.5 2.5h8v5h-3v3h-5z" fill="currentColor"/><rect x="8.15" y="8.15" width="6.7" height="6.7" fill="none" stroke="currentColor" stroke-width="1.3"/>',
+      back: '<path d="M1.5 1.5h7V5H5v3.5H1.5zM16.5 16.5h-7V13H13V9.5h3.5z" fill="currentColor"/><rect x="5.65" y="5.65" width="6.7" height="6.7" fill="none" stroke="currentColor" stroke-width="1.3"/>' };
+    // Text fonts: the three families every PDF reader has built in, so the sheet and the PDF match without embedding anything.
+    var FONTS = { sans: { label: 'Sans', css: 'Helvetica, Arial, sans-serif', pdf: ['Helvetica', 'HelveticaBold', 'HelveticaOblique', 'HelveticaBoldOblique'], avg: [0.54, 0.6] },
+      serif: { label: 'Serif', css: '"Times New Roman", Times, serif', pdf: ['TimesRoman', 'TimesRomanBold', 'TimesRomanItalic', 'TimesRomanBoldItalic'], avg: [0.47, 0.5] },
+      mono: { label: 'Mono', css: '"Courier New", Courier, monospace', pdf: ['Courier', 'CourierBold', 'CourierOblique', 'CourierBoldOblique'], avg: [0.6, 0.6] } };
+    function fontOf(fam, bold, ital) { var F = FONTS[fam] || FONTS.sans; return F.pdf[(bold ? 1 : 0) + (ital ? 2 : 0)]; }
     function ib(icon, attr, on, title) { return '<button type="button" class="ib' + (on ? ' on' : '') + '" ' + attr + ' title="' + title + '" aria-label="' + title + '" aria-pressed="' + (on ? 'true' : 'false') + '"><svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true">' + SICON[icon] + '</svg></button>'; }
     function toolCard() { var ti = TOOL_INFO[tool] || TOOL_INFO.select; return '<div class="block toolcard"><div class="tool-name">' + ti[0] + ' <kbd>' + ti[1] + '</kbd></div><p class="tip">' + ti[2] + '</p></div>'; }
     var SIZES = [8, 10, 12, 14, 18, 24, 36, 48, 72], WIDTHS = [0.5, 1, 1.5, 2, 3, 4, 6];
@@ -3258,7 +3503,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     function fresh() {
       return { paper: 'tabloid', orient: 'land', src: 'measure', fitTo: 'page', scale: 'fit', pan: { x: 0, y: 0 }, scaleBar: true, grid: true,
         tb: { client: '', project: '', location: '', date: today(), title: '', sheet: 'SD-1' }, notes: [], nextId: 1, mrunsOff: [],
-        style: { stroke: '#1c1c1c', fill: '', sw: 1.5, dash: false, color: '#1c1c1c', size: 14, bold: false, align: 'left', who: 'man' } };
+        style: { stroke: '#1c1c1c', fill: '', sw: 1.5, dash: false, color: '#1c1c1c', size: 14, bold: false, ital: false, font: 'sans', align: 'left', who: 'man' } };
     }
     function archLen(inch) { return ftIn(inch); }
     function defaultTitle() { return S.src === 'measure' ? (M.src === 'none' ? 'Drawing' : baseName()) : SOURCES[S.src]; }
@@ -3266,16 +3511,18 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     // ---- Text: measured with the PDF's own Helvetica so the editor and the PDF line up ----
     function loadMetrics() {
       if (metrics || loadMetrics.p) return;
-      loadMetrics.p = getPdfLib().then(function (PL) { return PL.PDFDocument.create().then(function (d) { return Promise.all([d.embedFont(PL.StandardFonts.Helvetica), d.embedFont(PL.StandardFonts.HelveticaBold)]); }); })
-        .then(function (f) { metrics = { reg: f[0], bold: f[1] }; if (mode === 'shop') paint(); }).catch(function () { loadMetrics.p = null; });
+      var names = []; Object.keys(FONTS).forEach(function (k) { names = names.concat(FONTS[k].pdf); });
+      loadMetrics.p = getPdfLib().then(function (PL) { return PL.PDFDocument.create().then(function (d) { return Promise.all(names.map(function (nm) { return d.embedFont(PL.StandardFonts[nm]); })); }); })
+        .then(function (f) { metrics = {}; names.forEach(function (nm, i) { metrics[nm] = f[i]; }); if (mode === 'shop') paint(); }).catch(function () { loadMetrics.p = null; });
     }
-    function tw(t, size, bold) { t = pdfText(t); return metrics ? (bold ? metrics.bold : metrics.reg).widthOfTextAtSize(t, size) : t.length * size * (bold ? 0.6 : 0.54); }
+    // Text width in points, in the font the PDF will use (fam is sans, serif or mono).
+    function tw(t, size, bold, fam, ital) { t = pdfText(t); var m = metrics && metrics[fontOf(fam, bold, ital)]; return m ? m.widthOfTextAtSize(t, size) : t.length * size * (FONTS[fam] || FONTS.sans).avg[bold ? 1 : 0]; }
     function fitText(t, size, bold, maxW) { t = pdfText(t || ''); if (tw(t, size, bold) <= maxW) return t; while (t.length > 1 && tw(t + '...', size, bold) > maxW) t = t.slice(0, -1); return t + '...'; }
-    function wrap(text, size, bold, maxW) {
+    function wrap(text, size, bold, maxW, fam, ital) {
       var out = [];
       String(text || '').split('\n').forEach(function (para) {
         var line = '';
-        para.split(/(\s+)/).forEach(function (w) { if (!w) return; var test = line + w; if (line.trim() && tw(test.replace(/\s+$/, ''), size, bold) > maxW) { out.push(line.replace(/\s+$/, '')); line = w.replace(/^\s+/, ''); } else line = test; });
+        para.split(/(\s+)/).forEach(function (w) { if (!w) return; var test = line + w; if (line.trim() && tw(test.replace(/\s+$/, ''), size, bold, fam, ital) > maxW) { out.push(line.replace(/\s+$/, '')); line = w.replace(/^\s+/, ''); } else line = test; });
         out.push(line.replace(/\s+$/, ''));
       });
       return out;
@@ -3387,10 +3634,10 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       if (n.k === 'ellipse') { P.push({ k: 'ellipse', cx: b.x + b.w / 2, cy: b.y + b.h / 2, rx: b.w / 2, ry: b.h / 2, fill: n.fill, stroke: n.stroke, sw: n.sw, dash: dash }); return; }
       if (n.fill || n.stroke) P.push({ k: 'rect', x: b.x, y: b.y, w: b.w, h: b.h, fill: n.fill, stroke: n.stroke, sw: n.sw, dash: dash });
       if (n.k === 'text') {
-        var pad = 4, lines = wrap(n.text, n.size, n.bold, Math.max(10, b.w - 2 * pad));
+        var pad = 4, fam = FONTS[n.font] ? n.font : 'sans', lines = wrap(n.text, n.size, n.bold, Math.max(10, b.w - 2 * pad), fam, n.ital);
         lines.forEach(function (t, i) {
-          var w = tw(t, n.size, n.bold), x = n.align === 'center' ? b.x + (b.w - w) / 2 : n.align === 'right' ? b.x + b.w - pad - w : b.x + pad;
-          P.push({ k: 'text', x: x, y: b.y + pad + n.size * 0.82 + i * n.size * 1.2, size: n.size, bold: n.bold, color: n.color, text: t });
+          var w = tw(t, n.size, n.bold, fam, n.ital), x = n.align === 'center' ? b.x + (b.w - w) / 2 : n.align === 'right' ? b.x + b.w - pad - w : b.x + pad;
+          P.push({ k: 'text', x: x, y: b.y + pad + n.size * 0.82 + i * n.size * 1.2, size: n.size, bold: n.bold, ital: n.ital, font: fam, color: n.color, text: t });
         });
       }
     }
@@ -3452,7 +3699,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       if (p.k === 'line') return '<line x1="' + p.x1 + '" y1="' + p.y1 + '" x2="' + p.x2 + '" y2="' + p.y2 + '"' + st + ' stroke-linecap="round"/>';
       if (p.k === 'poly') return '<polygon points="' + svgPts(p.pts) + '" fill="' + p.fill + '"/>';
       if (p.k === 'path') return '<path d="' + p.d + '" transform="translate(' + p.x + ' ' + p.y + ') scale(' + p.sc + ')" fill="' + hexOr(p.fill, 'none') + '"' + (p.stroke ? ' stroke="' + p.stroke + '" stroke-width="' + p.sw / p.sc + '" stroke-linejoin="round"' : '') + '/>';
-      if (p.k === 'text') return '<text x="' + p.x + '" y="' + p.y + '" font-family="Helvetica, Arial, sans-serif" font-size="' + p.size + '" font-weight="' + (p.bold ? 700 : 400) + '" fill="' + p.color + '" xml:space="preserve">' + esc(p.text) + '</text>';
+      if (p.k === 'text') return '<text x="' + p.x + '" y="' + p.y + '" font-family=\'' + (FONTS[p.font] || FONTS.sans).css + '\' font-size="' + p.size + '" font-weight="' + (p.bold ? 700 : 400) + '"' + (p.ital ? ' font-style="italic"' : '') + ' fill="' + p.color + '" xml:space="preserve">' + esc(p.text) + '</text>';
       if (p.k === 'image' && p.src === 'logo') return '<image href="' + logo.url + '" x="' + p.x + '" y="' + p.y + '" width="' + p.w + '" height="' + p.h + '" preserveAspectRatio="none"/>';
       if (p.k === 'image') {
         if (view.url) return '<image href="' + view.url + '" x="' + p.x + '" y="' + p.y + '" width="' + p.w + '" height="' + p.h + '" preserveAspectRatio="none"/>';
@@ -3496,7 +3743,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var st = S.style, n = { id: S.nextId++, k: kind, stroke: st.stroke, sw: st.sw, dash: st.dash };
       if (kind === 'line' || kind === 'arrow') { n.x1 = p.x; n.y1 = p.y; n.x2 = q.x; n.y2 = q.y; }
       else { n.x = p.x; n.y = p.y; n.w = q.x - p.x; n.h = q.y - p.y; n.fill = kind === 'text' ? '' : st.fill; }
-      if (kind === 'text') { n.text = 'Text'; n.size = st.size; n.bold = st.bold; n.color = st.color; n.align = st.align; n.stroke = ''; }
+      if (kind === 'text') { n.text = 'Text'; n.size = st.size; n.bold = st.bold; n.ital = !!st.ital; n.font = st.font || 'sans'; n.color = st.color; n.align = st.align; n.stroke = ''; }
       if (kind === 'figure') { n.who = FIGS[st.who] ? st.who : 'man'; n.hIn = FIGS[n.who].hIn; n.fill = st.fill || '#8c8c8c'; n.stroke = ''; n.w = 0; n.h = 0; fitFig(n); }
       return n;
     }
@@ -3583,8 +3830,8 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       if (mode !== 'shop') return;
       var p = PAPERS[S.paper], si = scaleInfo(), h = toolCard() + '<div class="block"><div class="label">Shop drawing · ' + esc(p[2]) + (S.orient === 'port' ? ', portrait' : '') + '</div><div class="readout small">' + esc(si ? si.label : 'Not to scale') + '</div></div>';
       if (!S.notes.length) { leftEl.innerHTML = h; return; }
-      h += '<div class="block"><div class="label">On sheet</div>';
-      h += '<div class="list">' + S.notes.map(function (n) {
+      h += '<div class="block"><div class="label">On sheet · front to back</div>';
+      h += '<div class="list">' + S.notes.slice().reverse().map(function (n) {
         var on = n.id === sel, label = n.k === 'text' ? (n.text || '').split('\n')[0].slice(0, 40) || 'Text' : n.k === 'figure' ? (FIGS[n.who] || FIGS.man).label + ', ' + archLen(n.hIn) : KIND[n.k];
         var row = '<div class="item' + (on ? ' sel' : '') + '" data-snote="' + n.id + '"><span class="chip" style="background:' + (n.k === 'text' ? n.color : n.fill || n.stroke || '#ffffff') + '"></span><span>' + esc(label) + '</span><b>' + KIND[n.k] + '</b><button type="button" data-sdel="' + n.id + '" aria-label="Delete">×</button>';
         if (on) row += '<div class="item-more">' + props(n) + '</div>';
@@ -3596,8 +3843,8 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var h = '';
       if (n.k === 'text') {
         h += '<textarea class="stext" data-sn="text" rows="3" aria-label="Text">' + esc(n.text) + '</textarea>';
-        h += '<div class="sty"><span class="sty-l">Size</span><select data-sp="size" aria-label="Text size">' + opts(SIZES, n.size, function (x) { return x + ' pt'; }) + '</select><span class="seg">' + ib('bold', 'data-stog="bold"', n.bold, 'Bold') + '</span></div>';
-        h += '<div class="sty"><span class="sty-l">Align</span><span class="seg">' + ['left', 'center', 'right'].map(function (a) { return ib(a, 'data-sset="align" data-v="' + a + '"', (n.align || 'left') === a, 'Align ' + a); }).join('') + '</span></div>';
+        h += '<div class="sty"><span class="sty-l">Font</span><select data-sp="font" aria-label="Font">' + opts(Object.keys(FONTS), FONTS[n.font] ? n.font : 'sans', function (x) { return FONTS[x].label; }) + '</select><span class="seg">' + ib('bold', 'data-stog="bold"', n.bold, 'Bold') + ib('ital', 'data-stog="ital"', n.ital, 'Italic') + '</span></div>';
+        h += '<div class="sty"><span class="sty-l">Size</span><select data-sp="size" aria-label="Text size">' + opts(SIZES, n.size, function (x) { return x + ' pt'; }) + '</select><span class="seg">' + ['left', 'center', 'right'].map(function (a) { return ib(a, 'data-sset="align" data-v="' + a + '"', (n.align || 'left') === a, 'Align ' + a); }).join('') + '</span></div>';
         h += '<div class="sty"><span class="sty-s">Text</span>' + swatches('color', n.color) + '</div>';
       }
       if (n.k === 'figure') {
@@ -3608,6 +3855,10 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       h += '<div class="sty"><span class="sty-s">Stroke</span>' + swatches('stroke', n.stroke, n.k !== 'line' && n.k !== 'arrow') + '</div>';
       if (n.k !== 'line' && n.k !== 'arrow') h += '<div class="sty"><span class="sty-s">Fill</span>' + swatches('fill', n.fill, true) + '</div>';
       h += '<div class="sty"><span class="sty-l">Width</span><select data-sp="sw" aria-label="Stroke width">' + opts(WIDTHS, n.sw, function (x) { return x + ' pt'; }) + '</select><span class="seg">' + ib('dash', 'data-stog="dash"', n.dash, 'Dashed') + '</span></div>';
+      var at = S.notes.indexOf(n), top = at === S.notes.length - 1, bottom = at === 0, mod = /Mac/.test(navigator.platform) ? '⌘' : 'Ctrl+';
+      h += '<div class="sty"><span class="sty-l">Arrange</span><span class="seg">' + [['back', 'Send to back', mod + '⇧['], ['bwd', 'Send backward', mod + '['], ['fwd', 'Bring forward', mod + ']'], ['front', 'Bring to front', mod + '⇧]']].map(function (a) {
+        var off = /back|bwd/.test(a[0]) ? bottom : top; return ib(a[0], 'data-sorder="' + a[0] + '"' + (off ? ' disabled' : ''), false, a[1] + ' (' + a[2] + ')');
+      }).join('') + '</span></div>';
       return h;
     }
     function right() {
@@ -3653,6 +3904,13 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
 
     // ---- Panel events ----
     function edit(fn) { var n = sel != null && noteById(sel); if (!n) return; fn(n); paint(); }
+    // Layer order: later in S.notes draws on top.
+    function arrange(how) {
+      var n = sel != null && noteById(sel); if (!n) return;
+      var i = S.notes.indexOf(n), j = how === 'front' ? S.notes.length - 1 : how === 'back' ? 0 : how === 'fwd' ? Math.min(S.notes.length - 1, i + 1) : Math.max(0, i - 1);
+      if (i === j) return;
+      S.notes.splice(i, 1); S.notes.splice(j, 0, n); left(); paint(); History.record();
+    }
     leftEl.addEventListener('click', function (e) {
       if (mode !== 'shop') return;
       var del = e.target.closest('[data-sdel]');
@@ -3661,6 +3919,8 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       if (sw) { var prop = sw.dataset.sc, v = sw.dataset.v; edit(function (n) { n[prop] = v; S.style[prop] = v; }); left(); History.record(); return; }
       var tg = e.target.closest('[data-stog]');
       if (tg) { var tp = tg.dataset.stog; edit(function (n) { n[tp] = !n[tp]; S.style[tp] = n[tp]; }); left(); History.record(); return; }
+      var so = e.target.closest('[data-sorder]');
+      if (so) { arrange(so.dataset.sorder); return; }
       var ss = e.target.closest('[data-sset]');
       if (ss) { var sp2 = ss.dataset.sset, sv = ss.dataset.v; edit(function (n) { n[sp2] = sv; S.style[sp2] = sv; }); left(); History.record(); return; }
       var row = e.target.closest('[data-snote]');
@@ -3706,6 +3966,9 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       else if (a === 'nologo') { logo = null; keepLogo(); all(); Autosave.schedule(); }
     });
     document.addEventListener('keydown', function (e) {
+      if (mode === 'shop' && !typing(e) && (e.ctrlKey || e.metaKey) && !e.altKey && (e.code === 'BracketRight' || e.code === 'BracketLeft') && sel != null) {
+        arrange(e.code === 'BracketRight' ? (e.shiftKey ? 'front' : 'fwd') : (e.shiftKey ? 'back' : 'bwd')); e.preventDefault(); return;
+      }
       if (mode !== 'shop' || typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
       var k = e.key.toLowerCase(), n = sel != null && noteById(sel);
       if ((e.key === 'Delete' || e.key === 'Backspace') && n) { S.notes = S.notes.filter(function (x) { return x !== n; }); sel = null; all(); History.record(); e.preventDefault(); }
@@ -3749,10 +4012,12 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
           doc = d; pg = doc.addPage([g.W, g.H]);
           doc.setTitle(pdfText(S.tb.title || defaultTitle())); doc.setCreator('DIM');
           var jpg = vr.empty ? null : new Promise(function (res, rej) { vr.canvas.toBlob(function (b) { if (b) b.arrayBuffer().then(res); else rej(new Error('the drawing is too large for this browser')); }, 'image/jpeg', 0.95); }).then(function (b) { return doc.embedJpg(b); });
-          return Promise.all([doc.embedFont(PL.StandardFonts.Helvetica), doc.embedFont(PL.StandardFonts.HelveticaBold), jpg, logo ? doc.embedPng(logo.url) : null]);
+          var used = {}; built.P.forEach(function (p) { if (p.k === 'text') used[fontOf(p.font, p.bold, p.ital)] = 1; });
+          var names = Object.keys(used);
+          return Promise.all([Promise.all(names.map(function (nm) { return doc.embedFont(PL.StandardFonts[nm]); })).then(function (fs) { var o = {}; names.forEach(function (nm, i) { o[nm] = fs[i]; }); return o; }), jpg, logo ? doc.embedPng(logo.url) : null]);
         });
       }).then(function (e) {
-        var reg = e[0], bold = e[1], viewImg = e[2], logoImg = e[3];
+        var fonts = e[0], viewImg = e[1], logoImg = e[2];
         var Y = function (y) { return g.H - y; }, C = function (h) { var a = hexArr(h); return PL.rgb(a[0], a[1], a[2]); };
         built.P.forEach(function (p) {
           if (p.k === 'rect') pg.drawRectangle({ x: p.x, y: Y(p.y + p.h), width: p.w, height: p.h, color: p.fill ? C(p.fill) : undefined, borderColor: p.stroke ? C(p.stroke) : undefined, borderWidth: p.stroke ? p.sw : 0, borderDashArray: p.dash || undefined });
@@ -3760,7 +4025,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
           else if (p.k === 'line' && p.stroke) pg.drawLine({ start: { x: p.x1, y: Y(p.y1) }, end: { x: p.x2, y: Y(p.y2) }, thickness: p.sw, color: C(p.stroke), dashArray: p.dash || undefined, lineCap: PL.LineCapStyle ? PL.LineCapStyle.Round : undefined });
           else if (p.k === 'poly' && p.fill) pg.drawSvgPath('M ' + p.pts.map(function (q) { return q.x.toFixed(2) + ' ' + q.y.toFixed(2); }).join(' L ') + ' Z', { x: 0, y: g.H, color: C(p.fill), borderWidth: 0 });
           else if (p.k === 'path') pg.drawSvgPath(p.d, { x: p.x, y: Y(p.y), scale: p.sc, color: p.fill ? C(p.fill) : undefined, borderColor: p.stroke ? C(p.stroke) : undefined, borderWidth: p.stroke ? p.sw / p.sc : 0 });
-          else if (p.k === 'text' && p.text) pg.drawText(pdfText(p.text), { x: p.x, y: Y(p.y), size: p.size, font: p.bold ? bold : reg, color: C(p.color) });
+          else if (p.k === 'text' && p.text) pg.drawText(pdfText(p.text), { x: p.x, y: Y(p.y), size: p.size, font: fonts[fontOf(p.font, p.bold, p.ital)], color: C(p.color) });
           else if (p.k === 'image' && p.src === 'view' && viewImg) pg.drawImage(viewImg, { x: p.x, y: Y(p.y + p.h), width: p.w, height: p.h });
           else if (p.k === 'image' && p.src === 'logo' && logoImg) pg.drawImage(logoImg, { x: p.x, y: Y(p.y + p.h), width: p.w, height: p.h });
         });
