@@ -2295,7 +2295,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       film: { allow: 1, defH: 96, mode: 'auto', look: 'gradient', c1: '#ffffff', c2: '#9cc8e8', sel: 0, fA: 36, fB: 72, d1: 24, d2: 36, d3: 60, d4: 72, dual: 'frost', person: 'none', sill: 0, balance: true,
         panes: [{ name: 'Conference 27-015', w: 60, h: 96, qty: 6 }, { name: 'Conference 27-016', w: 48, h: 96, qty: 4 }, { name: 'Office sidelite', w: 24, h: 96, qty: 6 }] },
       markers: { bands: '30, 60', barH: 2, maxStrip: 96, pattern: 'squares', size: 2, tickW: 0.25, gap: 7.5, margin: 0, glassH: 96, spacing: 0.5, sel: 0, graphics: [], seq: 'all', useIdx: 0, seqText: 'A, B', start: 'center', gapMode: 'min', perBand: false, bandSeq: [], mull: 2,
-        curb: 0, fJamb: 2, fHead: 2, fSill: 2, seam: 0.375, fColor: 'black', doorStyle: 'medium', doorBottom: 10, hw: 'pull', hwH: 40, swing: true,
+        curb: 0, fJamb: 2, fHead: 2, fSill: 2, seam: 0.375, fColor: 'black', doorStyle: 'medium', doorTop: 3.5, doorBottom: 10, hw: 'pull', hwH: 46, hwLen: 12, swing: true,
         runs: [{ name: 'Reception glass', len: 384 }, { name: 'Conference front', len: 240 }, { name: 'Office fronts, east', len: 1104 }] },
       quote: null, note: '', busy: false
     };
@@ -2467,12 +2467,13 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       }).filter(function (b) { return b.length; });
       return bays.length ? bays : null;
     }
-    // Door styles: stile width (each side) and top rail. The bottom rail is its own setting (10" gives a smooth push surface).
-    var DOORS = { narrow: { label: 'Narrow stile, 2 1/8"', stile: 2.125, top: 2.25 }, medium: { label: 'Medium stile, 3 1/2"', stile: 3.5, top: 3.5 }, wide: { label: 'Wide stile, 5"', stile: 5, top: 5 } };
+    // Door styles by stile width (each side); an all-glass door has no stiles. Top and bottom rails are their own settings.
+    var DOORS = { narrow: { label: 'Narrow stile, 2 1/8"', stile: 2.125 }, medium: { label: 'Medium stile, 3 1/2"', stile: 3.5 }, wide: { label: 'Wide stile, 5"', stile: 5 }, glass: { label: 'All glass, no stiles', stile: 0 } };
+    var DOOR_WORDS = /\s*\b(narrow|medium|wide|all[- ]glass|glass|frameless|RH|LH)\b/gi;
     var FRAME_COLORS = { black: ['Black', '#26282b'], bronze: ['Dark bronze', '#4a3e33'], clear: ['Clear anodized', '#b4bac0'] };
     function doorOf(name) {
       if (!/\bdoor\b/i.test(name || '')) return null;
-      var st = /\bwide\b/i.test(name) ? 'wide' : /\bmedium\b/i.test(name) ? 'medium' : /\bnarrow\b/i.test(name) ? 'narrow' : L.markers.doorStyle;
+      var st = /\bwide\b/i.test(name) ? 'wide' : /\bmedium\b/i.test(name) ? 'medium' : /\bnarrow\b/i.test(name) ? 'narrow' : /\b(glass|frameless)\b/i.test(name) ? 'glass' : L.markers.doorStyle;
       return { style: st, d: DOORS[st] || DOORS.medium, hinge: /\bRH\b/i.test(name) ? 'right' : 'left' };
     }
     // The whole storefront, in inches from the frame's outside left edge and up from the floor.
@@ -2487,7 +2488,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
           if (pi) x += K.seam;
           var w = p.flex ? Math.max(0, fw) : p.w, d = doorOf(p.name), st = d ? d.d.stile : 0;
           panes.push({ x: x, w: w, name: p.name, bay: bi, seam: pi > 0, door: d, gx: x + st, gw: Math.max(0, w - 2 * st),
-            gy0: d ? K.doorBottom : K.curb + K.fSill, gy1: top - K.fHead - (d ? d.d.top : 0) });
+            gy0: d ? K.doorBottom : K.curb + K.fSill, gy1: top - K.fHead - (d ? K.doorTop : 0) });
           x += w;
         });
         x += K.mull;
@@ -2496,11 +2497,12 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     }
     // Runs typed as panes get their length from the panes and frame, unless a * pane fills a length you typed.
     function syncLens() { L.markers.runs.forEach(function (r) { var f = runFrame(r); if (f && !f.flex) r.len = f.len; }); }
-    // Door hardware as a box (inches, x along the run, y up from the floor), on the latch side: a pull on the stile, or a bar across the door.
+    // Door hardware as a box (inches, x along the run, y up from the floor), on the latch side: a pull on the stile (on the glass of an all-glass door), or a bar across the door.
+    // Hardware height is to its top.
     function hardware(p) {
       var K = L.markers; if (!p.door || K.hw === 'none') return null;
-      if (K.hw === 'pull') { var off = Math.max(p.door.d.stile / 2, 2), cx = p.door.hinge === 'right' ? p.x + off : p.x + p.w - off; return { x0: cx - 0.5, x1: cx + 0.5, y0: K.hwH - 6, y1: K.hwH + 6, kind: 'pull' }; }
-      var t = K.hw === 'panic' ? 3 : 1.5; return { x0: p.gx, x1: p.gx + p.gw, y0: K.hwH - t / 2, y1: K.hwH + t / 2, kind: K.hw };
+      if (K.hw === 'pull') { var st = p.door.d.stile, off = st ? Math.max(st / 2, 2) : 3, cx = p.door.hinge === 'right' ? p.x + off : p.x + p.w - off; return { x0: cx - 0.5, x1: cx + 0.5, y0: K.hwH - K.hwLen, y1: K.hwH, kind: 'pull' }; }
+      var t = K.hw === 'panic' ? 3 : 1.5; return { x0: p.gx, x1: p.gx + p.gw, y0: K.hwH - t, y1: K.hwH, kind: K.hw };
     }
     // Does this mark, on band bi, sit within an inch of the door's hardware?
     function hitsHardware(p, bi, m) {
@@ -2808,7 +2810,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
           }
           var hw = hardware(p); if (hw) box(hw.x0, hw.y0, hw.x1 - hw.x0, hw.y1, K.fColor === 'clear' ? '#6c737a' : HW);
         });
-        fr.panes.forEach(function (p) { var nm = p.door ? p.name.replace(/\s*\b(narrow|medium|wide|RH|LH)\b/gi, '').trim() : p.name; if (nm && p.gw > 0) txt(ctx, nm.toUpperCase(), x0 + (p.gx + p.gw / 2) * s, Y(p.gy1 - (p.gy1 - p.gy0) * 0.15), { size: 12, w: 500, color: INK2 }); });
+        fr.panes.forEach(function (p) { var nm = p.door ? p.name.replace(DOOR_WORDS, '').trim() : p.name; if (nm && p.gw > 0) txt(ctx, nm.toUpperCase(), x0 + (p.gx + p.gw / 2) * s, Y(p.gy1 - (p.gy1 - p.gy0) * 0.15), { size: 12, w: 500, color: INK2 }); });
       } else box(0, 0, shown, K.glassH, GLASS);
       ctx.strokeStyle = SINK2; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x0 - 70, floor + .5); ctx.lineTo(x0 + w + 20, floor + .5); ctx.stroke();
       txt(ctx, 'FLOOR', x0 - 40, floor + 14, { size: 10, color: SINK2 });
@@ -3039,10 +3041,11 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
           field('Butt seam', 'markers.seam', 'in') + '<p class="hint" style="margin:0">Glass starts ' + esc(fmtIn(K.curb + K.fSill)) + ' above floor. Curb is any wall or base under the frame.</p>' +
           selectF('Color', 'markers.fColor', Object.keys(FRAME_COLORS).map(function (k) { return [k, FRAME_COLORS[k][0]]; })) +
           '<div class="label" style="margin-top:4px">Doors</div>' +
-          selectF('Style', 'markers.doorStyle', Object.keys(DOORS).map(function (k) { return [k, DOORS[k].label]; })) + field('Bottom rail', 'markers.doorBottom', 'in') +
-          selectF('Hardware', 'markers.hw', [['pull', 'Pull'], ['push', 'Push bar'], ['panic', 'Panic bar'], ['none', 'None']]) + (K.hw !== 'none' ? field('Hardware height, center', 'markers.hwH', 'in') : '') +
+          selectF('Style', 'markers.doorStyle', Object.keys(DOORS).map(function (k) { return [k, DOORS[k].label]; })) + '<div class="row2">' + field('Top rail', 'markers.doorTop', 'in') + field('Bottom rail', 'markers.doorBottom', 'in') + '</div>' +
+          selectF('Hardware', 'markers.hw', [['pull', 'Pull'], ['push', 'Push bar'], ['panic', 'Panic bar'], ['none', 'None']]) +
+          (K.hw === 'pull' ? '<div class="row2">' + field('Height to top', 'markers.hwH', 'in') + field('Pull length', 'markers.hwLen', 'in') + '</div>' : K.hw !== 'none' ? field('Height to top', 'markers.hwH', 'in') : '') +
           selectF('Swing', 'markers.swing', [['true', 'Show on drawing'], ['false', 'Hide']]) +
-          '<p class="hint" style="margin:0">Put <b>Door</b> in a pane\u2019s name to make it a door; add <b>narrow</b>, <b>medium</b> or <b>wide</b> for its style and <b>RH</b> for hinges on the right. A <b>*</b> pane takes whatever the run\u2019s length leaves, e.g. <b>*, * | 36 Door</b> on a 120" run.</p>';
+          '<p class="hint" style="margin:0">Put <b>Door</b> in a pane\u2019s name to make it a door; add <b>narrow</b>, <b>medium</b>, <b>wide</b> or <b>glass</b> for its style and <b>RH</b> for hinges on the right. A <b>*</b> pane takes whatever the run\u2019s length leaves, e.g. <b>*, * | 36 Door</b> on a 120" run.</p>';
         if (anyFrame) h += lsec('m_frame', 'Frame', fm);
         h += lsec('m_cut', 'Cutting', rollSel(true) + field('Piece spacing on roll', 'markers.spacing', 'in'));
         h += lsec('m_res', 'Results', '<dl class="kv"><dt>Glass</dt><dd>' + num(mt.runLen / 12) + ' ft</dd><dt>Bands</dt><dd>' + mt.nb + '</dd><dt>Marker length</dt><dd>' + num(mt.lf) + ' LF</dd>' + (K.pattern !== 'solid' ? '<dt>Pieces</dt><dd>' + num(mt.pieces, 0) + (mt.dark ? ' (' + num(mt.dark, 0) + ' dark)' : '') + '</dd>' : '') + '<dt>Across the roll</dt><dd>' + mt.lanes + ' ' + (K.pattern === 'solid' ? 'strips' : 'pieces') + '</dd><dt>Vinyl needed</dt><dd>' + num(Math.ceil(mt.rollFt * 10) / 10) + ' ft of ' + L.roll + '"</dd></dl><p class="hint" style="margin:0">Vinyl needed assumes pieces nest across the roll with the spacing above. Add a site-survey allowance before ordering.</p>');
