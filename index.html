@@ -114,7 +114,7 @@ label.field { display: grid; gap: 4px; color: var(--b01); font-size: 11.5px; }
 
 /* Right: inspector */
 details { border-bottom: 1px solid var(--line); }
-summary { list-style: none; cursor: pointer; padding: 9px 12px; color: var(--b00); display: flex; gap: 8px; align-items: center; }
+summary { list-style: none; cursor: pointer; padding: 10px 12px; color: var(--b00); display: flex; gap: 8px; align-items: center; font-size: 14px; font-weight: 700; }
 summary::-webkit-details-marker { display: none; }
 summary::before { content: "›"; display: inline-block; width: 8px; color: var(--b01); transition: transform .12s; }
 details[open] > summary::before { transform: rotate(90deg); }
@@ -290,12 +290,14 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
 .pb-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 10.5px; color: var(--b01); }
 .linkish { background: none; border: 0; padding: 0; font: inherit; color: var(--b01); text-decoration: underline; cursor: pointer; }
 .linkish:hover { color: var(--b00); }
-.pb-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 18px; gap: 5px; align-items: center; }
+.pb-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 16px 14px; gap: 5px; align-items: center; }
 .pb-row.door { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .pb-row select { min-width: 0; font-size: 11px; }
 .pb-del { background: none; border: 0; padding: 0; color: var(--b02); font-size: 15px; line-height: 1; }
 .pb-del:hover { color: var(--red-deep); }
-.pb-joint { display: flex; align-items: center; gap: 6px; width: 100%; background: none; border: 0; padding: 0 18px 0 0; font: inherit; font-size: 10px; color: var(--b02); cursor: pointer; }
+.pb-dup { display: grid; place-items: center; background: none; border: 0; padding: 0; color: var(--b02); line-height: 0; }
+.pb-dup:hover { color: var(--b00); }
+.pb-joint { display: flex; align-items: center; gap: 6px; width: 100%; background: none; border: 0; padding: 0 35px 0 0; font: inherit; font-size: 10px; color: var(--b02); cursor: pointer; }
 .pb-joint::before, .pb-joint::after { content: ''; flex: 1; border-top: 1px dashed var(--b04); }
 .pb-joint.mull::before, .pb-joint.mull::after { border-top: 2px solid var(--b02); }
 .pb-joint:hover { color: var(--b00); }
@@ -2326,8 +2328,8 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       mural: { w: 288, h: 108, bleed: 1, overlap: 1, orient: 'vertical', balance: true, custom: null, marks: true, art: 'gradient', color: '#5b8fbf', g1: '#1f3b57', g2: '#8fd0c8', angle: 0, img: null, imgName: '', fit: 'cover', tileW: 24, dpi: 50 },
       film: { allow: 1, defH: 96, mode: 'auto', look: 'gradient', c1: '#ffffff', c2: '#9cc8e8', sel: 0, fA: 36, fB: 72, d1: 24, d2: 36, d3: 60, d4: 72, dual: 'frost', person: 'none', sill: 0, balance: true, marks: true,
         panes: [{ name: 'Conference 27-015', w: 60, h: 96, qty: 6 }, { name: 'Conference 27-016', w: 48, h: 96, qty: 4 }, { name: 'Office sidelite', w: 24, h: 96, qty: 6 }] },
-      markers: { bands: '30, 60', barH: 2, maxStrip: 96, pattern: 'squares', size: 2, tickW: 0.25, gap: 7.5, margin: 0, glassH: 96, spacing: 0.5, sel: 0, graphics: [], seq: 'all', useIdx: 0, seqText: 'A, B', start: 'center', gapMode: 'min', gapBy: 'clear', perBand: false, bandSeq: [], mull: 2,
-        curb: 0, fJamb: 2, fHead: 2, fSill: 2, seam: 0.375, fColor: 'black', doorStyle: 'medium', doorTop: 3.5, doorBottom: 10, hw: 'pull', hwH: 46, hwLen: 12, swing: true,
+      markers: { bands: '30, 60', barH: 2, maxStrip: 96, pattern: 'squares', size: 2, tickW: 0.25, gap: 7.5, margin: 0, glassH: 96, spacing: 0.5, sel: 0, graphics: [], seq: 'all', useIdx: 0, seqText: 'A, B', start: 'center', gapMode: 'exact', gapBy: 'clear', perBand: false, bandSeq: [], mull: 2,
+        curb: 0, fJamb: 2, fHead: 2, fSill: 2, seam: 0.375, fColor: 'black', doorStyle: 'medium', doorTop: 3.5, doorBottom: 10, hw: 'pull', hwH: 46, hwLen: 12, lvH: 38, swing: true, glass: '#d9ecf7',
         runs: [{ name: 'Reception glass', len: 384 }, { name: 'Conference front', len: 240 }, { name: 'Office fronts, east', len: 1104 }] },
       quote: null, note: '', busy: false
     };
@@ -2583,6 +2585,9 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     function hardware(p) {
       var K = L.markers; if (!p.door || K.hw === 'none') return null;
       if (K.hw === 'pull') { var st = p.door.d.stile, off = st ? Math.max(st / 2, 2) : 3, cx = p.door.hinge === 'right' ? p.x + off : p.x + p.w - off; return { x0: cx - 0.5, x1: cx + 0.5, y0: K.hwH - K.hwLen, y1: K.hwH, kind: 'pull' }; }
+      // A lever: a 2 1/2" rose on the latch side with a 4 1/2" handle pointing toward the hinge. Its height is to the center.
+      if (K.hw === 'lever') { var st2 = p.door.d.stile, bk = st2 ? Math.max(st2 / 2, 2) : 2.75, rt = p.door.hinge === 'right', lx = rt ? p.x + bk : p.x + p.w - bk, r = 1.25, ln = 4.5;
+        return { x0: rt ? lx - r : lx - ln, x1: rt ? lx + ln : lx + r, y0: K.lvH - r, y1: K.lvH + r, kind: 'lever', cx: lx, cy: K.lvH, r: r, len: ln, dir: rt ? 1 : -1 }; }
       var t = K.hw === 'panic' ? 3 : 1.5; return { x0: p.gx, x1: p.gx + p.gw, y0: K.hwH - t, y1: K.hwH, kind: K.hw };
     }
     // Does this mark, on band bi, sit within an inch of the door's hardware?
@@ -2641,7 +2646,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         if (low.length) out.push(fmtIn(bh) + ' band is below the ' + low.join(' and ') + (low.indexOf('door') >= 0 ? ' (bottom rail ' + fmtIn(K.doorBottom) + ')' : ' (glass starts ' + fmtIn(K.curb + K.fSill) + ')') + '.');
         if (high.length) out.push(fmtIn(bh) + ' band is above the ' + high.join(' and ') + '.');
         var hits = ms.filter(function (m) { var p = fr.panes[m.pane]; return p && p.door && hitsHardware(p, bi, m); }).length;
-        if (hits) out.push(fmtIn(bh) + ' band: ' + hits + ' mark' + (hits > 1 ? 's' : '') + ' within 1" of the door ' + (K.hw === 'pull' ? 'pull' : K.hw === 'panic' ? 'exit device' : 'push bar') + '.');
+        if (hits) out.push(fmtIn(bh) + ' band: ' + hits + ' mark' + (hits > 1 ? 's' : '') + ' within 1" of the door ' + (K.hw === 'pull' ? 'pull' : K.hw === 'lever' ? 'lever' : K.hw === 'panic' ? 'exit device' : 'push bar') + '.');
       });
       return out;
     }
@@ -2718,7 +2723,9 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       if (vert) { ctx.moveTo(x1 - 5, y1); ctx.lineTo(x1 + 5, y1); ctx.moveTo(x2 - 5, y2); ctx.lineTo(x2 + 5, y2); }
       else { ctx.moveTo(x1, y1 - 5); ctx.lineTo(x1, y1 + 5); ctx.moveTo(x2, y2 - 5); ctx.lineTo(x2, y2 + 5); }
       ctx.stroke(); ctx.restore();
-      if (vert) { ctx.save(); ctx.translate(x1 - 8, (y1 + y2) / 2); ctx.rotate(-Math.PI / 2); txt(ctx, label, 0, 0, { size: 11 }); ctx.restore(); }
+      // 'right' sets a vertical dimension's label level, beside it, so a short one doesn't run over its own ticks.
+      if (vert && side === 'right') txt(ctx, label, x1 + 9, (y1 + y2) / 2, { size: 11, align: 'left', base: 'middle' });
+      else if (vert) { ctx.save(); ctx.translate(x1 - 8, (y1 + y2) / 2); ctx.rotate(-Math.PI / 2); txt(ctx, label, 0, 0, { size: 11 }); ctx.restore(); }
       else txt(ctx, label, (x1 + x2) / 2, side === 'below' ? y1 + 16 : y1 - 7, { size: 11 });
     }
     function tag(ctx, x, y, t, fill) {
@@ -2852,14 +2859,14 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       syncLens();
       var H = Math.max.apply(null, list.map(runTop)), maxShown = Math.max.apply(null, list.map(shownLen)), best = null;
       for (var cols = 1; cols <= list.length; cols++) {
-        var rows = Math.ceil(list.length / cols), sc = Math.min((c.cw - cols * 130) / (cols * maxShown), (c.ch - rows * 110) / (rows * H));
+        var rows = Math.ceil(list.length / cols), sc = Math.min((c.cw - cols * 170) / (cols * maxShown), (c.ch - rows * 110) / (rows * H));
         if (!best || sc > best.s) best = { s: sc, cols: cols, rows: rows };
       }
       var s = best.s; if (!(s > 0)) return; lastScale = s;
       var cellW = c.cw / best.cols, cellH = c.ch / best.rows;
       list.forEach(function (run, i) {
         var col = i % best.cols, row = Math.floor(i / best.cols), h = H * s;
-        drawRun(ctx, run, col * cellW + 90 + (cellW - 130 - maxShown * s) / 2, row * cellH + 30 + h + (cellH - 110 - h) / 2, s);
+        drawRun(ctx, run, col * cellW + 90 + (cellW - 170 - maxShown * s) / 2, row * cellH + 30 + h + (cellH - 110 - h) / 2, s);
       });
       canvas.setAttribute('aria-label', 'Distraction marker elevation for ' + list.map(function (r) { return r.name; }).join(', '));
     }
@@ -2879,7 +2886,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         box(0, K.curb, shown, fr.top, FC);
         fr.panes.forEach(function (p, i) {
           if (p.door) box(p.x, 0, p.w, fr.top - K.fHead, FC);
-          if (p.gw > 0 && p.gy1 > p.gy0) box(p.gx, p.gy0, p.gw, p.gy1, GLASS);
+          if (p.gw > 0 && p.gy1 > p.gy0) box(p.gx, p.gy0, p.gw, p.gy1, K.glass || GLASS);
           var q = fr.panes[i - 1];
           if (p.seam && q && p.x > q.x + q.w) box(q.x + q.w, Math.max(p.gy0, q.gy0), p.x - q.x - q.w, Math.min(p.gy1, q.gy1), SEAM);
         });
@@ -2890,10 +2897,15 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
             ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = '#55616b'; ctx.lineWidth = .9; ctx.beginPath();
             ctx.moveTo(x0 + lx * s, Y(ty)); ctx.lineTo(x0 + hx * s, Y(ty / 2)); ctx.lineTo(x0 + lx * s, Y(0)); ctx.stroke(); ctx.restore();
           }
-          var hw = hardware(p); if (hw) box(hw.x0, hw.y0, hw.x1 - hw.x0, hw.y1, K.fColor === 'clear' ? '#6c737a' : HW);
+          var hw = hardware(p), hwc = K.fColor === 'clear' ? '#6c737a' : HW;
+          if (hw && hw.kind === 'lever') {
+            var lt = 0.75, ex = hw.cx + hw.dir * hw.len;
+            ctx.fillStyle = hwc; ctx.fillRect(x0 + Math.min(hw.cx, ex) * s, Y(hw.cy + lt / 2), hw.len * s, lt * s); ctx.strokeRect(x0 + Math.min(hw.cx, ex) * s, Y(hw.cy + lt / 2), hw.len * s, lt * s);
+            ctx.beginPath(); ctx.arc(x0 + hw.cx * s, Y(hw.cy), hw.r * s, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+          } else if (hw) box(hw.x0, hw.y0, hw.x1 - hw.x0, hw.y1, hwc);
         });
         fr.panes.forEach(function (p) { var nm = p.door ? p.name.replace(DOOR_WORDS, '').trim() : p.name; if (nm && p.gw > 0) txt(ctx, nm.toUpperCase(), x0 + (p.gx + p.gw / 2) * s, Y(p.gy1 - (p.gy1 - p.gy0) * 0.15), { size: 12, w: 500, color: INK2 }); });
-      } else box(0, 0, shown, K.glassH, GLASS);
+      } else box(0, 0, shown, K.glassH, K.glass || GLASS);
       ctx.strokeStyle = SINK2; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x0 - 70, floor + .5); ctx.lineTo(x0 + w + 20, floor + .5); ctx.stroke();
       txt(ctx, 'FLOOR', x0 - 40, floor + 14, { size: 10, color: SINK2 });
       hs.forEach(function (bh, bi) {
@@ -2919,20 +2931,29 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         dimLine(ctx, xd, floor, xd, floor - bh * s, fmtIn(bh));
       });
       if (fr) {
-        // Openings under the floor line, the overall frame below them, where the glass starts on the right, and the spacing in the first pane.
+        // Openings under the floor line, the overall frame below them, where the glass starts on the right, and the spacing in the panes.
         ctx.font = '400 11px "JetBrains Mono", ui-monospace, monospace';
         fr.panes.forEach(function (p) { var lab = fmtIn(p.w); dimLine(ctx, x0 + p.x * s, floor + 22, x0 + (p.x + p.w) * s, floor + 22, ctx.measureText(lab).width + 6 < p.w * s ? lab : '', 'below'); });
         dimLine(ctx, x0, floor + 52, x0 + w, floor + 52, fmtFt(run.len), 'below');
-        var gb = K.curb + K.fSill; if (gb > 0 && fr.panes.some(function (p) { return !p.door; })) dimLine(ctx, x0 + w + 22, floor, x0 + w + 22, Y(gb), fmtIn(gb));
+        var gb = K.curb + K.fSill; if (gb > 0 && fr.panes.some(function (p) { return !p.door; })) dimLine(ctx, x0 + w + 22, floor, x0 + w + 22, Y(gb), fmtIn(gb), 'right');
         if (hs.length && K.pattern !== 'solid') {
-          var yb = floor - hs[hs.length - 1] * s + 16, p0 = fr.panes[0], p1 = fr.panes[1], inP = function (pi) { return ms.filter(function (m) { return m.pane === pi; }); };
-          var a = inP(0), lastR = -1e9, gd = function (xa, xb) { if (xb - xa < 0.05) return; var r2 = smallDim(ctx, x0 + xa * s, x0 + xb * s, yb, fmtIn(xb - xa), lastR); if (r2) lastR = r2; };
-          if (a.length) gd(p0.gx, a[0].x + (sw - markFor(hs.length - 1, a[0].q).w) / 2);
-          if (a.length > 1) { if (K.gapBy === 'oc') gd(a[0].x + sw / 2, a[1].x + sw / 2); else gd(a[0].x + sw, a[1].x); }
-          // With an exact gap the leftover can sit on the right, so show that edge too when it differs.
-          var e0 = ms.panes[0]; if (a.length && e0 && Math.abs(e0.edge - e0.edgeR) > 0.01) { var aL = a[a.length - 1]; gd(aL.x + (sw + markFor(hs.length - 1, aL.q).w) / 2, p0.gx + p0.gw); }
-          // Across the seam only when it differs from the gap between marks (it does with end clearance or a wide seam).
-          if (p1 && p1.seam && a.length) { var b = inP(1); if (b.length && (a.length < 2 || Math.abs((b[0].x - a[a.length - 1].x) - (a[1].x - a[0].x)) > 0.01)) gd(a[a.length - 1].x + sw, b[0].x); }
+          // Spacing in each pane: glass edge to first mark, the gap, the right edge when it differs, and across a seam when that differs from the gap.
+          // A pane spaced exactly like one already dimensioned is skipped, so a row of matching panes shows its numbers once.
+          var tb = hs.length - 1, yb = floor - hs[tb] * s + 16, lastR = -1e9, seen = {}, inP = function (pi) { return ms.filter(function (m) { return m.pane === pi; }); };
+          var gd = function (xa, xb) { if (xb - xa < 0.05) return; var r2 = smallDim(ctx, x0 + xa * s, x0 + xb * s, yb, fmtIn(xb - xa), lastR); if (r2) lastR = r2; };
+          fr.panes.forEach(function (p, pi) {
+            var a = inP(pi), e = ms.panes[pi], nx = fr.panes[pi + 1], segs = []; if (!a.length) return;
+            var aL = a[a.length - 1];
+            segs.push([p.gx, a[0].x + (sw - markFor(tb, a[0].q).w) / 2]);
+            if (a.length > 1) segs.push(K.gapBy === 'oc' ? [a[0].x + sw / 2, a[1].x + sw / 2] : [a[0].x + sw, a[1].x]);
+            if (e && Math.abs(e.edge - e.edgeR) > 0.01) segs.push([aL.x + (sw + markFor(tb, aL.q).w) / 2, p.gx + p.gw]);
+            var key = segs.map(function (g) { return Math.round((g[1] - g[0]) * 64); }).join(',');
+            if (!seen[key]) { seen[key] = 1; segs.forEach(function (g) { gd(g[0], g[1]); }); }
+            if (nx && nx.seam) {
+              var b = inP(pi + 1), sk; if (!b.length || (a.length > 1 && Math.abs((b[0].x - aL.x) - (a[1].x - a[0].x)) <= 0.01)) return;
+              sk = 's' + Math.round((b[0].x - aL.x - sw) * 64); if (!seen[sk]) { seen[sk] = 1; gd(aL.x + sw, b[0].x); }
+            }
+          });
         }
       }
       txt(ctx, run.name + ' · ' + fmtFt(run.len) + (run.len > shown ? ' (first 20\'-0" shown)' : ''), x0 + w / 2, floor - h - 10, { size: 11.5, w: 500 });
@@ -2947,7 +2968,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       ctx.moveTo(x1, y); ctx.lineTo(x2, y); ctx.moveTo(x1, y - 3); ctx.lineTo(x1, y + 3); ctx.moveTo(x2, y - 3); ctx.lineTo(x2, y + 3); ctx.stroke(); ctx.restore();
       ctx.font = '400 9.5px "JetBrains Mono", ui-monospace, monospace';
       var tw2 = ctx.measureText(label).width, cx = Math.max((x1 + x2) / 2, x1 + tw2 / 2 - 2);
-      ctx.fillStyle = 'rgba(217,236,247,.92)'; ctx.fillRect(cx - tw2 / 2 - 2, y + 4, tw2 + 4, 11);
+      ctx.fillStyle = L.markers.glass || GLASS; ctx.globalAlpha = .92; ctx.fillRect(cx - tw2 / 2 - 2, y + 4, tw2 + 4, 11); ctx.globalAlpha = 1;
       txt(ctx, label, cx, y + 12.5, { size: 9.5, color: '#b0127a' });
       return cx + tw2 / 2 + 2;
     }
@@ -3008,6 +3029,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         if (i) j = '<button type="button" class="pb-joint ' + p.joint + '" data-pj="' + i + '" title="Click to switch between a butt joint and a mullion">' + (p.joint === 'mull' ? 'Mullion' : 'Butt joint') + '</button>';
         var row = '<div class="pb-row"><input type="text" data-pw="' + i + '" value="' + esc(pp.type === 'fill' ? fmtIn(fw) : fmtIn(p.w)) + '"' + (pp.type === 'fill' ? ' class="fill" title="Fills what the run\u2019s length leaves. Type a width to fix it."' : '') + ' aria-label="Pane ' + (i + 1) + ' width">' +
           '<select data-pt="' + i + '" aria-label="Pane ' + (i + 1) + ' type"><option value="glass"' + (pp.type === 'glass' ? ' selected' : '') + '>Glass</option><option value="door"' + (pp.type === 'door' ? ' selected' : '') + '>Door</option>' + (fit || pp.type === 'fill' ? '<option value="fill"' + (pp.type === 'fill' ? ' selected' : '') + '>Fill rest</option>' : '') + '</select>' +
+          '<button type="button" class="pb-dup" data-pdup="' + i + '" title="Copy this pane" aria-label="Copy pane ' + (i + 1) + '"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3.5" y="3.5" width="7" height="7" rx="1"/><path d="M8.5 1.5h-6a1 1 0 0 0-1 1v6"/></svg></button>' +
           '<button type="button" class="pb-del" data-pdel="' + i + '" aria-label="Remove pane ' + (i + 1) + '">×</button></div>';
         if (pp.type === 'door') row += '<div class="pb-row door"><select data-ps="' + i + '" aria-label="Door style">' + Object.keys(DOORS).map(function (k) { return '<option value="' + k + '"' + ((pp.style || dflt) === k ? ' selected' : '') + '>' + esc(DOORS[k].short) + '</option>'; }).join('') + '</select>' +
           '<select data-ph="' + i + '" aria-label="Hinge side"><option value="left"' + (pp.hinge === 'left' ? ' selected' : '') + '>Hinge left</option><option value="right"' + (pp.hinge === 'right' ? ' selected' : '') + '>Hinge right</option></select></div>';
@@ -3138,7 +3160,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         if (K.pattern !== 'solid') bnd += '<div class="row2">' + (anySize ? field(K.pattern === 'dots' && !K.perBand ? 'Dot size' : isArt() ? 'Graphic width' : K.perBand ? 'Mark width' : 'Square size', 'markers.size', 'in') : field('Tick width', 'markers.tickW', 'in')) + field((K.gapMode !== 'exact' && K.runs.some(runBays) ? 'Min ' : '') + (K.gapBy === 'oc' ? 'O.C.' : 'gap'), 'markers.gap', 'in') + '</div>' + (anySize && seqHas('tick') ? field('Tick width', 'markers.tickW', 'in') : '') + (isArt() ? '<p class="hint" style="margin:0">Each graphic keeps its own shape; its height follows the width. The band height is where each graphic’s bottom edge sits.</p>' : '');
         bnd += field('End clearance', 'markers.margin', 'in');
         var anyFrame = K.runs.some(runBays);
-        if (K.runs.some(function (r) { return !runBays(r); })) bnd += field('Glass height (preview)', 'markers.glassH', 'in');
+        if (K.runs.some(function (r) { return !runBays(r); })) bnd += field('Glass height (preview)', 'markers.glassH', 'in') + (anyFrame ? '' : colorF('Glass tint', 'markers.glass'));
         h += lsec('m_bands', 'Bands', bnd);
         // Storefront frame for runs typed as panes.
         var fm = '<p class="hint" style="margin:0">For runs with panes. Pane sizes are visible glass; a door\u2019s size is its opening.</p>' +
@@ -3146,11 +3168,11 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
           '<div class="row2">' + field('Jamb sightline', 'markers.fJamb', 'in') + field('Mullion sightline', 'markers.mull', 'in') + '</div>' +
           '<div class="row2">' + field('Head sightline', 'markers.fHead', 'in') + field('Sill sightline', 'markers.fSill', 'in') + '</div>' +
           field('Butt joint', 'markers.seam', 'in') + '<p class="hint" style="margin:0">Sightline is the frame\u2019s visible face. Glass starts ' + esc(fmtIn(K.curb + K.fSill)) + ' AFF. Curb or knee wall is any base under the frame.</p>' +
-          selectF('Color', 'markers.fColor', Object.keys(FRAME_COLORS).map(function (k) { return [k, FRAME_COLORS[k][0]]; })) +
+          selectF('Color', 'markers.fColor', Object.keys(FRAME_COLORS).map(function (k) { return [k, FRAME_COLORS[k][0]]; })) + colorF('Glass tint', 'markers.glass') +
           '<div class="label" style="margin-top:4px">Doors</div>' +
           selectF('Style', 'markers.doorStyle', Object.keys(DOORS).map(function (k) { return [k, DOORS[k].label]; })) + '<div class="row2">' + field('Top rail', 'markers.doorTop', 'in') + field('Bottom rail', 'markers.doorBottom', 'in') + '</div>' +
-          selectF('Hardware', 'markers.hw', [['pull', 'Pull'], ['push', 'Push bar'], ['panic', 'Exit device (panic)'], ['none', 'None']]) +
-          (K.hw === 'pull' ? '<div class="row2">' + field('Height to top, AFF', 'markers.hwH', 'in') + field('Pull length', 'markers.hwLen', 'in') + '</div>' : K.hw !== 'none' ? field('Height to top, AFF', 'markers.hwH', 'in') : '') +
+          selectF('Hardware', 'markers.hw', [['pull', 'Pull'], ['lever', 'Lever handle'], ['push', 'Push bar'], ['panic', 'Exit device (panic)'], ['none', 'None']]) +
+          (K.hw === 'pull' ? '<div class="row2">' + field('Height to top, AFF', 'markers.hwH', 'in') + field('Pull length', 'markers.hwLen', 'in') + '</div>' : K.hw === 'lever' ? field('Height to center, AFF', 'markers.lvH', 'in') : K.hw !== 'none' ? field('Height to top, AFF', 'markers.hwH', 'in') : '') +
           selectF('Swing', 'markers.swing', [['true', 'Show on drawing'], ['false', 'Hide']]) +
           '<p class="hint" style="margin:0">Add doors with <b>+ Door</b> under a run\u2019s panes; each door can take its own style and hinge side there. Style here is the default.</p>';
         if (anyFrame) h += lsec('m_frame', 'Frame', fm);
@@ -3651,12 +3673,15 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     });
     leftEl.addEventListener('click', function (e) {
       if (mode !== 'layout' || L.job !== 'markers') return;
-      var b = e.target.closest('[data-pj],[data-pdel],[data-padd],[data-ptype]'); if (!b) return;
+      var b = e.target.closest('[data-pj],[data-pdel],[data-pdup],[data-padd],[data-ptype]'); if (!b) return;
       var row = b.closest('[data-row]'); if (!row) return;
       if (b.dataset.ptype) { paneTyped = !paneTyped; all(); return; }
+      var focusPane = null;
       editPanes(row, function (list, it) {
         if (b.dataset.pj) { var p = list[Number(b.dataset.pj)]; if (p) p.joint = p.joint === 'mull' ? 'seam' : 'mull'; }
         else if (b.dataset.pdel) list.splice(Number(b.dataset.pdel), 1);
+        // A copy goes right after its pane; a door is set off by a mullion, glass by a butt joint.
+        else if (b.dataset.pdup) { var k = Number(b.dataset.pdup), src = list[k]; if (src) { list.splice(k + 1, 0, { w: src.w, flex: src.flex, name: src.name, joint: doorOf(src.name) ? 'mull' : 'seam' }); focusPane = k + 1; } }
         else {
           var last = list[list.length - 1], door = b.dataset.padd === 'door';
           // Subtractive: new glass is Fill rest and shares what's left. Additive: the first glass pane takes the run's length less the jambs, and the run grows with each pane after.
@@ -3664,11 +3689,13 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
           if (!list.length && !it.fit) it.fit = 'fit';
           var np = door ? { w: 36, flex: false, name: 'Door' } : fit ? { w: 0, flex: true, name: '' } : !list.length ? { w: first > 1 ? first : 48, flex: false, name: '' } : { w: last && !last.flex && !doorOf(last.name) ? last.w : 48, flex: false, name: '' };
           np.joint = list.length ? (door || (last && doorOf(last.name)) ? 'mull' : 'seam') : null;
-          list.push(np);
+          list.push(np); focusPane = list.length - 1;
         }
         if (list[0]) list[0].joint = null;
       });
       all();
+      // Put the cursor in the new pane's width, ready for the next size.
+      if (focusPane != null) { var w = leftEl.querySelector('[data-row="' + row.dataset.row + '"] [data-pw="' + focusPane + '"]'); if (w) { w.focus(); w.select(); } }
     });
     leftEl.addEventListener('change', function (e) {
       if (mode !== 'layout') return;
