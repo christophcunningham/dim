@@ -284,6 +284,9 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
 .gl.g { width: 14px; height: 14px; object-fit: contain; border: 0; background: none; }
 .gl-more { font-size: 10.5px; color: var(--b02); }
 .pb { display: grid; gap: 4px; padding-left: 21px; }
+.pb-mode { display: grid; gap: 2px; font-size: 10.5px; color: var(--b01); }
+.pb-mode select { font-size: 11px; min-width: 0; }
+.pb-row input.fill { font-style: italic; color: var(--b02); }
 .pb-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 10.5px; color: var(--b01); }
 .linkish { background: none; border: 0; padding: 0; font: inherit; color: var(--b01); text-decoration: underline; cursor: pointer; }
 .linkish:hover { color: var(--b00); }
@@ -2552,6 +2555,9 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     }
     // The whole storefront, in inches from the frame's outside left edge and up from the floor.
     // Each pane has its opening (x, w) and its visible glass (gx, gw, gy0 to gy1); a door's glass sits inside its stiles and rails.
+    // How a run's length and its panes relate. Subtractive ('fit'): you set the length and Fill rest panes share what the others leave.
+    // Additive ('add'): the length is the panes plus the frame. Older runs without a mode are subtractive when they have a Fill rest pane or no panes yet.
+    function fitMode(r) { if (r.fit) return r.fit === 'fit'; var bays = runBays(r); return !bays || bays.some(function (b) { return b.some(function (p) { return p.flex; }); }); }
     function runFrame(r) {
       var bays = runBays(r); if (!bays) return null;
       var K = L.markers, flex = 0, fixed = 2 * K.fJamb + K.mull * (bays.length - 1);
@@ -2567,10 +2573,11 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         });
         x += K.mull;
       });
-      return { len: flex ? r.len : x - K.mull + K.fJamb, panes: panes, flex: flex, short: flex && fw <= 0, top: top };
+      var total = x - K.mull + K.fJamb, fit = !!flex || fitMode(r);
+      return { len: fit ? r.len : total, total: total, fit: fit, panes: panes, flex: flex, short: flex ? fw <= 0 : fit && total > r.len + 1 / 32, gap: !flex && fit ? r.len - total : 0, top: top };
     }
     // Runs typed as panes get their length from the panes and frame, unless a * pane fills a length you typed.
-    function syncLens() { L.markers.runs.forEach(function (r) { var f = runFrame(r); if (f && !f.flex) r.len = f.len; }); }
+    function syncLens() { L.markers.runs.forEach(function (r) { var f = runFrame(r); if (f && !f.fit) r.len = f.len; }); }
     // Door hardware as a box (inches, x along the run, y up from the floor), on the latch side: a pull on the stile (on the glass of an all-glass door), or a bar across the door.
     // Hardware height is to its top.
     function hardware(p) {
@@ -2621,7 +2628,8 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     // Problems worth flagging on a run: panes that don't fit, bands that miss the glass, marks in the way of door hardware.
     function runWarnings(r) {
       var K = L.markers, fr = runFrame(r), out = []; if (!fr) return out;
-      if (fr.short) out.push('Panes don’t fit in ' + fmtFt(r.len) + '.');
+      if (fr.short) out.push((fr.total - r.len > 1 / 32 ? 'Panes don’t fit in ' + fmtFt(r.len) + ': ' + fmtIn(fr.total - r.len) + ' over' : 'Fill rest panes have no room left in ' + fmtFt(r.len)) + '.');
+      else if (fr.gap > 1 / 32) out.push('Panes come up ' + fmtIn(fr.gap) + ' short of ' + fmtFt(r.len) + '. Make a pane Fill rest to take it up.');
       var hs = bands(), ms = runMarks(r);
       hs.forEach(function (bh, bi) {
         var seq = seqFor(bi), mh = K.pattern === 'solid' ? K.barH : seq.reduce(function (a, t) { return Math.max(a, markOf(t).h); }, 0), low = [], high = [];
@@ -2992,13 +3000,14 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     var paneTyped = false;
     function paneBuilder(r) {
       var list = paneList(r), fr = runFrame(r), dflt = DOORS[L.markers.doorStyle] ? L.markers.doorStyle : 'medium';
-      var head = '<div class="pb-head"><span>Panes, left to right</span>' + (list.length || paneTyped ? '<button type="button" class="linkish" data-ptype="1">' + (paneTyped ? 'Use builder' : 'Type instead') + '</button>' : '') + '</div>';
+      var fit = fitMode(r), modeSel = '<label class="pb-mode">Run length<select data-pmode="1" aria-label="Run length"><option value="fit"' + (fit ? ' selected' : '') + '>Subtractive: fixed length</option><option value="add"' + (fit ? '' : ' selected') + '>Additive: grows with panes</option></select></label>';
+      var head = modeSel + '<div class="pb-head"><span>Panes, left to right</span>' + (list.length || paneTyped ? '<button type="button" class="linkish" data-ptype="1">' + (paneTyped ? 'Use builder' : 'Type instead') + '</button>' : '') + '</div>';
       if (paneTyped) return '<div class="pb">' + head + '<input type="text" data-f="panes" value="' + esc(r.panes || '') + '" placeholder="34.5, 34.5 | 36 Door | 8" aria-label="Panes, left to right"><p class="hint" style="margin:0">Commas are butt joints, <b>|</b> is a mullion, <b>3@48</b> is three 48" panes, <b>*</b> fills the rest of the run. Add <b>Door</b>, its style (<b>narrow</b>, <b>medium</b>, <b>wide</b>, <b>all glass</b>) and <b>hinge right</b> to a pane\u2019s name.</p></div>';
       var rows = list.map(function (p, i) {
         var pp = paneParts(p), fw = fr && fr.panes[i] ? fr.panes[i].w : 0, j = '';
         if (i) j = '<button type="button" class="pb-joint ' + p.joint + '" data-pj="' + i + '" title="Click to switch between a butt joint and a mullion">' + (p.joint === 'mull' ? 'Mullion' : 'Butt joint') + '</button>';
-        var row = '<div class="pb-row"><input type="text" data-pw="' + i + '" value="' + esc(pp.type === 'fill' ? fmtIn(fw) : fmtIn(p.w)) + '"' + (pp.type === 'fill' ? ' disabled title="Fills what the run\u2019s length leaves"' : '') + ' aria-label="Pane ' + (i + 1) + ' width">' +
-          '<select data-pt="' + i + '" aria-label="Pane ' + (i + 1) + ' type"><option value="glass"' + (pp.type === 'glass' ? ' selected' : '') + '>Glass</option><option value="door"' + (pp.type === 'door' ? ' selected' : '') + '>Door</option><option value="fill"' + (pp.type === 'fill' ? ' selected' : '') + '>Fill rest</option></select>' +
+        var row = '<div class="pb-row"><input type="text" data-pw="' + i + '" value="' + esc(pp.type === 'fill' ? fmtIn(fw) : fmtIn(p.w)) + '"' + (pp.type === 'fill' ? ' class="fill" title="Fills what the run\u2019s length leaves. Type a width to fix it."' : '') + ' aria-label="Pane ' + (i + 1) + ' width">' +
+          '<select data-pt="' + i + '" aria-label="Pane ' + (i + 1) + ' type"><option value="glass"' + (pp.type === 'glass' ? ' selected' : '') + '>Glass</option><option value="door"' + (pp.type === 'door' ? ' selected' : '') + '>Door</option>' + (fit || pp.type === 'fill' ? '<option value="fill"' + (pp.type === 'fill' ? ' selected' : '') + '>Fill rest</option>' : '') + '</select>' +
           '<button type="button" class="pb-del" data-pdel="' + i + '" aria-label="Remove pane ' + (i + 1) + '">×</button></div>';
         if (pp.type === 'door') row += '<div class="pb-row door"><select data-ps="' + i + '" aria-label="Door style">' + Object.keys(DOORS).map(function (k) { return '<option value="' + k + '"' + ((pp.style || dflt) === k ? ' selected' : '') + '>' + esc(DOORS[k].short) + '</option>'; }).join('') + '</select>' +
           '<select data-ph="' + i + '" aria-label="Hinge side"><option value="left"' + (pp.hinge === 'left' ? ' selected' : '') + '>Hinge left</option><option value="right"' + (pp.hinge === 'right' ? ' selected' : '') + '>Hinge right</option></select></div>';
@@ -3037,7 +3046,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         var mt = markerTotals();
         h += '<div class="block"><div class="label">Distraction markers · ' + mt.nb + ' band' + (mt.nb === 1 ? '' : 's') + '</div><div class="readout">' + num(Math.ceil(mt.lf), 0) + ' LF</div><p class="hint">' + num(mt.runLen / 12) + ' ft of glass' + (L.markers.pattern !== 'solid' ? ', ' + num(mt.pieces, 0) + ' pieces' : '') + '</p></div>';
         h += '<div class="block"><div class="label">Glass runs (24\', 98\'-5", or inches)</div><div class="list">' + L.markers.runs.map(function (r, i) {
-          var fr = runFrame(r), bays = fr && !fr.flex, ms = runMarks(r), on = i === L.markers.sel, warn = runWarnings(r);
+          var fr = runFrame(r), bays = fr && !fr.fit, ms = runMarks(r), on = i === L.markers.sel, warn = runWarnings(r);
           return '<div class="ed' + (on ? ' sel' : '') + '" data-row="' + i + '"><div class="ed-top"><span class="chip" style="background:var(--yellow)"></span><input type="text" data-f="name" value="' + esc(r.name) + '" aria-label="Run name"><button type="button" data-delrow="' + i + '" aria-label="Delete ' + esc(r.name) + '">×</button></div>' +
             '<div class="ed-nums two"><label>Length<input type="text" data-f="len" value="' + esc(fmtFt(r.len)) + '"' + (bays ? ' disabled title="Set by the panes"' : '') + '></label><span class="ed-out">' + (L.markers.pattern === 'solid' ? num(r.len * mt.nb / 12) + ' LF' : ms.length * mt.nb + ' pcs') + '</span></div>' +
             (on ? paneBuilder(r) : fr ? '<div class="ed-out">' + esc(r.panes) + '</div>' : '') +
@@ -3608,8 +3617,16 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var it = L.markers.runs[Number(row.dataset.row)]; if (!it) return;
       var list = paneList(it); fn(list, it);
       it.panes = paneText(list);
-      var fr0 = runFrame(it); if (fr0 && !fr0.flex) it.len = fr0.len;
+      var fr0 = runFrame(it); if (fr0 && !fr0.fit) it.len = fr0.len;
     }
+    leftEl.addEventListener('change', function (e) {
+      if (mode !== 'layout' || L.job !== 'markers' || !e.target.dataset.pmode) return;
+      var row = e.target.closest('[data-row]'), it = row && L.markers.runs[Number(row.dataset.row)]; if (!it) return;
+      // Going additive fixes each Fill rest pane at its current width, so nothing moves; the length then follows the panes.
+      if (e.target.value === 'add') editPanes(row, function (list, r) { var fr1 = runFrame(r); list.forEach(function (p, i) { if (p.flex) { var fw = fr1 && fr1.panes[i] ? Math.round(fr1.panes[i].w * 8) / 8 : 0; p.flex = false; p.w = fw > 0 ? fw : 48; } }); r.fit = 'add'; });
+      else it.fit = 'fit';
+      e.stopImmediatePropagation(); all();
+    });
     leftEl.addEventListener('change', function (e) {
       if (mode !== 'layout' || L.job !== 'markers') return;
       var el = e.target, row = el.closest('[data-row]'); if (!row) return;
@@ -3618,7 +3635,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       editPanes(row, function (list, it) {
         var p = list[i]; if (!p) return;
         var pp = paneParts(p);
-        if (d.pw != null) { var v = parseIn(el.value); if (v > 0) p.w = v; }
+        if (d.pw != null) { var v = parseIn(el.value); if (v > 0) { p.w = v; p.flex = false; } }
         else if (d.pt != null) {
           if (el.value === 'fill') { p.flex = true; if (pp.type === 'door') p.name = pp.label; }
           else {
@@ -3642,9 +3659,10 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         else if (b.dataset.pdel) list.splice(Number(b.dataset.pdel), 1);
         else {
           var last = list[list.length - 1], door = b.dataset.padd === 'door';
-          // The first glass pane takes the run's length less the jambs, so the run keeps its size; after that the run grows with each pane.
-          var first = Math.round((it.len - 2 * L.markers.fJamb) * 8) / 8;
-          var np = door ? { w: 36, flex: false, name: 'Door' } : !list.length ? { w: first > 1 ? first : 48, flex: false, name: '' } : { w: last && !last.flex && !doorOf(last.name) ? last.w : 48, flex: false, name: '' };
+          // Subtractive: new glass is Fill rest and shares what's left. Additive: the first glass pane takes the run's length less the jambs, and the run grows with each pane after.
+          var first = Math.round((it.len - 2 * L.markers.fJamb) * 8) / 8, fit = fitMode(it);
+          if (!list.length && !it.fit) it.fit = 'fit';
+          var np = door ? { w: 36, flex: false, name: 'Door' } : fit ? { w: 0, flex: true, name: '' } : !list.length ? { w: first > 1 ? first : 48, flex: false, name: '' } : { w: last && !last.flex && !doorOf(last.name) ? last.w : 48, flex: false, name: '' };
           np.joint = list.length ? (door || (last && doorOf(last.name)) ? 'mull' : 'seam') : null;
           list.push(np);
         }
@@ -3657,7 +3675,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var row = e.target.closest('[data-row]'), f = e.target.dataset.f; if (!row || !f) return;
       var it = rows()[Number(row.dataset.row)]; if (!it) return;
       if (f === 'name') it.name = e.target.value || it.name;
-      else if (f === 'panes') { it.panes = e.target.value.trim(); var fr0 = runFrame(it); if (fr0 && !fr0.flex) it.len = fr0.len; }
+      else if (f === 'panes') { it.panes = e.target.value.trim(); var fr0 = runFrame(it); if (fr0 && !fr0.fit) it.len = fr0.len; }
       else if (f === 'qty') { var q = parseInt(e.target.value, 10); if (q > 0) it.qty = q; }
       else { var v = parseIn(e.target.value); if (v > 0) it[f] = v; }
       refocusAfter(leftEl, function (a) { var r = a.closest && a.closest('[data-row]'); return r && a.dataset.f ? '[data-row="' + r.dataset.row + '"] [data-f="' + a.dataset.f + '"]' : null; });
@@ -3676,7 +3694,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       if (e.target.closest('[data-addrow]')) {
         nextRow += 1;
         if (L.job === 'film') L.film.panes.push({ name: 'Pane ' + (L.film.panes.length + 1), w: 48, h: 96, qty: 1 });
-        else L.markers.runs.push({ name: 'Run ' + (L.markers.runs.length + 1), len: 120 });
+        else L.markers.runs.push({ name: 'Run ' + (L.markers.runs.length + 1), len: 120, fit: 'fit' });
         all(); return;
       }
       if (e.target.closest('[data-frommeasure]')) {
@@ -3686,7 +3704,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
           L.film.panes.forEach(function (r) { if (r.fromId) have[r.fromId] = 1; });
           measuredRects('film').forEach(function (x) { if (!have[x.id]) { L.film.panes.push({ name: x.name, w: Math.round(x.w * 8) / 8, h: Math.round(x.h * 8) / 8, qty: 1, fromId: x.id }); added++; } });
           measuredLengths('film').forEach(function (x) { if (!have[x.id]) { L.film.panes.push({ name: x.name, w: Math.round(x.len * 8) / 8, h: L.film.defH, qty: 1, fromId: x.id }); added++; } });
-        } else measuredLengths('markers').forEach(function (x) { if (!have[x.id]) { L.markers.runs.push({ name: x.name, len: x.len, fromId: x.id }); added++; } });
+        } else measuredLengths('markers').forEach(function (x) { if (!have[x.id]) { L.markers.runs.push({ name: x.name, len: x.len, fromId: x.id, fit: 'fit' }); added++; } });
         all(); flash(added ? 'Added ' + added + ' measured length' + (added === 1 ? '' : 's') + '.' : 'Those measurements are already in the list.'); return;
       }
       var row = e.target.closest('[data-row]');
