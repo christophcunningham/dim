@@ -3689,7 +3689,8 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         all(); flash(added ? 'Added ' + added + ' measured length' + (added === 1 ? '' : 's') + '.' : 'Those measurements are already in the list.'); return;
       }
       var row = e.target.closest('[data-row]');
-      if (row && !/INPUT|BUTTON/.test(e.target.tagName)) { var k2 = L.job === 'film' ? L.film : L.markers; k2.sel = Number(row.dataset.row); left(); draw(); }
+      // Clicking a row selects it. Leave fields, buttons and dropdowns alone (redrawing would close an open dropdown), and only redraw for a new row.
+      if (row && !e.target.closest('input, button, select, label')) { var k2 = L.job === 'film' ? L.film : L.markers, ri = Number(row.dataset.row); if (k2.sel !== ri) { k2.sel = ri; left(); draw(); } }
     });
 
     function setMarkerArt(list) { if (Array.isArray(list)) L.markers.graphics = list.filter(function (g) { return g && g.url; }); }
