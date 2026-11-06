@@ -114,7 +114,7 @@ label.field { display: grid; gap: 4px; color: var(--b01); font-size: 11.5px; }
 
 /* Right: inspector */
 details { border-bottom: 1px solid var(--line); }
-summary { list-style: none; cursor: pointer; padding: 9px 12px; color: var(--b00); display: flex; gap: 8px; align-items: center; }
+summary { list-style: none; cursor: pointer; padding: 10px 12px; color: var(--b00); display: flex; gap: 8px; align-items: center; font-size: 14px; font-weight: 700; }
 summary::-webkit-details-marker { display: none; }
 summary::before { content: "›"; display: inline-block; width: 8px; color: var(--b01); transition: transform .12s; }
 details[open] > summary::before { transform: rotate(90deg); }
@@ -177,6 +177,8 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
 /* Tools in two rows, row details, quote */
 .tools.grid5 { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
 .tools.grid8 { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); }
+.tools.grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.tools.grid4 .tool.txt { padding: 0 4px; }
 .chip.art { width: 18px; height: 18px; background-color: #fff; background-image: var(--art), repeating-conic-gradient(#b9b9b9 0 25%, #f4f4f4 0 50%); background-size: contain, 6px 6px; background-position: center, 0 0; background-repeat: no-repeat, repeat; }
 .item-more input.valin { flex: 1 1 100%; background: var(--b08); padding: 3px 5px; font-size: 11.5px; }
 .readout.small { font-size: 22px; }
@@ -290,12 +292,25 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
 .pb-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 10.5px; color: var(--b01); }
 .linkish { background: none; border: 0; padding: 0; font: inherit; color: var(--b01); text-decoration: underline; cursor: pointer; }
 .linkish:hover { color: var(--b00); }
-.pb-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 18px; gap: 5px; align-items: center; }
+.pb-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 16px 14px; gap: 5px; align-items: center; }
 .pb-row.door { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .pb-row select { min-width: 0; font-size: 11px; }
 .pb-del { background: none; border: 0; padding: 0; color: var(--b02); font-size: 15px; line-height: 1; }
 .pb-del:hover { color: var(--red-deep); }
-.pb-joint { display: flex; align-items: center; gap: 6px; width: 100%; background: none; border: 0; padding: 0 18px 0 0; font: inherit; font-size: 10px; color: var(--b02); cursor: pointer; }
+.pb-dup { display: grid; place-items: center; background: none; border: 0; padding: 0; color: var(--b02); line-height: 0; }
+.pb-dup:hover { color: var(--b00); }
+.gitem { display: grid; gap: 6px; padding: 8px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+.gitem.sel { border-color: var(--b00); background: var(--b08); }
+.gitem-top { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto 14px; gap: 7px; align-items: center; }
+.gitem-top span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gitem-top button { background: none; border: 0; padding: 0; color: var(--b02); font-size: 15px; line-height: 1; }
+.gitem-top button:hover { color: var(--red-deep); }
+.tog { display: flex; flex-wrap: wrap; gap: 5px; }
+.btn[aria-pressed="true"] { background: var(--strong); color: var(--strong-ink); border-color: var(--strong); }
+.btn[aria-pressed="true"]:hover:not(:disabled) { background: var(--strong-hover); }
+.item .linkish { font-size: 11px; color: var(--b01); }
+.item .linkish:hover { color: var(--b00); }
+.pb-joint { display: flex; align-items: center; gap: 6px; width: 100%; background: none; border: 0; padding: 0 35px 0 0; font: inherit; font-size: 10px; color: var(--b02); cursor: pointer; }
 .pb-joint::before, .pb-joint::after { content: ''; flex: 1; border-top: 1px dashed var(--b04); }
 .pb-joint.mull::before, .pb-joint.mull::after { border-top: 2px solid var(--b02); }
 .pb-joint:hover { color: var(--b00); }
@@ -1535,7 +1550,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
   var MTOOL_NAME = { pan: ['Pan', 'H'], edit: ['Edit', 'V'], scale: ['Scale', 'S'], resize: ['Resize', 'Z'], length: ['Length', 'L'], run: ['Run', 'R'], curve: ['Curve', 'K'], dim: ['Dimension', 'D'], area: ['Area', 'A'], rect: ['Rectangle', 'B'], circle: ['Circle', 'O'], count: ['Count', 'C'], angle: ['Angle', 'G'], note: ['Note', 'T'] };
   var DRAW_TOOLS = /^(length|run|curve|dim|area|rect|circle|count|angle|note)$/;
   function renderTools() {
-    toolsEl.classList.toggle('grid5', mode === 'measure'); if (mode !== 'shop') toolsEl.classList.remove('grid8');
+    toolsEl.classList.toggle('grid5', mode === 'measure'); toolsEl.classList.remove('grid4'); if (mode !== 'shop') toolsEl.classList.remove('grid8');
     if (mode === 'measure') toolsEl.innerHTML = MTOOLS.map(function (t) { return toolBtn(t[0], t[1], t[2], M.tool === t[1]); }).join('');
   }
   toolsEl.addEventListener('click', function (e) {
@@ -1992,7 +2007,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
   function toB64(blob) { return new Promise(function (res, rej) { var fr = new FileReader(); fr.onload = function () { res(String(fr.result).split(',')[1]); }; fr.onerror = function () { rej(fr.error); }; fr.readAsDataURL(blob); }); }
   function fromB64(b, type) { var bin = atob(b), u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new Blob([u], { type: type || 'application/octet-stream' }); }
   var Project = {
-    state: function () { return { app: 'DIM', v: 1, name: M.name, src: M.src, page: M.page, scales: M.scales, items: M.items, n: M.n, nextId: nextId, snapDrawing: M.snapDrawing, units: UNITS, style: M.style, round: M.round || '', blank: M.blank || null, markerArt: Lay.markerArt(), layout: Lay.getState(), shop: Shop.getState(), shopLogo: Shop.getLogo() }; },
+    state: function () { return { app: 'DIM', v: 1, name: M.name, src: M.src, page: M.page, scales: M.scales, items: M.items, n: M.n, nextId: nextId, snapDrawing: M.snapDrawing, units: UNITS, style: M.style, round: M.round || '', blank: M.blank || null, markerArt: Lay.markerArt(), graphicArt: Lay.graphicArt(), layout: Lay.getState(), shop: Shop.getState(), shopLogo: Shop.getLogo() }; },
     save: function () {
       var st = Project.state(), img = Lay.imageBlob();
       Promise.all([M.fileBytes ? toB64(new Blob([M.fileBytes])) : null, img ? toB64(img) : null]).then(function (r) {
@@ -2014,7 +2029,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       nextId = st.nextId || (M.items.reduce(function (m, it) { return Math.max(m, it.id); }, 0) + 1);
       M.snapDrawing = st.snapDrawing !== false;
       M.style = Object.assign({ color: '', end: '' }, st.style || {}); M.round = st.round || '';
-      Lay.setState(st.layout, imgBlob); if (st.markerArt) Lay.setMarkerArt(st.markerArt);
+      Lay.setState(st.layout, imgBlob); if (st.markerArt) Lay.setMarkerArt(st.markerArt); Lay.setGraphicArt(st.graphicArt);
       Shop.setState(st.shop); if (st.shopLogo) Shop.setLogo(st.shopLogo);
     }
     var p;
@@ -2322,18 +2337,22 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
   var Lay = (function () {
     var ROLLS = [48, 54, 60, 61];
     var L = {
-      job: 'mural', roll: 54, margin: 6,
+      job: 'graphic', roll: 54, margin: 6,
       mural: { w: 288, h: 108, bleed: 1, overlap: 1, orient: 'vertical', balance: true, custom: null, marks: true, art: 'gradient', color: '#5b8fbf', g1: '#1f3b57', g2: '#8fd0c8', angle: 0, img: null, imgName: '', fit: 'cover', tileW: 24, dpi: 50 },
       film: { allow: 1, defH: 96, mode: 'auto', look: 'gradient', c1: '#ffffff', c2: '#9cc8e8', sel: 0, fA: 36, fB: 72, d1: 24, d2: 36, d3: 60, d4: 72, dual: 'frost', person: 'none', sill: 0, balance: true, marks: true,
         panes: [{ name: 'Conference 27-015', w: 60, h: 96, qty: 6 }, { name: 'Conference 27-016', w: 48, h: 96, qty: 4 }, { name: 'Office sidelite', w: 24, h: 96, qty: 6 }] },
-      markers: { bands: '30, 60', barH: 2, maxStrip: 96, pattern: 'squares', size: 2, tickW: 0.25, gap: 7.5, margin: 0, glassH: 96, spacing: 0.5, sel: 0, graphics: [], seq: 'all', useIdx: 0, seqText: 'A, B', start: 'center', gapMode: 'min', gapBy: 'clear', perBand: false, bandSeq: [], mull: 2,
-        curb: 0, fJamb: 2, fHead: 2, fSill: 2, seam: 0.375, fColor: 'black', doorStyle: 'medium', doorTop: 3.5, doorBottom: 10, hw: 'pull', hwH: 46, hwLen: 12, swing: true,
+      markers: { bands: '30, 60', barH: 2, maxStrip: 96, pattern: 'squares', size: 2, tickW: 0.25, gap: 7.5, margin: 0, glassH: 96, spacing: 0.5, sel: 0, graphics: [], seq: 'all', useIdx: 0, seqText: 'A, B', start: 'center', gapMode: 'exact', gapBy: 'clear', perBand: false, bandSeq: [], mull: 2,
+        curb: 0, fJamb: 2, fHead: 2, fSill: 2, seam: 0.375, fColor: 'black', doorStyle: 'medium', doorTop: 3.5, doorBottom: 10, hw: 'pull', hwH: 46, hwLen: 12, lvH: 38, swing: true, glass: '#d9ecf7',
         runs: [{ name: 'Reception glass', len: 384 }, { name: 'Conference front', len: 240 }, { name: 'Office fronts, east', len: 1104 }] },
+      graphic: { sel: 0, isel: null, nextId: 1, graphics: [], dims: { size: true, bottom: true, center: false, edges: true },
+        glassH: 96, curb: 0, fJamb: 2, fHead: 2, fSill: 2, mull: 2, seam: 0.375, fColor: 'black', doorStyle: 'medium', doorTop: 3.5, doorBottom: 10, hw: 'pull', hwH: 46, hwLen: 12, lvH: 38, swing: false, glass: '#d9ecf7',
+        runs: [{ name: 'Front entrance', kind: 'glass', len: 78, panes: '36 Door | 36', fit: 'add', items: [] }, { name: 'Lobby wall', kind: 'wall', finish: 'brick', color: '#a4553a', len: 144, wallH: 108, items: [] }] },
       quote: null, note: '', busy: false
     };
     var open = { m_frame: true, l_size: true, l_roll: true, l_art: true, l_res: true, l_exp: false, f_roll: true, f_look: false, f_res: true, f_exp: false, m_bands: true, m_cut: true, m_res: true, m_exp: false };
     var canvas = null, nextRow = 100, geo = null, offTarget = null, lastScale = NaN, noSel = false;
     open.q_mural = open.q_film = open.q_markers = open.l_shop = true;
+    open.g_art = open.g_items = open.g_dims = open.g_wall = true;
     var PRICE_DEFAULTS = { mural: { rate: 9.5, basis: 'printed', install: 3, setup: 0, min: 150, rush: 25 }, film: { rate: 7.25, basis: 'glass', install: 2.5, setup: 0, min: 125, rush: 25 }, markers: { rate: 2.5, basis: 'lf', install: 1.25, setup: 25, min: 90, rush: 25 } };
     function loadPrices() {
       var q = JSON.parse(JSON.stringify(PRICE_DEFAULTS));
@@ -2402,7 +2421,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     var artCache = {};
     function artImg(g) {
       var im = artCache[g.url];
-      if (!im) { im = artCache[g.url] = new Image(); im.onload = function () { if (mode === 'layout' && L.job === 'markers') draw(); }; im.src = g.url; }
+      if (!im) { im = artCache[g.url] = new Image(); im.onload = function () { if (mode === 'layout' && (L.job === 'markers' || L.job === 'graphic')) draw(); }; im.src = g.url; }
       return im.complete && im.naturalWidth ? im : null;
     }
     function letter(i) { return String.fromCharCode(65 + i); }
@@ -2469,8 +2488,9 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     function slotW() { var all = bandSeqs(); return all.length && all.every(function (t) { return t === 'tick'; }) ? L.markers.tickW : L.markers.size; }
     function graphicH(g) { return g ? L.markers.size * g.h / g.w : L.markers.size; }
     function isArt() { return L.markers.pattern === 'graphic'; }
-    function readGraphics(files) {
-      var list = Array.prototype.slice.call(files || []);
+    // Reads PNG or SVG files into graphics ({ name, url, w, h }, at most 1200 px), one at a time, then calls done with the list.
+    function readGraphics(files, done) {
+      var list = Array.prototype.slice.call(files || []), got = [];
       list.reduce(function (chain, f) {
         return chain.then(function () {
           return new Promise(function (res) {
@@ -2488,14 +2508,14 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
                 var f2 = Math.min(1, 1200 / Math.max(w0, h0)), c = document.createElement('canvas');
                 c.width = Math.max(1, Math.round(w0 * f2)); c.height = Math.max(1, Math.round(h0 * f2));
                 c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
-                L.markers.graphics.push({ name: f.name, url: c.toDataURL('image/png'), w: c.width, h: c.height }); res();
+                got.push({ name: f.name, url: c.toDataURL('image/png'), w: c.width, h: c.height }); res();
               };
               im.onerror = function () { flash('Could not read ' + f.name + '.'); res(); };
               im.src = url;
             });
           });
         });
-      }, Promise.resolve()).then(function () { if (L.markers.graphics.length) L.markers.pattern = 'graphic'; all(); Autosave.schedule(); });
+      }, Promise.resolve()).then(function () { done(got); all(); Autosave.schedule(); });
     }
     function bands() { return String(L.markers.bands).split(/[,\s]+/).map(parseIn).filter(function (x) { return isFinite(x) && x >= 0; }).sort(function (a, b) { return a - b; }); }
     // A run's glass, typed left to right: "34.5, 34.5 | 36 Door | 8". Commas are butt joints, bars are mullions, 3@48 is three
@@ -2520,9 +2540,10 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     var DOORS = { narrow: { label: 'Narrow stile, 2 1/8"', short: 'Narrow', stile: 2.125 }, medium: { label: 'Medium stile, 3 1/2"', short: 'Medium', stile: 3.5 }, wide: { label: 'Wide stile, 5"', short: 'Wide', stile: 5 }, glass: { label: 'All glass, no stiles', short: 'All glass', stile: 0 } };
     var DOOR_WORDS = /\s*\b(narrow|medium|wide|all[- ]glass|glass|frameless|hinge\s*(?:right|left)|RH|LH)\b/gi;
     var FRAME_COLORS = { black: ['Black', '#26282b'], bronze: ['Dark bronze', '#4a3e33'], clear: ['Clear anodized', '#b4bac0'] };
-    function doorOf(name) {
+    // Frame settings (curb, sightlines, doors, hardware, glass tint) belong to a job: Markers by default, or the Graphic tab.
+    function doorOf(name, K) {
       if (!/\bdoor\b/i.test(name || '')) return null;
-      var st = /\bwide\b/i.test(name) ? 'wide' : /\bmedium\b/i.test(name) ? 'medium' : /\bnarrow\b/i.test(name) ? 'narrow' : /\b(glass|frameless)\b/i.test(name) ? 'glass' : L.markers.doorStyle;
+      var st = /\bwide\b/i.test(name) ? 'wide' : /\bmedium\b/i.test(name) ? 'medium' : /\bnarrow\b/i.test(name) ? 'narrow' : /\b(glass|frameless)\b/i.test(name) ? 'glass' : (K || L.markers).doorStyle;
       return { style: st, d: DOORS[st] || DOORS.medium, hinge: /\bRH\b|\bhinge\s*right\b/i.test(name) ? 'right' : 'left' };
     }
     // The pane builder edits a run as a flat list: each pane with its width (or flex), name, and the joint before it.
@@ -2558,15 +2579,15 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     // How a run's length and its panes relate. Subtractive ('fit'): you set the length and Fill rest panes share what the others leave.
     // Additive ('add'): the length is the panes plus the frame. Older runs without a mode are subtractive when they have a Fill rest pane or no panes yet.
     function fitMode(r) { if (r.fit) return r.fit === 'fit'; var bays = runBays(r); return !bays || bays.some(function (b) { return b.some(function (p) { return p.flex; }); }); }
-    function runFrame(r) {
+    function runFrame(r, K) {
       var bays = runBays(r); if (!bays) return null;
-      var K = L.markers, flex = 0, fixed = 2 * K.fJamb + K.mull * (bays.length - 1);
+      K = K || L.markers; var flex = 0, fixed = 2 * K.fJamb + K.mull * (bays.length - 1);
       bays.forEach(function (b) { b.forEach(function (p, i) { if (p.flex) flex++; else fixed += p.w; if (i) fixed += K.seam; }); });
       var fw = flex ? (r.len - fixed) / flex : 0, x = K.fJamb, panes = [], top = K.curb + K.glassH;
       bays.forEach(function (b, bi) {
         b.forEach(function (p, pi) {
           if (pi) x += K.seam;
-          var w = p.flex ? Math.max(0, fw) : p.w, d = doorOf(p.name), st = d ? d.d.stile : 0;
+          var w = p.flex ? Math.max(0, fw) : p.w, d = doorOf(p.name, K), st = d ? d.d.stile : 0;
           panes.push({ x: x, w: w, name: p.name, bay: bi, seam: pi > 0, door: d, gx: x + st, gw: Math.max(0, w - 2 * st),
             gy0: d ? K.doorBottom : K.curb + K.fSill, gy1: top - K.fHead - (d ? K.doorTop : 0) });
           x += w;
@@ -2577,12 +2598,15 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       return { len: fit ? r.len : total, total: total, fit: fit, panes: panes, flex: flex, short: flex ? fw <= 0 : fit && total > r.len + 1 / 32, gap: !flex && fit ? r.len - total : 0, top: top };
     }
     // Runs typed as panes get their length from the panes and frame, unless a * pane fills a length you typed.
-    function syncLens() { L.markers.runs.forEach(function (r) { var f = runFrame(r); if (f && !f.fit) r.len = f.len; }); }
+    function syncLens(K) { K = K || L.markers; K.runs.forEach(function (r) { var f = r.kind === 'wall' ? null : runFrame(r, K); if (f && !f.fit) r.len = f.len; }); }
     // Door hardware as a box (inches, x along the run, y up from the floor), on the latch side: a pull on the stile (on the glass of an all-glass door), or a bar across the door.
     // Hardware height is to its top.
-    function hardware(p) {
-      var K = L.markers; if (!p.door || K.hw === 'none') return null;
+    function hardware(p, K) {
+      K = K || L.markers; if (!p.door || K.hw === 'none') return null;
       if (K.hw === 'pull') { var st = p.door.d.stile, off = st ? Math.max(st / 2, 2) : 3, cx = p.door.hinge === 'right' ? p.x + off : p.x + p.w - off; return { x0: cx - 0.5, x1: cx + 0.5, y0: K.hwH - K.hwLen, y1: K.hwH, kind: 'pull' }; }
+      // A lever: a 2 1/2" rose on the latch side with a 4 1/2" handle pointing toward the hinge. Its height is to the center.
+      if (K.hw === 'lever') { var st2 = p.door.d.stile, bk = st2 ? Math.max(st2 / 2, 2) : 2.75, rt = p.door.hinge === 'right', lx = rt ? p.x + bk : p.x + p.w - bk, r = 1.25, ln = 4.5;
+        return { x0: rt ? lx - r : lx - ln, x1: rt ? lx + ln : lx + r, y0: K.lvH - r, y1: K.lvH + r, kind: 'lever', cx: lx, cy: K.lvH, r: r, len: ln, dir: rt ? 1 : -1 }; }
       var t = K.hw === 'panic' ? 3 : 1.5; return { x0: p.gx, x1: p.gx + p.gw, y0: K.hwH - t, y1: K.hwH, kind: K.hw };
     }
     // Does this mark, on band bi, sit within an inch of the door's hardware?
@@ -2641,7 +2665,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         if (low.length) out.push(fmtIn(bh) + ' band is below the ' + low.join(' and ') + (low.indexOf('door') >= 0 ? ' (bottom rail ' + fmtIn(K.doorBottom) + ')' : ' (glass starts ' + fmtIn(K.curb + K.fSill) + ')') + '.');
         if (high.length) out.push(fmtIn(bh) + ' band is above the ' + high.join(' and ') + '.');
         var hits = ms.filter(function (m) { var p = fr.panes[m.pane]; return p && p.door && hitsHardware(p, bi, m); }).length;
-        if (hits) out.push(fmtIn(bh) + ' band: ' + hits + ' mark' + (hits > 1 ? 's' : '') + ' within 1" of the door ' + (K.hw === 'pull' ? 'pull' : K.hw === 'panic' ? 'exit device' : 'push bar') + '.');
+        if (hits) out.push(fmtIn(bh) + ' band: ' + hits + ' mark' + (hits > 1 ? 's' : '') + ' within 1" of the door ' + (K.hw === 'pull' ? 'pull' : K.hw === 'lever' ? 'lever' : K.hw === 'panic' ? 'exit device' : 'push bar') + '.');
       });
       return out;
     }
@@ -2718,7 +2742,9 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       if (vert) { ctx.moveTo(x1 - 5, y1); ctx.lineTo(x1 + 5, y1); ctx.moveTo(x2 - 5, y2); ctx.lineTo(x2 + 5, y2); }
       else { ctx.moveTo(x1, y1 - 5); ctx.lineTo(x1, y1 + 5); ctx.moveTo(x2, y2 - 5); ctx.lineTo(x2, y2 + 5); }
       ctx.stroke(); ctx.restore();
-      if (vert) { ctx.save(); ctx.translate(x1 - 8, (y1 + y2) / 2); ctx.rotate(-Math.PI / 2); txt(ctx, label, 0, 0, { size: 11 }); ctx.restore(); }
+      // 'right' sets a vertical dimension's label level, beside it, so a short one doesn't run over its own ticks.
+      if (vert && side === 'right') txt(ctx, label, x1 + 9, (y1 + y2) / 2, { size: 11, align: 'left', base: 'middle' });
+      else if (vert) { ctx.save(); ctx.translate(x1 - 8, (y1 + y2) / 2); ctx.rotate(-Math.PI / 2); txt(ctx, label, 0, 0, { size: 11 }); ctx.restore(); }
       else txt(ctx, label, (x1 + x2) / 2, side === 'below' ? y1 + 16 : y1 - 7, { size: 11 });
     }
     function tag(ctx, x, y, t, fill) {
@@ -2852,14 +2878,14 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       syncLens();
       var H = Math.max.apply(null, list.map(runTop)), maxShown = Math.max.apply(null, list.map(shownLen)), best = null;
       for (var cols = 1; cols <= list.length; cols++) {
-        var rows = Math.ceil(list.length / cols), sc = Math.min((c.cw - cols * 130) / (cols * maxShown), (c.ch - rows * 110) / (rows * H));
+        var rows = Math.ceil(list.length / cols), sc = Math.min((c.cw - cols * 170) / (cols * maxShown), (c.ch - rows * 110) / (rows * H));
         if (!best || sc > best.s) best = { s: sc, cols: cols, rows: rows };
       }
       var s = best.s; if (!(s > 0)) return; lastScale = s;
       var cellW = c.cw / best.cols, cellH = c.ch / best.rows;
       list.forEach(function (run, i) {
         var col = i % best.cols, row = Math.floor(i / best.cols), h = H * s;
-        drawRun(ctx, run, col * cellW + 90 + (cellW - 130 - maxShown * s) / 2, row * cellH + 30 + h + (cellH - 110 - h) / 2, s);
+        drawRun(ctx, run, col * cellW + 90 + (cellW - 170 - maxShown * s) / 2, row * cellH + 30 + h + (cellH - 110 - h) / 2, s);
       });
       canvas.setAttribute('aria-label', 'Distraction marker elevation for ' + list.map(function (r) { return r.name; }).join(', '));
     }
@@ -2867,33 +2893,44 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     function shownLen(r) { return runBays(r) ? r.len : Math.min(r.len, 240); }
     function runTop(r) { return runBays(r) ? L.markers.curb + L.markers.glassH : L.markers.glassH; }
     var GLASS = '#d9ecf7', DARK_MARK = '#262626', SEAM = '#6f7b84', WALL = '#cfc9bf', HW = '#d6d9dc', WARN = '#d0342c';
+    // A storefront elevation drawn from its frame: curb, frame (jambs, head, sill and mullions show as the frame color around the glass), butt seams, doors and hardware.
+    // x0 and floor are where the frame's outside left edge meets the floor, in pixels; s is pixels per inch.
+    function drawFrame(ctx, fr, K, x0, floor, s, shown, labels) {
+      var Y = function (inch) { return floor - inch * s; };
+      ctx.lineWidth = .75; ctx.strokeStyle = INK2;
+      var box = function (x, y0, bw, y1, fill) { ctx.fillStyle = fill; ctx.fillRect(x0 + x * s, Y(y1), bw * s, (y1 - y0) * s); ctx.strokeRect(x0 + x * s + .25, Y(y1) + .25, bw * s - .5, (y1 - y0) * s - .5); };
+      var FC = (FRAME_COLORS[K.fColor] || FRAME_COLORS.black)[1];
+      if (K.curb > 0) box(0, 0, shown, K.curb, WALL);
+      box(0, K.curb, shown, fr.top, FC);
+      fr.panes.forEach(function (p, i) {
+        if (p.door) box(p.x, 0, p.w, fr.top - K.fHead, FC);
+        if (p.gw > 0 && p.gy1 > p.gy0) box(p.gx, p.gy0, p.gw, p.gy1, K.glass || GLASS);
+        var q = fr.panes[i - 1];
+        if (p.seam && q && p.x > q.x + q.w) box(q.x + q.w, Math.max(p.gy0, q.gy0), p.x - q.x - q.w, Math.min(p.gy1, q.gy1), SEAM);
+      });
+      fr.panes.forEach(function (p) {
+        if (!p.door) return;
+        if (K.swing) {   // dashed lines meet at the hinge side
+          var hx = p.door.hinge === 'right' ? p.x + p.w : p.x, lx = p.door.hinge === 'right' ? p.x : p.x + p.w, ty = fr.top - K.fHead;
+          ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = '#55616b'; ctx.lineWidth = .9; ctx.beginPath();
+          ctx.moveTo(x0 + lx * s, Y(ty)); ctx.lineTo(x0 + hx * s, Y(ty / 2)); ctx.lineTo(x0 + lx * s, Y(0)); ctx.stroke(); ctx.restore();
+        }
+        var hw = hardware(p, K), hwc = K.fColor === 'clear' ? '#6c737a' : HW;
+        if (hw && hw.kind === 'lever') {
+          var lt = 0.75, ex = hw.cx + hw.dir * hw.len;
+          ctx.fillStyle = hwc; ctx.fillRect(x0 + Math.min(hw.cx, ex) * s, Y(hw.cy + lt / 2), hw.len * s, lt * s); ctx.strokeRect(x0 + Math.min(hw.cx, ex) * s, Y(hw.cy + lt / 2), hw.len * s, lt * s);
+          ctx.beginPath(); ctx.arc(x0 + hw.cx * s, Y(hw.cy), hw.r * s, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        } else if (hw) box(hw.x0, hw.y0, hw.x1 - hw.x0, hw.y1, hwc);
+      });
+      if (labels) fr.panes.forEach(function (p) { var nm = p.door ? p.name.replace(DOOR_WORDS, '').trim() : p.name; if (nm && p.gw > 0) txt(ctx, nm.toUpperCase(), x0 + (p.gx + p.gw / 2) * s, Y(p.gy1 - (p.gy1 - p.gy0) * 0.15), { size: 12, w: 500, color: INK2 }); });
+    }
     function drawRun(ctx, run, x0, floor, s) {
       var K = L.markers, ms = runMarks(run), fr = runFrame(run), shown = shownLen(run), hs = bands(), w = shown * s, h = runTop(run) * s, sw = slotW();
       var Y = function (inch) { return floor - inch * s; };
       ctx.lineWidth = .75; ctx.strokeStyle = INK2;
       var box = function (x, y0, bw, y1, fill) { ctx.fillStyle = fill; ctx.fillRect(x0 + x * s, Y(y1), bw * s, (y1 - y0) * s); ctx.strokeRect(x0 + x * s + .25, Y(y1) + .25, bw * s - .5, (y1 - y0) * s - .5); };
-      if (fr) {
-        // Storefront elevation: curb, frame (jambs, head, sill and mullions show as the frame color around the glass), butt seams, doors.
-        var FC = (FRAME_COLORS[K.fColor] || FRAME_COLORS.black)[1];
-        if (K.curb > 0) box(0, 0, shown, K.curb, WALL);
-        box(0, K.curb, shown, fr.top, FC);
-        fr.panes.forEach(function (p, i) {
-          if (p.door) box(p.x, 0, p.w, fr.top - K.fHead, FC);
-          if (p.gw > 0 && p.gy1 > p.gy0) box(p.gx, p.gy0, p.gw, p.gy1, GLASS);
-          var q = fr.panes[i - 1];
-          if (p.seam && q && p.x > q.x + q.w) box(q.x + q.w, Math.max(p.gy0, q.gy0), p.x - q.x - q.w, Math.min(p.gy1, q.gy1), SEAM);
-        });
-        fr.panes.forEach(function (p) {
-          if (!p.door) return;
-          if (K.swing) {   // dashed lines meet at the hinge side
-            var hx = p.door.hinge === 'right' ? p.x + p.w : p.x, lx = p.door.hinge === 'right' ? p.x : p.x + p.w, ty = fr.top - K.fHead;
-            ctx.save(); ctx.setLineDash([5, 4]); ctx.strokeStyle = '#55616b'; ctx.lineWidth = .9; ctx.beginPath();
-            ctx.moveTo(x0 + lx * s, Y(ty)); ctx.lineTo(x0 + hx * s, Y(ty / 2)); ctx.lineTo(x0 + lx * s, Y(0)); ctx.stroke(); ctx.restore();
-          }
-          var hw = hardware(p); if (hw) box(hw.x0, hw.y0, hw.x1 - hw.x0, hw.y1, K.fColor === 'clear' ? '#6c737a' : HW);
-        });
-        fr.panes.forEach(function (p) { var nm = p.door ? p.name.replace(DOOR_WORDS, '').trim() : p.name; if (nm && p.gw > 0) txt(ctx, nm.toUpperCase(), x0 + (p.gx + p.gw / 2) * s, Y(p.gy1 - (p.gy1 - p.gy0) * 0.15), { size: 12, w: 500, color: INK2 }); });
-      } else box(0, 0, shown, K.glassH, GLASS);
+      if (fr) drawFrame(ctx, fr, K, x0, floor, s, shown, true);
+      else box(0, 0, shown, K.glassH, K.glass || GLASS);
       ctx.strokeStyle = SINK2; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x0 - 70, floor + .5); ctx.lineTo(x0 + w + 20, floor + .5); ctx.stroke();
       txt(ctx, 'FLOOR', x0 - 40, floor + 14, { size: 10, color: SINK2 });
       hs.forEach(function (bh, bi) {
@@ -2919,20 +2956,29 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         dimLine(ctx, xd, floor, xd, floor - bh * s, fmtIn(bh));
       });
       if (fr) {
-        // Openings under the floor line, the overall frame below them, where the glass starts on the right, and the spacing in the first pane.
+        // Openings under the floor line, the overall frame below them, where the glass starts on the right, and the spacing in the panes.
         ctx.font = '400 11px "JetBrains Mono", ui-monospace, monospace';
         fr.panes.forEach(function (p) { var lab = fmtIn(p.w); dimLine(ctx, x0 + p.x * s, floor + 22, x0 + (p.x + p.w) * s, floor + 22, ctx.measureText(lab).width + 6 < p.w * s ? lab : '', 'below'); });
         dimLine(ctx, x0, floor + 52, x0 + w, floor + 52, fmtFt(run.len), 'below');
-        var gb = K.curb + K.fSill; if (gb > 0 && fr.panes.some(function (p) { return !p.door; })) dimLine(ctx, x0 + w + 22, floor, x0 + w + 22, Y(gb), fmtIn(gb));
+        var gb = K.curb + K.fSill; if (gb > 0 && fr.panes.some(function (p) { return !p.door; })) dimLine(ctx, x0 + w + 22, floor, x0 + w + 22, Y(gb), fmtIn(gb), 'right');
         if (hs.length && K.pattern !== 'solid') {
-          var yb = floor - hs[hs.length - 1] * s + 16, p0 = fr.panes[0], p1 = fr.panes[1], inP = function (pi) { return ms.filter(function (m) { return m.pane === pi; }); };
-          var a = inP(0), lastR = -1e9, gd = function (xa, xb) { if (xb - xa < 0.05) return; var r2 = smallDim(ctx, x0 + xa * s, x0 + xb * s, yb, fmtIn(xb - xa), lastR); if (r2) lastR = r2; };
-          if (a.length) gd(p0.gx, a[0].x + (sw - markFor(hs.length - 1, a[0].q).w) / 2);
-          if (a.length > 1) { if (K.gapBy === 'oc') gd(a[0].x + sw / 2, a[1].x + sw / 2); else gd(a[0].x + sw, a[1].x); }
-          // With an exact gap the leftover can sit on the right, so show that edge too when it differs.
-          var e0 = ms.panes[0]; if (a.length && e0 && Math.abs(e0.edge - e0.edgeR) > 0.01) { var aL = a[a.length - 1]; gd(aL.x + (sw + markFor(hs.length - 1, aL.q).w) / 2, p0.gx + p0.gw); }
-          // Across the seam only when it differs from the gap between marks (it does with end clearance or a wide seam).
-          if (p1 && p1.seam && a.length) { var b = inP(1); if (b.length && (a.length < 2 || Math.abs((b[0].x - a[a.length - 1].x) - (a[1].x - a[0].x)) > 0.01)) gd(a[a.length - 1].x + sw, b[0].x); }
+          // Spacing in each pane: glass edge to first mark, the gap, the right edge when it differs, and across a seam when that differs from the gap.
+          // A pane spaced exactly like one already dimensioned is skipped, so a row of matching panes shows its numbers once.
+          var tb = hs.length - 1, yb = floor - hs[tb] * s + 16, lastR = -1e9, seen = {}, inP = function (pi) { return ms.filter(function (m) { return m.pane === pi; }); };
+          var gd = function (xa, xb) { if (xb - xa < 0.05) return; var r2 = smallDim(ctx, x0 + xa * s, x0 + xb * s, yb, fmtIn(xb - xa), lastR); if (r2) lastR = r2; };
+          fr.panes.forEach(function (p, pi) {
+            var a = inP(pi), e = ms.panes[pi], nx = fr.panes[pi + 1], segs = []; if (!a.length) return;
+            var aL = a[a.length - 1];
+            segs.push([p.gx, a[0].x + (sw - markFor(tb, a[0].q).w) / 2]);
+            if (a.length > 1) segs.push(K.gapBy === 'oc' ? [a[0].x + sw / 2, a[1].x + sw / 2] : [a[0].x + sw, a[1].x]);
+            if (e && Math.abs(e.edge - e.edgeR) > 0.01) segs.push([aL.x + (sw + markFor(tb, aL.q).w) / 2, p.gx + p.gw]);
+            var key = segs.map(function (g) { return Math.round((g[1] - g[0]) * 64); }).join(',');
+            if (!seen[key]) { seen[key] = 1; segs.forEach(function (g) { gd(g[0], g[1]); }); }
+            if (nx && nx.seam) {
+              var b = inP(pi + 1), sk; if (!b.length || (a.length > 1 && Math.abs((b[0].x - aL.x) - (a[1].x - a[0].x)) <= 0.01)) return;
+              sk = 's' + Math.round((b[0].x - aL.x - sw) * 64); if (!seen[sk]) { seen[sk] = 1; gd(aL.x + sw, b[0].x); }
+            }
+          });
         }
       }
       txt(ctx, run.name + ' · ' + fmtFt(run.len) + (run.len > shown ? ' (first 20\'-0" shown)' : ''), x0 + w / 2, floor - h - 10, { size: 11.5, w: 500 });
@@ -2947,11 +2993,208 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       ctx.moveTo(x1, y); ctx.lineTo(x2, y); ctx.moveTo(x1, y - 3); ctx.lineTo(x1, y + 3); ctx.moveTo(x2, y - 3); ctx.lineTo(x2, y + 3); ctx.stroke(); ctx.restore();
       ctx.font = '400 9.5px "JetBrains Mono", ui-monospace, monospace';
       var tw2 = ctx.measureText(label).width, cx = Math.max((x1 + x2) / 2, x1 + tw2 / 2 - 2);
-      ctx.fillStyle = 'rgba(217,236,247,.92)'; ctx.fillRect(cx - tw2 / 2 - 2, y + 4, tw2 + 4, 11);
+      ctx.fillStyle = L.markers.glass || GLASS; ctx.globalAlpha = .92; ctx.fillRect(cx - tw2 / 2 - 2, y + 4, tw2 + 4, 11); ctx.globalAlpha = 1;
       txt(ctx, label, cx, y + 12.5, { size: 9.5, color: '#b0127a' });
       return cx + tw2 / 2 + 2;
     }
-    function draw() { if (L.job === 'mural') drawMural(); else if (L.job === 'film') drawFilm(); else drawMarkers(offTarget && offTarget.runs); }
+    // ---- Graphic tab: logos and graphics placed on a storefront or a wall, with the dimensions you choose ----
+    // Each elevation is glass (panes, doors and frame, built like a marker run) or a wall. Each graphic on it has its left edge x
+    // (inches from the elevation's left), its bottom edge y (inches above the floor), its width w (its height follows the art's shape) and a surface.
+    var GDIM = '#b0127a', gGeo = [], gDrag = null, gSnap = null, secondCache = typeof WeakMap === 'function' ? new WeakMap() : null;
+    function r8(v) { return Math.round(v * 8) / 8; }
+    function isWall(r) { return r.kind === 'wall'; }
+    function elevFrame(r) { return isWall(r) ? null : runFrame(r, L.graphic); }
+    function elevTop(r) { var G = L.graphic; return isWall(r) ? r.wallH : runBays(r) ? G.curb + G.glassH : G.glassH; }
+    function elevLen(r) { var f = elevFrame(r); return f ? f.len : r.len; }
+    function artOf(it) { return (L.graphic.graphics || []).filter(function (g) { return g.id === it.gid; })[0] || null; }
+    function itemH(it, g) { return g ? it.w * g.h / g.w : it.w; }
+    // What a graphic sits on: the glass of the pane under its center (or nearest it), a plain sheet of glass, or the wall.
+    function areaOf(r, fr, cx) {
+      if (isWall(r)) return { x0: 0, x1: r.len, y0: 0, y1: r.wallH, name: 'wall' };
+      if (!fr) return { x0: 0, x1: r.len, y0: 0, y1: L.graphic.glassH, name: 'glass' };
+      var best = null, bd = Infinity;
+      fr.panes.forEach(function (p, i) {
+        if (p.gw <= 0) return;
+        var d = cx < p.gx ? p.gx - cx : cx > p.gx + p.gw ? cx - p.gx - p.gw : 0;
+        if (d < bd) { bd = d; best = { x0: p.gx, x1: p.gx + p.gw, y0: p.gy0, y1: p.gy1, name: p.door ? 'door' : 'pane ' + (i + 1), door: !!p.door }; }
+      });
+      return best || { x0: 0, x1: fr.len, y0: 0, y1: fr.top, name: 'glass' };
+    }
+    // A new graphic goes on the first door (or the widest pane, or the wall), centered across it with its center about 60" up.
+    function placeNew(r, g) {
+      var fr = elevFrame(r), area;
+      if (fr) {
+        var ps = fr.panes.filter(function (p) { return p.gw > 0; }), p = ps.filter(function (q) { return q.door; })[0] || ps.reduce(function (a, b) { return !a || b.gw > a.gw ? b : a; }, null);
+        if (p) area = { x0: p.gx, x1: p.gx + p.gw, y0: p.gy0, y1: p.gy1 };
+      }
+      if (!area) area = areaOf(r, fr, r.len / 2);
+      var aw = area.x1 - area.x0, ah = area.y1 - area.y0, ratio = g.h / g.w;
+      var w = Math.max(1, r8(Math.min(isWall(r) ? 36 : 20, aw * 0.6, ah * 0.6 / ratio))), h = w * ratio;
+      var cy = Math.min(Math.max(60, area.y0 + h / 2), area.y1 - h / 2);
+      return { id: L.graphic.nextId++, gid: g.id, w: w, x: r8(area.x0 + (aw - w) / 2), y: r8(Math.max(0, cy - h / 2)), surface: 'first' };
+    }
+    // Second surface art sits behind the glass: tinted toward the glass color and a little see-through.
+    function secondImg(im, tint) {
+      var c = secondCache && secondCache.get(im);
+      if (c && c.tint === tint) return c.cv;
+      var cv = document.createElement('canvas'); cv.width = im.naturalWidth; cv.height = im.naturalHeight;
+      var g = cv.getContext('2d'); g.drawImage(im, 0, 0); g.globalCompositeOperation = 'source-atop'; g.globalAlpha = 0.3; g.fillStyle = tint; g.fillRect(0, 0, cv.width, cv.height);
+      if (secondCache) secondCache.set(im, { tint: tint, cv: cv });
+      return cv;
+    }
+    // A placement dimension, in magenta like the spacing on marker panes. Vertical ones put their label beside the line, on side 'left' or 'right'.
+    function gDim(ctx, x1, y1, x2, y2, label, side) {
+      var vert = Math.abs(x1 - x2) < 0.5;
+      if (vert ? Math.abs(y2 - y1) < 2 : Math.abs(x2 - x1) < 2) return;
+      ctx.save(); ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+      if (vert) { ctx.moveTo(x1 - 3.5, y1); ctx.lineTo(x1 + 3.5, y1); ctx.moveTo(x2 - 3.5, y2); ctx.lineTo(x2 + 3.5, y2); }
+      else { ctx.moveTo(x1, y1 - 3.5); ctx.lineTo(x1, y1 + 3.5); ctx.moveTo(x2, y2 - 3.5); ctx.lineTo(x2, y2 + 3.5); }
+      ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 3; ctx.stroke();   // a light halo keeps the line readable on brick or block
+      ctx.strokeStyle = GDIM; ctx.lineWidth = .9; ctx.stroke();
+      ctx.font = '500 10px "JetBrains Mono", ui-monospace, monospace';
+      var lw = ctx.measureText(label).width, cx, cy;
+      if (vert) { cy = (y1 + y2) / 2; cx = side === 'left' ? x1 - 6 - lw / 2 : x1 + 6 + lw / 2; }
+      else { cx = (x1 + x2) / 2; cy = y1 - 7 - (lw + 6 > Math.abs(x2 - x1) ? 10 : 0); }
+      ctx.fillStyle = 'rgba(255,255,255,.88)'; ctx.fillRect(cx - lw / 2 - 2, cy - 6.5, lw + 4, 12);
+      ctx.restore();
+      txt(ctx, label, cx, cy, { size: 10, w: 500, color: GDIM, base: 'middle' });
+    }
+    // Wall finishes, drawn at true size from the floor up: modular brick (7 5/8 x 2 1/4 with 3/8 joints, so three courses make 8"),
+    // 8 x 16 concrete block, and cast concrete with a few long, subtle hairline cracks.
+    var FINISHES = { paint: ['Painted wall', '#e9e4da'], brick: ['Brick', '#a4553a'], block: ['Cinder block', '#b9b6ae'], concrete: ['Concrete', '#bdbab3'] };
+    function wallColor(r) { return r.color || (FINISHES[r.finish] || FINISHES.paint)[1]; }
+    function shade(hex, f) {
+      var m = /^#?([0-9a-f]{6})$/i.exec(hex || ''), n = m ? parseInt(m[1], 16) : 0xcccccc;
+      var c = [n >> 16, (n >> 8) & 255, n & 255].map(function (v) { return Math.max(0, Math.min(255, Math.round(f >= 1 ? v + (255 - v) * (f - 1) : v * f))); });
+      return 'rgb(' + c.join(',') + ')';
+    }
+    function hash2(i, j) { var h = Math.sin(i * 127.1 + j * 311.7) * 43758.5453; return h - Math.floor(h); }
+    // Hairline cracks: about one per 25 sq ft, each a wandering line 2' to 5' long that thins toward its end and sometimes branches.
+    // They come from a fixed seed, so a wall looks the same every time it's drawn.
+    function drawCracks(ctx, len, top, x0, Y, s, base) {
+      var n = Math.max(1, Math.round(len * top / 3600)), k = 0;
+      ctx.save(); ctx.strokeStyle = shade(base, 0.68); ctx.globalAlpha = 0.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      var crack = function (x, y, ang, total, wid, depth) {
+        var steps = Math.max(3, Math.round(total / 3)), seg = total / steps;
+        for (var i = 0; i < steps; i++) {
+          var t = i / steps, r1 = hash2(++k, 7.3), r2 = hash2(k, 19.1);
+          ang += (r1 - 0.5) * 0.9;
+          var nx = x + Math.cos(ang) * seg * (0.6 + r2 * 0.8), ny = y + Math.sin(ang) * seg * (0.6 + r2 * 0.8);
+          ctx.lineWidth = Math.max(0.35, wid * (1 - t * 0.75)); ctx.beginPath(); ctx.moveTo(x0 + x * s, Y(y)); ctx.lineTo(x0 + nx * s, Y(ny)); ctx.stroke();
+          if (depth < 1 && hash2(k, 3.7) < 0.12) crack(nx, ny, ang + (hash2(k, 5.9) < 0.5 ? -1 : 1) * (0.5 + hash2(k, 8.1) * 0.6), total * (1 - t) * 0.5, wid * 0.6, depth + 1);
+          x = nx; y = ny;
+        }
+      };
+      for (var c = 0; c < n; c++) {
+        var sx = hash2(c, 1.1) * len, sy = hash2(c, 2.2) * top, a = hash2(c, 3.3) * Math.PI * 2, L0 = 24 + hash2(c, 4.4) * 36;
+        crack(sx, sy, a, L0, Math.max(0.5, 0.09 * s), 0);
+      }
+      ctx.restore();
+    }
+    function drawWall(ctx, r, x0, floor, s) {
+      var len = r.len, top = r.wallH, base = wallColor(r), fin = r.finish || 'paint', Y = function (inch) { return floor - inch * s; };
+      ctx.save(); ctx.fillStyle = base; ctx.fillRect(x0, Y(top), len * s, top * s);
+      ctx.beginPath(); ctx.rect(x0, Y(top), len * s, top * s); ctx.clip();
+      if (fin === 'brick' || fin === 'block') {
+        var uw = fin === 'brick' ? 8 : 16, uh = fin === 'brick' ? 8 / 3 : 8, jt = 0.375;
+        if (uh * s >= 2.5) {
+          ctx.fillStyle = fin === 'brick' ? shade(base, 1.55) : shade(base, 0.82); ctx.fillRect(x0, Y(top), len * s, top * s);   // mortar
+          for (var row = 0; row * uh < top; row++) {
+            var off = row % 2 ? uw / 2 : 0;
+            for (var col = -1; col * uw - off < len; col++) {
+              var bx = col * uw + off, by = row * uh, v = hash2(row, col);
+              ctx.fillStyle = shade(base, fin === 'brick' ? 0.88 + v * 0.24 : 0.96 + v * 0.08);
+              ctx.fillRect(x0 + bx * s, Y(by + uh - jt), (uw - jt) * s, (uh - jt) * s);
+            }
+          }
+        }
+      } else if (fin === 'concrete') {
+        drawCracks(ctx, len, top, x0, Y, s, base);
+      }
+      ctx.restore();
+      ctx.lineWidth = .75; ctx.strokeStyle = INK2; ctx.strokeRect(x0 + .25, Y(top) + .25, len * s - .5, top * s - .5);
+    }
+    // One elevation, or several (Shop drawing) in whichever grid of columns draws them biggest.
+    function drawGraphic(runIdx) {
+      var c = setupCanvas(), ctx = c.ctx, G = L.graphic, list = (runIdx || [G.sel]).map(function (i) { return G.runs[i] ? { r: G.runs[i], i: i } : null; }).filter(Boolean);
+      lastScale = NaN; if (!offTarget) gGeo = [];
+      if (!list.length && !runIdx && G.runs[0]) list = [{ r: G.runs[0], i: 0 }];
+      if (!list.length) { txt(ctx, runIdx && G.runs.length ? 'Pick at least one elevation' : 'Add an elevation in the left panel', c.cw / 2, c.ch / 2, { size: 13 }); return; }
+      syncLens(G);
+      var H = Math.max.apply(null, list.map(function (x) { return elevTop(x.r); })), W = Math.max.apply(null, list.map(function (x) { return elevLen(x.r); })), best = null;
+      for (var cols = 1; cols <= list.length; cols++) {
+        var rows = Math.ceil(list.length / cols), sc = Math.min((c.cw - cols * 190) / (cols * W), (c.ch - rows * 130) / (rows * H));
+        if (!best || sc > best.s) best = { s: sc, cols: cols, rows: rows };
+      }
+      var s = best.s; if (!(s > 0)) return; lastScale = s;
+      var cellW = c.cw / best.cols, cellH = c.ch / best.rows;
+      list.forEach(function (x, k) {
+        var col = k % best.cols, row = Math.floor(k / best.cols), h = H * s;
+        drawElev(ctx, x.r, x.i, col * cellW + 100 + (cellW - 190 - W * s) / 2, row * cellH + 46 + h + (cellH - 130 - h) / 2, s);
+      });
+      if (canvas && !offTarget) canvas.setAttribute('aria-label', 'Graphic mockup for ' + list.map(function (x) { return x.r.name; }).join(', '));
+    }
+    function drawElev(ctx, r, ri, x0, floor, s) {
+      var G = L.graphic, fr = elevFrame(r), len = elevLen(r), top = elevTop(r), w = len * s;
+      var Y = function (inch) { return floor - inch * s; };
+      ctx.lineWidth = .75; ctx.strokeStyle = INK2;
+      var box = function (x, y0, bw, y1, fill) { ctx.fillStyle = fill; ctx.fillRect(x0 + x * s, Y(y1), bw * s, (y1 - y0) * s); ctx.strokeRect(x0 + x * s + .25, Y(y1) + .25, bw * s - .5, (y1 - y0) * s - .5); };
+      if (fr) drawFrame(ctx, fr, G, x0, floor, s, len, false);
+      else if (isWall(r)) drawWall(ctx, r, x0, floor, s);
+      else box(0, 0, len, top, G.glass || GLASS);
+      ctx.strokeStyle = SINK2; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x0 - 70, floor + .5); ctx.lineTo(x0 + w + 20, floor + .5); ctx.stroke();
+      txt(ctx, 'FLOOR', x0 - 40, floor + 14, { size: 10, color: SINK2 });
+      if (gSnap && gSnap.ri === ri && !offTarget) {   // guide while a dragged graphic is snapped to the center of its glass or wall
+        ctx.save(); ctx.setLineDash([4, 4]); ctx.strokeStyle = GDIM; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x0 + gSnap.x * s, Y(gSnap.y1)); ctx.lineTo(x0 + gSnap.x * s, Y(gSnap.y0)); ctx.stroke(); ctx.restore();
+      }
+      (r.items || []).forEach(function (it) {
+        var g = artOf(it); if (!g) return;
+        var im = artImg(g), h = itemH(it, g), px = x0 + it.x * s, py = Y(it.y + h), pw = it.w * s, ph = h * s;
+        if (im) {
+          if (!isWall(r) && it.surface === 'second') { ctx.save(); ctx.globalAlpha = 0.78; ctx.drawImage(secondImg(im, G.glass || GLASS), px, py, pw, ph); ctx.restore(); }
+          else ctx.drawImage(im, px, py, pw, ph);
+        } else { ctx.save(); ctx.setLineDash([3, 3]); ctx.strokeStyle = INK; ctx.strokeRect(px, py, pw, ph); ctx.restore(); }
+        if (!noSel && !offTarget && G.isel === it.id && ri === G.sel) {
+          ctx.save(); ctx.setLineDash([4, 3]); ctx.strokeStyle = '#1f6feb'; ctx.lineWidth = 1.25; ctx.strokeRect(px - 3, py - 3, pw + 6, ph + 6); ctx.restore();
+        }
+        if (!offTarget) gGeo.push({ ri: ri, id: it.id, x: px, y: py, w: pw, h: ph, s: s });
+      });
+      // Pane openings and the overall length under the floor, where the glass starts, or the wall's height.
+      ctx.font = '400 11px "JetBrains Mono", ui-monospace, monospace';
+      if (fr) {
+        fr.panes.forEach(function (p) { var lab = fmtIn(p.w); dimLine(ctx, x0 + p.x * s, floor + 22, x0 + (p.x + p.w) * s, floor + 22, ctx.measureText(lab).width + 6 < p.w * s ? lab : '', 'below'); });
+        dimLine(ctx, x0, floor + 52, x0 + w, floor + 52, fmtFt(len), 'below');
+        var gb = G.curb + G.fSill; if (gb > 0 && fr.panes.some(function (p) { return !p.door; })) dimLine(ctx, x0 + w + 22, floor, x0 + w + 22, Y(gb), fmtIn(gb), 'right');
+      } else {
+        dimLine(ctx, x0, floor + 22, x0 + w, floor + 22, fmtFt(len), 'below');
+        dimLine(ctx, x0 - 24, floor, x0 - 24, Y(top), fmtFt(top));
+      }
+      (r.items || []).forEach(function (it) { graphicDims(ctx, r, fr, it, x0, floor, s); });
+      // The title sits above the elevation, and above any graphic's dimensions that reach past its top.
+      var ty = Y(top); (r.items || []).forEach(function (it) { var g = artOf(it); if (g) ty = Math.min(ty, Y(it.y + itemH(it, g)) - 30); });
+      txt(ctx, r.name + ' · ' + fmtFt(len), x0 + w / 2, ty - 10, { size: 11.5, w: 500 });
+    }
+    // The dimensions switched on under Dimensions: from the glass (or wall) edges and the width in a chain above the graphic,
+    // the bottom edge and height chained up its right side, and its center height on its left.
+    function graphicDims(ctx, r, fr, it, x0, floor, s) {
+      var D = L.graphic.dims || {}, g = artOf(it); if (!g) return;
+      var h = itemH(it, g), a = areaOf(r, fr, it.x + it.w / 2), Y = function (inch) { return floor - inch * s; };
+      var lx = x0 + it.x * s, rx = x0 + (it.x + it.w) * s, ty = Y(it.y + h), by = Y(it.y), yt = ty - 12;
+      if (D.edges) { gDim(ctx, x0 + a.x0 * s, yt, lx, yt, fmtIn(it.x - a.x0)); gDim(ctx, rx, yt, x0 + a.x1 * s, yt, fmtIn(a.x1 - it.x - it.w)); }
+      if (D.size) { gDim(ctx, lx, yt, rx, yt, fmtIn(it.w)); gDim(ctx, rx + 14, by, rx + 14, ty, fmtIn(h), 'right'); }
+      if (D.bottom) gDim(ctx, rx + 14, floor, rx + 14, by, fmtIn(it.y), 'right');
+      if (D.center) gDim(ctx, lx - 14, floor, lx - 14, Y(it.y + h / 2), fmtIn(it.y + h / 2), 'left');
+    }
+    function graphicAt(cx, cy) {
+      if (!canvas) return null;
+      var rc = canvas.getBoundingClientRect(), x = cx - rc.left, y = cy - rc.top;
+      for (var i = gGeo.length - 1; i >= 0; i--) { var b = gGeo[i]; if (x >= b.x - 3 && x <= b.x + b.w + 3 && y >= b.y - 3 && y <= b.y + b.h + 3) return b; }
+      return null;
+    }
+    function selElev() { var G = L.graphic; return G.runs[G.sel] || null; }
+    function selItem() { var r = selElev(), id = L.graphic.isel; return r && (r.items || []).filter(function (it) { return it.id === id; })[0] || null; }
+    function graphicCount() { return L.graphic.runs.reduce(function (t, r) { return t + (r.items || []).filter(artOf).length; }, 0); }
+    function draw() { if (L.job === 'mural') drawMural(); else if (L.job === 'film') drawFilm(); else if (L.job === 'graphic') drawGraphic(offTarget && offTarget.runs); else drawMarkers(offTarget && offTarget.runs); }
     // Draw one job into someone else's canvas (Shop drawing), w × h in points at r pixels per point. Returns real inches per point.
     function renderTo(cv, w, h, r, job, opts) {
       var keep = { canvas: canvas, job: L.job, geo: geo };
@@ -2961,6 +3204,22 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     }
 
     // ---- Panels ----
+    // The Frame section, for Markers or the Graphic tab: P is the job's key in L.
+    function frameSec(P) {
+      var K = L[P], what = P === 'graphic' ? 'elevation' : 'run';
+      return '<p class="hint" style="margin:0">For ' + what + 's with panes. Pane sizes are visible glass; a door\u2019s size is its opening.</p>' +
+        '<div class="row2">' + field('Frame height', P + '.glassH', 'in') + field('Curb / knee wall', P + '.curb', 'in') + '</div>' +
+        '<div class="row2">' + field('Jamb sightline', P + '.fJamb', 'in') + field('Mullion sightline', P + '.mull', 'in') + '</div>' +
+        '<div class="row2">' + field('Head sightline', P + '.fHead', 'in') + field('Sill sightline', P + '.fSill', 'in') + '</div>' +
+        field('Butt joint', P + '.seam', 'in') + '<p class="hint" style="margin:0">Sightline is the frame\u2019s visible face. Glass starts ' + esc(fmtIn(K.curb + K.fSill)) + ' AFF. Curb or knee wall is any base under the frame.</p>' +
+        selectF('Color', P + '.fColor', Object.keys(FRAME_COLORS).map(function (k) { return [k, FRAME_COLORS[k][0]]; })) + colorF('Glass tint', P + '.glass') +
+        '<div class="label" style="margin-top:4px">Doors</div>' +
+        selectF('Style', P + '.doorStyle', Object.keys(DOORS).map(function (k) { return [k, DOORS[k].label]; })) + '<div class="row2">' + field('Top rail', P + '.doorTop', 'in') + field('Bottom rail', P + '.doorBottom', 'in') + '</div>' +
+        selectF('Hardware', P + '.hw', [['pull', 'Pull'], ['lever', 'Lever handle'], ['push', 'Push bar'], ['panic', 'Exit device (panic)'], ['none', 'None']]) +
+        (K.hw === 'pull' ? '<div class="row2">' + field('Height to top, AFF', P + '.hwH', 'in') + field('Pull length', P + '.hwLen', 'in') + '</div>' : K.hw === 'lever' ? field('Height to center, AFF', P + '.lvH', 'in') : K.hw !== 'none' ? field('Height to top, AFF', P + '.hwH', 'in') : '') +
+        selectF('Swing', P + '.swing', [['true', 'Show on drawing'], ['false', 'Hide']]) +
+        '<p class="hint" style="margin:0">Add doors with <b>+ Door</b> under ' + (P === 'graphic' ? 'an elevation' : 'a run') + '\u2019s panes; each door can take its own style and hinge side there. Style here is the default.</p>';
+    }
     function field(label, path, kind, extra) {
       var v = get(path), shown = kind === 'len' ? fmtFt(v) : kind === 'in' ? fmtIn(v) : v;
       return '<label class="field">' + label + '<input type="text" data-k="' + path + '" data-kind="' + kind + '" value="' + esc(shown) + '"' + (extra || '') + '></label>';
@@ -2994,12 +3253,13 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       });
       return '<div class="ed-out spacing">' + out.join('<br>') + '</div>';
     }
-    function fromMeasureCount() { return L.job === 'film' ? measuredLengths('film').length + measuredRects('film').length : measuredLengths('markers').length; }
+    function fromMeasureCount() { return L.job === 'graphic' ? 0 : L.job === 'film' ? measuredLengths('film').length + measuredRects('film').length : measuredLengths('markers').length; }
 
     // Panes for the selected run, left to right: width, type and the joint to the next pane, or the typed text.
     var paneTyped = false;
-    function paneBuilder(r) {
-      var list = paneList(r), fr = runFrame(r), dflt = DOORS[L.markers.doorStyle] ? L.markers.doorStyle : 'medium';
+    function paneBuilder(r, K) {
+      K = K || L.markers;
+      var list = paneList(r), fr = runFrame(r, K), dflt = DOORS[K.doorStyle] ? K.doorStyle : 'medium';
       var fit = fitMode(r), modeSel = '<label class="pb-mode">Run length<select data-pmode="1" aria-label="Run length"><option value="fit"' + (fit ? ' selected' : '') + '>Subtractive: fixed length</option><option value="add"' + (fit ? '' : ' selected') + '>Additive: grows with panes</option></select></label>';
       var head = modeSel + '<div class="pb-head"><span>Panes, left to right</span>' + (list.length || paneTyped ? '<button type="button" class="linkish" data-ptype="1">' + (paneTyped ? 'Use builder' : 'Type instead') + '</button>' : '') + '</div>';
       if (paneTyped) return '<div class="pb">' + head + '<input type="text" data-f="panes" value="' + esc(r.panes || '') + '" placeholder="34.5, 34.5 | 36 Door | 8" aria-label="Panes, left to right"><p class="hint" style="margin:0">Commas are butt joints, <b>|</b> is a mullion, <b>3@48</b> is three 48" panes, <b>*</b> fills the rest of the run. Add <b>Door</b>, its style (<b>narrow</b>, <b>medium</b>, <b>wide</b>, <b>all glass</b>) and <b>hinge right</b> to a pane\u2019s name.</p></div>';
@@ -3008,6 +3268,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         if (i) j = '<button type="button" class="pb-joint ' + p.joint + '" data-pj="' + i + '" title="Click to switch between a butt joint and a mullion">' + (p.joint === 'mull' ? 'Mullion' : 'Butt joint') + '</button>';
         var row = '<div class="pb-row"><input type="text" data-pw="' + i + '" value="' + esc(pp.type === 'fill' ? fmtIn(fw) : fmtIn(p.w)) + '"' + (pp.type === 'fill' ? ' class="fill" title="Fills what the run\u2019s length leaves. Type a width to fix it."' : '') + ' aria-label="Pane ' + (i + 1) + ' width">' +
           '<select data-pt="' + i + '" aria-label="Pane ' + (i + 1) + ' type"><option value="glass"' + (pp.type === 'glass' ? ' selected' : '') + '>Glass</option><option value="door"' + (pp.type === 'door' ? ' selected' : '') + '>Door</option>' + (fit || pp.type === 'fill' ? '<option value="fill"' + (pp.type === 'fill' ? ' selected' : '') + '>Fill rest</option>' : '') + '</select>' +
+          '<button type="button" class="pb-dup" data-pdup="' + i + '" title="Copy this pane" aria-label="Copy pane ' + (i + 1) + '"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3.5" y="3.5" width="7" height="7" rx="1"/><path d="M8.5 1.5h-6a1 1 0 0 0-1 1v6"/></svg></button>' +
           '<button type="button" class="pb-del" data-pdel="' + i + '" aria-label="Remove pane ' + (i + 1) + '">×</button></div>';
         if (pp.type === 'door') row += '<div class="pb-row door"><select data-ps="' + i + '" aria-label="Door style">' + Object.keys(DOORS).map(function (k) { return '<option value="' + k + '"' + ((pp.style || dflt) === k ? ' selected' : '') + '>' + esc(DOORS[k].short) + '</option>'; }).join('') + '</select>' +
           '<select data-ph="' + i + '" aria-label="Hinge side"><option value="left"' + (pp.hinge === 'left' ? ' selected' : '') + '>Hinge left</option><option value="right"' + (pp.hinge === 'right' ? ' selected' : '') + '>Hinge right</option></select></div>';
@@ -3017,8 +3278,8 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         (list.length ? '' : '<p class="hint" style="margin:0">Optional. Add the glass left to right to see the frame and space marks on each pane.</p>') + '</div>';
     }
     function tools() {
-      var J = [['mural', 'Mural', 'Wall mural tiling'], ['film', 'Film', 'Privacy film'], ['markers', 'Markers', 'Distraction markers']];
-      toolsEl.classList.remove('grid5', 'grid8');
+      var J = [['graphic', 'Graphic', 'Graphics on glass or a wall'], ['mural', 'Mural', 'Wall mural tiling'], ['film', 'Film', 'Privacy film'], ['markers', 'Markers', 'Distraction markers']];
+      toolsEl.classList.remove('grid5', 'grid8'); toolsEl.classList.add('grid4');
       toolsEl.innerHTML = J.map(function (j) { return '<button type="button" class="tool txt' + (L.job === j[0] ? ' on' : '') + '" data-job="' + j[0] + '" title="' + j[2] + '" aria-pressed="' + (L.job === j[0]) + '">' + j[1] + '</button>'; }).join('');
     }
     function left() {
@@ -3042,6 +3303,18 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
             '<div class="ed-nums"><label>W<input type="text" data-f="w" value="' + esc(fmtIn(p.w)) + '"></label><label>H<input type="text" data-f="h" value="' + esc(fmtIn(p.h)) + '"></label><label>Qty<input type="text" data-f="qty" value="' + p.qty + '"></label></div>' +
             '<div class="ed-out">' + (filmByLf() ? num(p.w * p.qty / 12) + ' LF' : num(p.w * p.h * p.qty / 144) + ' sq ft') + ' · ' + esc(dropsText(r, p.qty)) + ' · ' + num(r.lf * p.qty) + ' ft of roll</div></div>';
         }).join('') + '</div><div class="row" style="margin-top:8px"><button type="button" class="btn" data-addrow="1">+ Add pane</button>' + (fromMeasureCount() ? '<button type="button" class="btn" data-frommeasure="1">Add from Measure</button>' : '') + '</div></div>';
+      } else if (L.job === 'graphic') {
+        var G = L.graphic, gc = graphicCount(); syncLens(G);
+        h += '<div class="block"><div class="label">Graphic mockup</div><div class="readout">' + gc + ' graphic' + (gc === 1 ? '' : 's') + '</div><p class="hint">On ' + G.runs.length + ' elevation' + (G.runs.length === 1 ? '' : 's') + ', glass or wall. Place logos and graphics, then open as a shop drawing.</p></div>';
+        h += '<div class="block"><div class="label">Elevations (24\', 98\'-5", or inches)</div><div class="list">' + G.runs.map(function (r, i) {
+          var on = i === G.sel, fr = isWall(r) ? null : runFrame(r, G), bays = fr && !fr.fit;
+          var tv = isWall(r) ? r.finish || 'paint' : 'glass';
+          var kind = '<label>Type<select data-gkind="' + i + '" aria-label="Elevation type"><option value="glass"' + (tv === 'glass' ? ' selected' : '') + '>Glass</option>' + Object.keys(FINISHES).map(function (k) { return '<option value="' + k + '"' + (tv === k ? ' selected' : '') + '>' + FINISHES[k][0] + '</option>'; }).join('') + '</select></label>';
+          return '<div class="ed' + (on ? ' sel' : '') + '" data-row="' + i + '"><div class="ed-top"><span class="chip" style="background:var(--' + (isWall(r) ? 'orange' : 'blue') + ')"></span><input type="text" data-f="name" value="' + esc(r.name) + '" aria-label="Elevation name"><button type="button" data-delrow="' + i + '" aria-label="Delete ' + esc(r.name) + '">×</button></div>' +
+            (isWall(r) ? '<div class="ed-nums one">' + kind + '</div><div class="ed-nums" style="grid-template-columns: repeat(2, minmax(0, 1fr))"><label>Width<input type="text" data-f="len" value="' + esc(fmtFt(r.len)) + '"></label><label>Height<input type="text" data-f="wallH" value="' + esc(fmtFt(r.wallH)) + '"></label></div>'
+              : '<div class="ed-nums">' + kind + '<label>Length<input type="text" data-f="len" value="' + esc(fmtFt(r.len)) + '"' + (bays ? ' disabled title="Set by the panes"' : '') + '></label></div>' +
+                (on ? paneBuilder(r, G) : fr ? '<div class="ed-out">' + esc(r.panes) + '</div>' : '')) + '</div>';
+        }).join('') + '</div><div class="row" style="margin-top:8px"><button type="button" class="btn" data-addrow="1">+ Add elevation</button></div></div>';
       } else {
         var mt = markerTotals();
         h += '<div class="block"><div class="label">Distraction markers · ' + mt.nb + ' band' + (mt.nb === 1 ? '' : 's') + '</div><div class="readout">' + num(Math.ceil(mt.lf), 0) + ' LF</div><p class="hint">' + num(mt.runLen / 12) + ' ft of glass' + (L.markers.pattern !== 'solid' ? ', ' + num(mt.pieces, 0) + ' pieces' : '') + '</p></div>';
@@ -3108,6 +3381,30 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
           '<label class="chk"><input type="checkbox" data-filmmarks="1"' + (F2.marks ? ' checked' : '') + '> Strip labels and glass-edge marks in bleed</label>' +
           '<p class="hint" style="margin:0">One true-size page per strip, bleed included. ' + (F2.look === 'gradient' ? 'The gradient runs bottom to top across the whole pane, so strips line up.' : 'Frost prints as grayscale: black is solid frost, white is clear. Map it to white ink or your frost layer in the RIP.') + ' Panes with a quantity say how many to print.</p>' +
           '<div class="row"><button type="button" class="btn" data-lact="copy">Copy cut list</button><button type="button" class="btn" data-lact="csv" data-dl>CSV</button></div>' + (L.note ? '<p class="ok">' + esc(L.note) + '</p>' : '') + '<textarea id="lay-copy" hidden readonly class="copybox"></textarea>');
+      } else if (L.job === 'graphic') {
+        var G = L.graphic, er = selElev(), efr = er && elevFrame(er);
+        var gh = (G.graphics.length ? '<div class="list" style="margin-top:0">' + G.graphics.map(function (g) { return '<div class="item ro"><span class="chip art" style="--art:url(' + g.url + ')"></span><span>' + esc(g.name) + '</span><b><button type="button" class="linkish" data-gplace="' + g.id + '"' + (er ? '' : ' disabled') + '>Place</button></b><button type="button" data-gdelart="' + g.id + '" aria-label="Remove ' + esc(g.name) + '">×</button></div>'; }).join('') + '</div>' : '') +
+          '<div class="row"><label class="btn strong" for="graphic-art">Upload graphics</label><input type="file" id="graphic-art" accept="image/png,image/svg+xml,.svg,.png" multiple hidden></div>' +
+          '<p class="hint" style="margin:0">PNG or SVG. Each upload is placed on the selected elevation; <b>Place</b> adds another copy.</p>';
+        h += lsec('g_art', 'Graphics', gh);
+        if (er) {
+          var items = (er.items || []).filter(artOf);
+          var ih = items.length ? items.map(function (it) {
+            var g = artOf(it), a = areaOf(er, efr, it.x + it.w / 2), on = G.isel === it.id, gid = it.id;
+            var gf = function (label, f, v) { return '<label class="field">' + label + '<input type="text" data-gi="' + gid + '" data-gf="' + f + '" value="' + esc(v) + '"></label>'; };
+            return '<div class="gitem' + (on ? ' sel' : '') + '" data-gitem="' + gid + '"><div class="gitem-top"><span class="chip art" style="--art:url(' + g.url + ')"></span><span>' + esc(g.name) + '</span><span class="hint">on ' + a.name + '</span><button type="button" data-gdel="' + gid + '" aria-label="Remove ' + esc(g.name) + ' from ' + esc(er.name) + '">×</button></div>' +
+              '<div class="row2">' + gf('Width', 'w', fmtIn(it.w)) + gf('Height', 'h', fmtIn(itemH(it, g))) + '</div>' +
+              '<div class="row2">' + gf('From left edge', 'x', fmtIn(it.x - a.x0)) + gf('Bottom, AFF', 'y', fmtIn(it.y)) + '</div>' +
+              (isWall(er) ? '' : '<label class="field">Surface<select data-gi="' + gid + '" data-gf="surface"><option value="first"' + (it.surface !== 'second' ? ' selected' : '') + '>First surface (on the glass)</option><option value="second"' + (it.surface === 'second' ? ' selected' : '') + '>Second surface (behind the glass)</option></select></label>') +
+              '<div class="row"><button type="button" class="btn" data-gcenter="' + gid + '">Center across ' + (a.name === 'door' ? 'the door' : a.name === 'wall' ? 'the wall' : a.name === 'glass' ? 'the glass' : a.name) + '</button></div></div>';
+          }).join('') : '<p class="hint" style="margin:0">No graphics here yet. Upload one above, or <b>Place</b> one from the list.</p>';
+          ih += '<p class="hint" style="margin:0">Drag a graphic on the drawing to move it; it snaps to the center of its glass or wall. From left edge is to the edge of the glass ' + (isWall(er) ? 'or wall ' : '') + 'it sits on. Width and height keep its shape.</p>';
+          h += lsec('g_items', 'On ' + esc(er.name), ih);
+        }
+        var DT = [['size', 'Size'], ['bottom', 'Bottom AFF'], ['center', 'Center AFF'], ['edges', 'From edges']];
+        h += lsec('g_dims', 'Dimensions', '<div class="tog">' + DT.map(function (d) { var v = !!(G.dims || {})[d[0]]; return '<button type="button" class="btn" data-gdim="' + d[0] + '" aria-pressed="' + v + '">' + d[1] + '</button>'; }).join('') + '</div><p class="hint" style="margin:0">Shown for every graphic, here and on the shop drawing. AFF is above finished floor.</p>');
+        if (er && isWall(er)) { if (!er.color) er.color = wallColor(er); h += lsec('g_wall', 'Wall', colorF((FINISHES[er.finish] || FINISHES.paint)[0] + ' color', 'graphic.runs.' + G.sel + '.color') + '<p class="hint" style="margin:0">Change the finish in the elevation\u2019s Type menu. Brick and block are drawn at true size, coursed from the floor.</p>'); }
+        if (G.runs.some(function (r) { return !isWall(r); })) h += lsec('g_frame', 'Frame', frameSec('graphic'));
       } else {
         var K = L.markers, mt = markerTotals();
         var bnd = '<label class="field">Band heights, bottom edge AFF<input type="text" data-k="markers.bands" data-kind="raw" value="' + esc(K.bands) + '"></label><p class="hint" style="margin:0">AFF is above finished floor. Separate with commas, e.g. 30, 60. Check local code and spec.</p>' +
@@ -3138,21 +3435,10 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         if (K.pattern !== 'solid') bnd += '<div class="row2">' + (anySize ? field(K.pattern === 'dots' && !K.perBand ? 'Dot size' : isArt() ? 'Graphic width' : K.perBand ? 'Mark width' : 'Square size', 'markers.size', 'in') : field('Tick width', 'markers.tickW', 'in')) + field((K.gapMode !== 'exact' && K.runs.some(runBays) ? 'Min ' : '') + (K.gapBy === 'oc' ? 'O.C.' : 'gap'), 'markers.gap', 'in') + '</div>' + (anySize && seqHas('tick') ? field('Tick width', 'markers.tickW', 'in') : '') + (isArt() ? '<p class="hint" style="margin:0">Each graphic keeps its own shape; its height follows the width. The band height is where each graphic’s bottom edge sits.</p>' : '');
         bnd += field('End clearance', 'markers.margin', 'in');
         var anyFrame = K.runs.some(runBays);
-        if (K.runs.some(function (r) { return !runBays(r); })) bnd += field('Glass height (preview)', 'markers.glassH', 'in');
+        if (K.runs.some(function (r) { return !runBays(r); })) bnd += field('Glass height (preview)', 'markers.glassH', 'in') + (anyFrame ? '' : colorF('Glass tint', 'markers.glass'));
         h += lsec('m_bands', 'Bands', bnd);
         // Storefront frame for runs typed as panes.
-        var fm = '<p class="hint" style="margin:0">For runs with panes. Pane sizes are visible glass; a door\u2019s size is its opening.</p>' +
-          '<div class="row2">' + field('Frame height', 'markers.glassH', 'in') + field('Curb / knee wall', 'markers.curb', 'in') + '</div>' +
-          '<div class="row2">' + field('Jamb sightline', 'markers.fJamb', 'in') + field('Mullion sightline', 'markers.mull', 'in') + '</div>' +
-          '<div class="row2">' + field('Head sightline', 'markers.fHead', 'in') + field('Sill sightline', 'markers.fSill', 'in') + '</div>' +
-          field('Butt joint', 'markers.seam', 'in') + '<p class="hint" style="margin:0">Sightline is the frame\u2019s visible face. Glass starts ' + esc(fmtIn(K.curb + K.fSill)) + ' AFF. Curb or knee wall is any base under the frame.</p>' +
-          selectF('Color', 'markers.fColor', Object.keys(FRAME_COLORS).map(function (k) { return [k, FRAME_COLORS[k][0]]; })) +
-          '<div class="label" style="margin-top:4px">Doors</div>' +
-          selectF('Style', 'markers.doorStyle', Object.keys(DOORS).map(function (k) { return [k, DOORS[k].label]; })) + '<div class="row2">' + field('Top rail', 'markers.doorTop', 'in') + field('Bottom rail', 'markers.doorBottom', 'in') + '</div>' +
-          selectF('Hardware', 'markers.hw', [['pull', 'Pull'], ['push', 'Push bar'], ['panic', 'Exit device (panic)'], ['none', 'None']]) +
-          (K.hw === 'pull' ? '<div class="row2">' + field('Height to top, AFF', 'markers.hwH', 'in') + field('Pull length', 'markers.hwLen', 'in') + '</div>' : K.hw !== 'none' ? field('Height to top, AFF', 'markers.hwH', 'in') : '') +
-          selectF('Swing', 'markers.swing', [['true', 'Show on drawing'], ['false', 'Hide']]) +
-          '<p class="hint" style="margin:0">Add doors with <b>+ Door</b> under a run\u2019s panes; each door can take its own style and hinge side there. Style here is the default.</p>';
+        var fm = frameSec('markers');
         if (anyFrame) h += lsec('m_frame', 'Frame', fm);
         h += lsec('m_cut', 'Cutting', rollSel(true) + field('Gutter', 'markers.spacing', 'in'));
         h += lsec('m_res', 'Results', '<dl class="kv"><dt>Glass</dt><dd>' + num(mt.runLen / 12) + ' ft</dd><dt>Bands</dt><dd>' + mt.nb + '</dd><dt>Marker length</dt><dd>' + num(mt.lf) + ' LF</dd>' + (K.pattern !== 'solid' ? '<dt>Pieces</dt><dd>' + num(mt.pieces, 0) + (mt.dark ? ' (' + num(mt.dark, 0) + ' dark)' : '') + '</dd>' : '') + '<dt>Across the roll</dt><dd>' + mt.lanes + ' ' + (K.pattern === 'solid' ? 'strips' : 'pieces') + '</dd><dt>Media used</dt><dd>' + num(Math.ceil(mt.rollFt * 10) / 10) + ' ft of ' + L.roll + '"</dd></dl><p class="hint" style="margin:0">Media used assumes pieces nest across the roll with the gutter above. Add a site-survey allowance before ordering.</p>');
@@ -3169,6 +3455,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     function status() {
       if (L.job === 'mural') { var m = muralPanels(); statusEl.textContent = 'Mural · ' + m.n + ' panels on ' + L.roll + '" · orange = overlap, light edge = bleed, dashed = wall'; }
       else if (L.job === 'film') { var ft = filmTotals(); statusEl.textContent = 'Privacy film · orange dashes are seams · ' + filmQty(ft) + ' · ' + num(ft.lf) + ' ft of ' + L.roll + '" roll'; }
+      else if (L.job === 'graphic') { var er2 = selElev(), si = selItem(); statusEl.textContent = 'Graphic mockup · ' + (er2 ? er2.name + ' · ' : '') + (si ? 'drag to move, or type sizes in the right panel' : 'click a graphic to select it, drag to move it'); }
       else statusEl.textContent = 'Distraction markers · click a run in the list to preview it · ' + num(Math.ceil(markerTotals().lf), 0) + ' LF';
     }
     function all() { tools(); left(); right(); draw(); status(); History.record(); }
@@ -3530,13 +3817,51 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     });
     stage.addEventListener('pointerup', function () { if (seamDrag) { seamDrag = null; all(); } });
 
+    // ---- Graphic tab: typed sizes, and dragging graphics on the drawing ----
+    function graphicEdit(el) {
+      var G = L.graphic, r = selElev(), id = Number(el.dataset.gi), it = r && (r.items || []).filter(function (x) { return x.id === id; })[0]; if (!it) return;
+      var g = artOf(it), f = el.dataset.gf, cx = it.x + it.w / 2;
+      if (f === 'surface') it.surface = el.value;
+      else {
+        var v = parseIn(el.value);
+        if (!(v >= 0) || ((f === 'w' || f === 'h') && !(v > 0))) { right(); return; }
+        // A new size keeps the graphic centered where it was, on the same bottom edge.
+        if (f === 'w' || f === 'h') { var nw = f === 'w' ? v : g ? v * g.w / g.h : v; it.w = r8(nw); it.x = r8(cx - it.w / 2); }
+        else if (f === 'x') it.x = r8(areaOf(r, elevFrame(r), cx).x0 + v);
+        else if (f === 'y') it.y = r8(v);
+      }
+      G.isel = it.id;
+      refocusAfter(rightEl, function (a) { return a.dataset && a.dataset.gf ? '[data-gi="' + a.dataset.gi + '"][data-gf="' + a.dataset.gf + '"]' : null; });
+    }
+    stage.addEventListener('pointerdown', function (e) {
+      if (mode !== 'layout' || L.job !== 'graphic' || e.button !== 0) return;
+      var G = L.graphic, hit = graphicAt(e.clientX, e.clientY);
+      if (!hit) { if (G.isel != null) { G.isel = null; right(); draw(); status(); } return; }
+      var r = G.runs[hit.ri], it = r && (r.items || []).filter(function (x) { return x.id === hit.id; })[0]; if (!it) return;
+      G.isel = it.id; gDrag = { it: it, r: r, ri: hit.ri, sx: e.clientX, sy: e.clientY, x: it.x, y: it.y, s: hit.s, moved: false };
+      stage.setPointerCapture(e.pointerId); e.preventDefault(); right(); draw(); status();
+    });
+    stage.addEventListener('pointermove', function (e) {
+      if (mode !== 'layout' || L.job !== 'graphic') return;
+      if (!gDrag) { stage.style.cursor = graphicAt(e.clientX, e.clientY) ? 'move' : ''; return; }
+      var d = gDrag, it = d.it, dx = (e.clientX - d.sx) / d.s, dy = -(e.clientY - d.sy) / d.s;
+      if (!d.moved && Math.abs(e.clientX - d.sx) + Math.abs(e.clientY - d.sy) < 3) return;
+      var nx = r8(d.x + dx), ny = Math.max(0, r8(d.y + dy)), a = areaOf(d.r, elevFrame(d.r), nx + it.w / 2), mid = (a.x0 + a.x1) / 2;
+      // Within 6 px of the center of its glass or wall, the graphic snaps to it.
+      gSnap = null; if (Math.abs(nx + it.w / 2 - mid) * d.s < 6) { nx = mid - it.w / 2; gSnap = { ri: d.ri, x: mid, y0: a.y0, y1: a.y1 }; }
+      it.x = nx; it.y = ny; d.moved = true; draw();
+    });
+    function endGraphicDrag() { if (!gDrag) return; var m = gDrag.moved; gDrag = null; gSnap = null; if (m) all(); else draw(); }
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (t) { stage.addEventListener(t, endGraphicDrag); });
+
     // ---- State for undo, autosave and .dim files ----
     function getState() { return JSON.parse(JSON.stringify(L, function (k, v) { return k === 'img' || k === 'imgBlob' || k === 'busy' || k === 'note' || k === 'graphics' ? undefined : v; })); }
     function setState(st, imgBlob) {
       if (!st) return;
       var keepImg = L.mural.img, keepBlob = L.mural.imgBlob, keepName = L.mural.imgName;
       if (st.job) L.job = st.job; if (st.roll) L.roll = st.roll; if (st.margin != null) L.margin = st.margin;
-      ['mural', 'film', 'markers', 'quote'].forEach(function (k) { if (st[k]) L[k] = Object.assign({}, L[k], JSON.parse(JSON.stringify(st[k]))); });
+      ['mural', 'film', 'markers', 'graphic', 'quote'].forEach(function (k) { if (st[k]) L[k] = Object.assign({}, L[k], JSON.parse(JSON.stringify(st[k]))); });
+      if (!Array.isArray(L.graphic.graphics)) L.graphic.graphics = [];
       L.mural.img = keepImg; L.mural.imgBlob = keepBlob; L.mural.imgName = keepName;
       if (imgBlob) { var im = new Image(); im.onload = function () { L.mural.img = im; L.mural.imgBlob = imgBlob; L.mural.imgName = imgBlob.dimName || (st.mural && st.mural.imgName) || 'image'; if (mode === 'layout') draw(); }; im.src = URL.createObjectURL(imgBlob); }
       else if (imgBlob === null) { L.mural.img = null; L.mural.imgBlob = null; L.mural.imgName = ''; }
@@ -3552,7 +3877,13 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         var f = el.files && el.files[0]; if (!f) return;
         var img = new Image(); img.onload = function () { L.mural.img = img; L.mural.imgName = f.name; L.mural.imgBlob = f; all(); Autosave.schedule(); }; img.onerror = function () { flash('Could not read that image.'); }; img.src = URL.createObjectURL(f); return;
       }
-      if (el.id === 'marker-art') { readGraphics(el.files); el.value = ''; return; }
+      if (el.id === 'marker-art') { readGraphics(el.files, function (got) { L.markers.graphics = L.markers.graphics.concat(got); if (L.markers.graphics.length) L.markers.pattern = 'graphic'; }); el.value = ''; return; }
+      if (el.id === 'graphic-art') {
+        // Each upload joins the list and is placed on the selected elevation.
+        readGraphics(el.files, function (got) { var G = L.graphic, r = selElev(); got.forEach(function (g) { g.id = G.nextId++; G.graphics.push(g); if (r) { r.items = r.items || []; var it = placeNew(r, g); r.items.push(it); G.isel = it.id; } }); });
+        el.value = ''; return;
+      }
+      if (el.dataset.gf) { graphicEdit(el); return; }
       if (el.dataset.measure) {
         var mv = el.value.split(':');
         if (mv[0] === 'w') L.mural.w = parseFloat(mv[1]); else if (mv[0] === 'r') { L.mural.w = parseFloat(mv[1]); L.mural.h = parseFloat(mv[2]); }
@@ -3566,7 +3897,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var kind = el.dataset.kind, v;
       if (kind === 'len' || kind === 'in') { v = parseIn(el.value); if (!(v >= 0) || (kind === 'len' && !(v > 0))) { el.value = kind === 'len' ? fmtFt(get(k)) : fmtIn(get(k)); return; } }
       else if (kind === 'money') { v = parseFloat(String(el.value).replace(/[$,\s]/g, '')); if (!(v >= 0)) { el.value = Number(get(k)).toFixed(2); return; } }
-      else if (kind === 'sel') { v = el.value; if (k === 'roll' || k === 'mural.angle' || k === 'mural.dpi' || k === 'markers.useIdx') v = Number(v); if (k === 'mural.balance' || k === 'film.balance' || k === 'markers.perBand' || k === 'markers.swing') v = v === 'true'; }
+      else if (kind === 'sel') { v = el.value; if (k === 'roll' || k === 'mural.angle' || k === 'mural.dpi' || k === 'markers.useIdx') v = Number(v); if (k === 'mural.balance' || k === 'film.balance' || k === 'markers.perBand' || k === 'markers.swing' || k === 'graphic.swing') v = v === 'true'; }
       else v = el.value;
       if (k === 'mural.overlap' && v >= printW()) v = printW() - 1;
       if (k === 'margin' && v > L.roll - 6) v = L.roll - 6;
@@ -3576,9 +3907,24 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       refocusAfter(rightEl, function (a) { return a.dataset && a.dataset.k ? '[data-k="' + a.dataset.k + '"]' : null; });
     });
     rightEl.addEventListener('input', function (e) { if (mode === 'layout' && e.target.dataset.kind === 'color') { set(e.target.dataset.k, e.target.value); draw(); } });
-    rightEl.addEventListener('keydown', function (e) { if (mode === 'layout' && e.key === 'Enter' && e.target.dataset.k) e.target.blur(); });
+    rightEl.addEventListener('keydown', function (e) { if (mode === 'layout' && e.key === 'Enter' && (e.target.dataset.k || e.target.dataset.gf)) e.target.blur(); });
     rightEl.addEventListener('click', function (e) {
       if (mode !== 'layout') return;
+      if (L.job === 'graphic') {
+        var G = L.graphic, er = selElev(), gb = e.target.closest('[data-gplace],[data-gdelart],[data-gdel],[data-gcenter],[data-gdim]');
+        if (gb) {
+          var gd = gb.dataset;
+          if (gd.gplace && er) { var pg = G.graphics.filter(function (g) { return g.id === Number(gd.gplace); })[0]; if (pg) { er.items = er.items || []; var ni = placeNew(er, pg); er.items.push(ni); G.isel = ni.id; } }
+          else if (gd.gdelart) { var aid = Number(gd.gdelart); G.graphics = G.graphics.filter(function (g) { return g.id !== aid; }); G.runs.forEach(function (r) { r.items = (r.items || []).filter(function (it) { return it.gid !== aid; }); }); Autosave.schedule(); }
+          else if (gd.gdel && er) { var did = Number(gd.gdel); er.items = (er.items || []).filter(function (it) { return it.id !== did; }); if (G.isel === did) G.isel = null; }
+          else if (gd.gcenter && er) { var cit = er.items.filter(function (it) { return it.id === Number(gd.gcenter); })[0]; if (cit) { var ca = areaOf(er, elevFrame(er), cit.x + cit.w / 2); cit.x = r8((ca.x0 + ca.x1 - cit.w) / 2); G.isel = cit.id; } }
+          else if (gd.gdim) { G.dims = G.dims || {}; G.dims[gd.gdim] = !G.dims[gd.gdim]; }
+          all(); return;
+        }
+        // Clicking a graphic's card (not its fields) selects it on the drawing.
+        var card = e.target.closest('[data-gitem]');
+        if (card && !e.target.closest('input, select, button, label')) { var cid = Number(card.dataset.gitem); if (G.isel !== cid) { G.isel = cid; rightEl.querySelectorAll('.gitem').forEach(function (x) { x.classList.toggle('sel', x === card); }); draw(); status(); } return; }
+      }
       var da = e.target.closest('[data-delart]');
       if (da) { L.markers.graphics.splice(Number(da.dataset.delart), 1); L.markers.useIdx = 0; if (!L.markers.graphics.length) L.markers.pattern = 'squares'; all(); Autosave.schedule(); return; }
       var sq = e.target.closest('[data-seqadd]');
@@ -3611,24 +3957,35 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         else artCutPdf(nr).then(function (b) { save(b, cutName('pdf')); }).catch(function (err) { flash('Could not make the PDF: ' + (err && err.message ? err.message : err)); });
       }
     });
-    function rows() { return L.job === 'film' ? L.film.panes : L.markers.runs; }
+    // The job whose list the left panel edits: film panes, marker runs, or Graphic tab elevations.
+    function FK() { return L.job === 'graphic' ? L.graphic : L.markers; }
+    function frameJob() { return L.job === 'markers' || L.job === 'graphic'; }
+    function rows() { return L.job === 'film' ? L.film.panes : FK().runs; }
     // Pane builder: change the selected run's pane list, write it back as text, and size the run from it.
     function editPanes(row, fn) {
-      var it = L.markers.runs[Number(row.dataset.row)]; if (!it) return;
+      var K = FK(), it = K.runs[Number(row.dataset.row)]; if (!it) return;
       var list = paneList(it); fn(list, it);
       it.panes = paneText(list);
-      var fr0 = runFrame(it); if (fr0 && !fr0.fit) it.len = fr0.len;
+      var fr0 = runFrame(it, K); if (fr0 && !fr0.fit) it.len = fr0.len;
     }
     leftEl.addEventListener('change', function (e) {
-      if (mode !== 'layout' || L.job !== 'markers' || !e.target.dataset.pmode) return;
-      var row = e.target.closest('[data-row]'), it = row && L.markers.runs[Number(row.dataset.row)]; if (!it) return;
+      if (mode !== 'layout' || L.job !== 'graphic' || e.target.dataset.gkind == null) return;
+      var r = L.graphic.runs[Number(e.target.dataset.gkind)]; if (!r) return;
+      // A wall finish brings its own color; pick another under Wall in the right panel.
+      var v = e.target.value; r.kind = v === 'glass' ? 'glass' : 'wall';
+      if (r.kind === 'wall') { if (!(r.wallH > 0)) r.wallH = 108; if (r.finish !== v) { r.finish = v; r.color = FINISHES[v] ? FINISHES[v][1] : FINISHES.paint[1]; } }
+      e.stopImmediatePropagation(); all();
+    });
+    leftEl.addEventListener('change', function (e) {
+      if (mode !== 'layout' || !frameJob() || !e.target.dataset.pmode) return;
+      var row = e.target.closest('[data-row]'), it = row && FK().runs[Number(row.dataset.row)]; if (!it) return;
       // Going additive fixes each Fill rest pane at its current width, so nothing moves; the length then follows the panes.
-      if (e.target.value === 'add') editPanes(row, function (list, r) { var fr1 = runFrame(r); list.forEach(function (p, i) { if (p.flex) { var fw = fr1 && fr1.panes[i] ? Math.round(fr1.panes[i].w * 8) / 8 : 0; p.flex = false; p.w = fw > 0 ? fw : 48; } }); r.fit = 'add'; });
+      if (e.target.value === 'add') editPanes(row, function (list, r) { var fr1 = runFrame(r, FK()); list.forEach(function (p, i) { if (p.flex) { var fw = fr1 && fr1.panes[i] ? Math.round(fr1.panes[i].w * 8) / 8 : 0; p.flex = false; p.w = fw > 0 ? fw : 48; } }); r.fit = 'add'; });
       else it.fit = 'fit';
       e.stopImmediatePropagation(); all();
     });
     leftEl.addEventListener('change', function (e) {
-      if (mode !== 'layout' || L.job !== 'markers') return;
+      if (mode !== 'layout' || !frameJob()) return;
       var el = e.target, row = el.closest('[data-row]'); if (!row) return;
       var d = el.dataset, i = Number(d.pw != null ? d.pw : d.pt != null ? d.pt : d.ps != null ? d.ps : d.ph);
       if (d.pw == null && d.pt == null && d.ps == null && d.ph == null) return;
@@ -3639,7 +3996,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         else if (d.pt != null) {
           if (el.value === 'fill') { p.flex = true; if (pp.type === 'door') p.name = pp.label; }
           else {
-            if (p.flex) { var fr1 = runFrame(it); p.w = fr1 && fr1.panes[i] && fr1.panes[i].w > 0 ? Math.round(fr1.panes[i].w * 8) / 8 : 48; p.flex = false; }
+            if (p.flex) { var fr1 = runFrame(it, FK()); p.w = fr1 && fr1.panes[i] && fr1.panes[i].w > 0 ? Math.round(fr1.panes[i].w * 8) / 8 : 48; p.flex = false; }
             p.name = paneName(el.value, pp.label, pp.style, pp.hinge);
           }
         }
@@ -3650,32 +4007,37 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       refocusAfter(leftEl, function (a) { var k = ['pw', 'pt', 'ps', 'ph'].filter(function (n) { return a.dataset && a.dataset[n] != null; })[0], r = a.closest && a.closest('[data-row]'); return k && r ? '[data-row="' + r.dataset.row + '"] [data-' + k + '="' + a.dataset[k] + '"]' : null; });
     });
     leftEl.addEventListener('click', function (e) {
-      if (mode !== 'layout' || L.job !== 'markers') return;
-      var b = e.target.closest('[data-pj],[data-pdel],[data-padd],[data-ptype]'); if (!b) return;
+      if (mode !== 'layout' || !frameJob()) return;
+      var b = e.target.closest('[data-pj],[data-pdel],[data-pdup],[data-padd],[data-ptype]'); if (!b) return;
       var row = b.closest('[data-row]'); if (!row) return;
       if (b.dataset.ptype) { paneTyped = !paneTyped; all(); return; }
+      var focusPane = null;
       editPanes(row, function (list, it) {
         if (b.dataset.pj) { var p = list[Number(b.dataset.pj)]; if (p) p.joint = p.joint === 'mull' ? 'seam' : 'mull'; }
         else if (b.dataset.pdel) list.splice(Number(b.dataset.pdel), 1);
+        // A copy goes right after its pane; a door is set off by a mullion, glass by a butt joint.
+        else if (b.dataset.pdup) { var k = Number(b.dataset.pdup), src = list[k]; if (src) { list.splice(k + 1, 0, { w: src.w, flex: src.flex, name: src.name, joint: doorOf(src.name) ? 'mull' : 'seam' }); focusPane = k + 1; } }
         else {
           var last = list[list.length - 1], door = b.dataset.padd === 'door';
           // Subtractive: new glass is Fill rest and shares what's left. Additive: the first glass pane takes the run's length less the jambs, and the run grows with each pane after.
-          var first = Math.round((it.len - 2 * L.markers.fJamb) * 8) / 8, fit = fitMode(it);
+          var first = Math.round((it.len - 2 * FK().fJamb) * 8) / 8, fit = fitMode(it);
           if (!list.length && !it.fit) it.fit = 'fit';
           var np = door ? { w: 36, flex: false, name: 'Door' } : fit ? { w: 0, flex: true, name: '' } : !list.length ? { w: first > 1 ? first : 48, flex: false, name: '' } : { w: last && !last.flex && !doorOf(last.name) ? last.w : 48, flex: false, name: '' };
           np.joint = list.length ? (door || (last && doorOf(last.name)) ? 'mull' : 'seam') : null;
-          list.push(np);
+          list.push(np); focusPane = list.length - 1;
         }
         if (list[0]) list[0].joint = null;
       });
       all();
+      // Put the cursor in the new pane's width, ready for the next size.
+      if (focusPane != null) { var w = leftEl.querySelector('[data-row="' + row.dataset.row + '"] [data-pw="' + focusPane + '"]'); if (w) { w.focus(); w.select(); } }
     });
     leftEl.addEventListener('change', function (e) {
       if (mode !== 'layout') return;
       var row = e.target.closest('[data-row]'), f = e.target.dataset.f; if (!row || !f) return;
       var it = rows()[Number(row.dataset.row)]; if (!it) return;
       if (f === 'name') it.name = e.target.value || it.name;
-      else if (f === 'panes') { it.panes = e.target.value.trim(); var fr0 = runFrame(it); if (fr0 && !fr0.fit) it.len = fr0.len; }
+      else if (f === 'panes') { it.panes = e.target.value.trim(); var fr0 = runFrame(it, FK()); if (fr0 && !fr0.fit) it.len = fr0.len; }
       else if (f === 'qty') { var q = parseInt(e.target.value, 10); if (q > 0) it.qty = q; }
       else { var v = parseIn(e.target.value); if (v > 0) it[f] = v; }
       refocusAfter(leftEl, function (a) { var r = a.closest && a.closest('[data-row]'); return r && a.dataset.f ? '[data-row="' + r.dataset.row + '"] [data-f="' + a.dataset.f + '"]' : null; });
@@ -3683,17 +4045,18 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     leftEl.addEventListener('focusin', function (e) {
       if (mode !== 'layout' || L.job === 'mural') return;
       var row = e.target.closest('[data-row]'); if (!row) return;
-      var k3 = L.job === 'film' ? L.film : L.markers, i3 = Number(row.dataset.row);
+      var k3 = L.job === 'film' ? L.film : FK(), i3 = Number(row.dataset.row);
       if (k3.sel !== i3) { k3.sel = i3; leftEl.querySelectorAll('.ed').forEach(function (x) { x.classList.toggle('sel', x === row); }); draw(); }
     });
     leftEl.addEventListener('keydown', function (e) { if (mode === 'layout' && e.key === 'Enter' && (e.target.dataset.f || e.target.dataset.pw != null)) e.target.blur(); });
     leftEl.addEventListener('click', function (e) {
       if (mode !== 'layout') return;
       var d = e.target.closest('[data-delrow]');
-      if (d) { rows().splice(Number(d.dataset.delrow), 1); var key = L.job === 'film' ? L.film : L.markers; key.sel = Math.min(key.sel, Math.max(0, rows().length - 1)); all(); return; }
+      if (d) { rows().splice(Number(d.dataset.delrow), 1); var key = L.job === 'film' ? L.film : FK(); key.sel = Math.min(key.sel, Math.max(0, rows().length - 1)); all(); return; }
       if (e.target.closest('[data-addrow]')) {
         nextRow += 1;
         if (L.job === 'film') L.film.panes.push({ name: 'Pane ' + (L.film.panes.length + 1), w: 48, h: 96, qty: 1 });
+        else if (L.job === 'graphic') { L.graphic.runs.push({ name: 'Elevation ' + (L.graphic.runs.length + 1), kind: 'glass', len: 38, panes: '36 Door', fit: 'add', items: [] }); L.graphic.sel = L.graphic.runs.length - 1; }
         else L.markers.runs.push({ name: 'Run ' + (L.markers.runs.length + 1), len: 120, fit: 'fit' });
         all(); return;
       }
@@ -3709,12 +4072,14 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       }
       var row = e.target.closest('[data-row]');
       // Clicking a row selects it. Leave fields, buttons and dropdowns alone (redrawing would close an open dropdown), and only redraw for a new row.
-      if (row && !e.target.closest('input, button, select, label')) { var k2 = L.job === 'film' ? L.film : L.markers, ri = Number(row.dataset.row); if (k2.sel !== ri) { k2.sel = ri; left(); draw(); } }
+      if (row && !e.target.closest('input, button, select, label')) { var k2 = L.job === 'film' ? L.film : FK(), ri = Number(row.dataset.row); if (k2.sel !== ri) { k2.sel = ri; left(); draw(); } }
     });
 
     function setMarkerArt(list) { if (Array.isArray(list)) L.markers.graphics = list.filter(function (g) { return g && g.url; }); }
+    function setGraphicArt(list) { L.graphic.graphics = Array.isArray(list) ? list.filter(function (g) { return g && g.url && g.id != null; }) : []; }
     return { markerRuns: function () { syncLens(); return L.markers.runs.map(function (r) { return r.name + ' · ' + fmtFt(r.len); }); },
-      enter: all, draw: draw, renderTo: renderTo, tools: tools, markerArt: function () { return L.markers.graphics || []; }, setMarkerArt: setMarkerArt, left: left, right: right, status: status, getState: getState, setState: setState,
+      enter: all, draw: draw, renderTo: renderTo, tools: tools, markerArt: function () { return L.markers.graphics || []; }, setMarkerArt: setMarkerArt, graphicArt: function () { return L.graphic.graphics || []; }, setGraphicArt: setGraphicArt,
+      graphicRuns: function () { syncLens(L.graphic); return L.graphic.runs.map(function (r) { return r.name + ' · ' + fmtFt(elevLen(r)); }); }, left: left, right: right, status: status, getState: getState, setState: setState,
       imageBlob: function () { return L.mural.imgBlob || null; }, imageName: function () { return L.mural.imgName || ''; } };
   })();
 
@@ -3722,7 +4087,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
   // Everything on the sheet is in points (1/72"), y down. The same list of shapes draws the editor (SVG) and the PDF, so they match.
   var Shop = (function () {
     var PAPERS = { letter: [11, 8.5, 'Letter, 8.5 × 11'], tabloid: [17, 11, 'Tabloid, 11 × 17'], archc: [24, 18, 'Arch C, 18 × 24'], archd: [36, 24, 'Arch D, 24 × 36'] };
-    var SOURCES = { mural: 'Mural layout', film: 'Privacy film layout', markers: 'Distraction marker layout' };
+    var SOURCES = { mural: 'Mural layout', film: 'Privacy film layout', markers: 'Distraction marker layout', graphic: 'Graphic mockup' };
     var KIND = { text: 'Text', rect: 'Rectangle', ellipse: 'Ellipse', line: 'Line', arrow: 'Arrow', figure: 'Person' };
     var TOOLS = [['select', 'select', 'Select and move (V)'], ['hand', 'hand', 'Slide the drawing in its frame (H)'], ['text', 'text', 'Text box (T)'], ['rect', 'box', 'Rectangle (R)'], ['ellipse', 'ellipse', 'Ellipse (E)'], ['line', 'length', 'Line (L)'], ['arrow', 'arrow', 'Arrow (A)'], ['figure', 'person', 'Person for scale: click where their feet go (P)']];
     var KEYS = { v: 'select', h: 'hand', t: 'text', r: 'rect', e: 'ellipse', l: 'line', a: 'arrow', p: 'figure' };
@@ -3754,7 +4119,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     function today() { var d = new Date(); return (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear(); }
     function fresh() {
       return { paper: 'tabloid', orient: 'land', src: 'measure', fitTo: 'page', scale: 'fit', pan: { x: 0, y: 0 }, scaleBar: true, grid: true,
-        tb: { client: '', project: '', location: '', date: today(), title: '', sheet: 'SD-1' }, notes: [], nextId: 1, mrunsOff: [],
+        tb: { client: '', project: '', location: '', date: today(), title: '', sheet: 'SD-1' }, notes: [], nextId: 1, mrunsOff: [], grunsOff: [],
         style: { stroke: '#1c1c1c', fill: '', sw: 1.5, dash: false, color: '#1c1c1c', size: 14, bold: false, ital: false, font: 'sans', align: 'left', who: 'man' } };
     }
     function archLen(inch) { return ftIn(inch); }
@@ -3899,7 +4264,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var F = geom().frame, cw = Math.max(1, Math.round(F.w * ppp)), ch = Math.max(1, Math.round(F.h * ppp));
       var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
       var ctx = cv.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cw, ch);
-      if (S.src !== 'measure') return Promise.resolve({ canvas: cv, info: Lay.renderTo(cv, F.w, F.h, ppp, S.src, S.src === 'markers' ? { runs: shopRuns() } : null) });
+      if (S.src !== 'measure') return Promise.resolve({ canvas: cv, info: Lay.renderTo(cv, F.w, F.h, ppp, S.src, S.src === 'markers' ? { runs: shopRuns() } : S.src === 'graphic' ? { runs: shopElevs() } : null) });
       var r = region(); if (!r) return Promise.resolve({ canvas: cv, info: null, empty: true });
       var f = r.z * ppp, paint;
       if (M.src === 'pdf') paint = M.pdf.getPage(M.page).then(function (pg) { return pg.render({ canvasContext: ctx, viewport: pg.getViewport({ scale: f, offsetX: -r.x * f, offsetY: -r.y * f }) }).promise; });
@@ -3915,12 +4280,13 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         return { canvas: cv, info: r };
       });
     }
+    function shopElevs() { return Lay.graphicRuns().map(function (x, i) { return i; }).filter(function (i) { return (S.grunsOff || []).indexOf(i) < 0; }); }
     function shopRuns() { return Lay.markerRuns().map(function (x, i) { return i; }).filter(function (i) { return (S.mrunsOff || []).indexOf(i) < 0; }); }
     // Pixels per point, kept under what browsers allow for one canvas (Safari: about 16 million pixels).
     function sharpness(want, cap) { var F = geom().frame; return Math.min(want, Math.sqrt(cap / (F.w * F.h))); }
     function viewKey() {
       var F = geom().frame, r = region();
-      return JSON.stringify([S.src, S.grid, S.mrunsOff, F, r && [r.x, r.y, r.w, r.h].map(function (v) { return Math.round(v * 10); }), S.src === 'measure' ? [M.src, M.name, M.page, M.items.filter(function (it) { return it.page === M.page; }), M.scales[M.page]] : [Lay.getState(), Lay.imageName(), UNITS, Lay.markerArt().map(function (g) { return g.name + g.w; })]]);
+      return JSON.stringify([S.src, S.grid, S.mrunsOff, S.grunsOff, F, r && [r.x, r.y, r.w, r.h].map(function (v) { return Math.round(v * 10); }), S.src === 'measure' ? [M.src, M.name, M.page, M.items.filter(function (it) { return it.page === M.page; }), M.scales[M.page]] : [Lay.getState(), Lay.imageName(), UNITS, Lay.markerArt().map(function (g) { return g.name + g.w; }), Lay.graphicArt().map(function (g) { return g.id + g.name + g.w; })]]);
     }
     function ensureView() {
       var key = viewKey(); if (key === view.key) return;
@@ -4066,7 +4432,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
 
     // ---- Panels ----
     function tools() {
-      toolsEl.classList.remove('grid5'); toolsEl.classList.add('grid8');
+      toolsEl.classList.remove('grid5', 'grid4'); toolsEl.classList.add('grid8');
       toolsEl.innerHTML = TOOLS.map(function (t) { return toolBtn(t[1], t[0], t[2], tool === t[0]); }).join('');
       if (mode !== 'shop') return;
       var tc = leftEl.querySelector('.toolcard'); if (tc) tc.outerHTML = toolCard();
@@ -4131,6 +4497,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         dv += '<div class="row"><button type="button" class="btn" data-sact="center"' + (S.pan.x || S.pan.y ? '' : ' disabled') + '>Center drawing</button></div><p class="hint" style="margin:0">Hand tool (H) slides the drawing in its frame. Measurements show as in Measure.</p>';
       } else {
         dv += '<p class="hint" style="margin:0">Layout fills the frame. Change it in Layout.</p>';
+        if (S.src === 'graphic') dv += '<div class="label" style="margin-top:4px">Elevations shown</div>' + Lay.graphicRuns().map(function (nm, i) { return '<label class="chk"><input type="checkbox" data-grun="' + i + '"' + ((S.grunsOff || []).indexOf(i) < 0 ? ' checked' : '') + '> ' + esc(nm) + '</label>'; }).join('');
         if (S.src === 'markers') dv += '<div class="label" style="margin-top:4px">Glass runs shown</div>' + Lay.markerRuns().map(function (nm, i) { return '<label class="chk"><input type="checkbox" data-srun="' + i + '"' + ((S.mrunsOff || []).indexOf(i) < 0 ? ' checked' : '') + '> ' + esc(nm) + '</label>'; }).join('');
       }
       h += sec('sh_view', 'Drawing', dv);
@@ -4202,6 +4569,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var el = e.target, d = el.dataset;
       if (el.id === 'shop-logo') { readLogo(el.files && el.files[0]); el.value = ''; return; }
       if (d.stb) { History.record(); return; }
+      if (d.grun != null) { var gi2 = Number(d.grun); S.grunsOff = (S.grunsOff || []).filter(function (x) { return x !== gi2; }); if (!el.checked) S.grunsOff.push(gi2); all(); History.record(); return; }
       if (d.srun != null) { var ri = Number(d.srun); S.mrunsOff = (S.mrunsOff || []).filter(function (x) { return x !== ri; }); if (!el.checked) S.mrunsOff.push(ri); all(); History.record(); return; }
       if (d.sk) {
         S[d.sk] = el.type === 'checkbox' ? el.checked : el.value;
