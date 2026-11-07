@@ -84,6 +84,8 @@ Plain numbers are inches; `24'`, `2'-6"` and `3.2 m` work too. Roll widths: 48",
 | `vendor/pdfjs/` | Mozilla pdf.js 3.11.174, which draws the PDFs (Apache-2.0, license included) |
 | `vendor/pdf-lib/` | pdf-lib 1.17.1, which writes the marked-up and panel PDFs (MIT, license included) |
 | `favicon.svg` | Tab icon |
+| `apple-touch-icon.png`, `icon-192.png`, `icon-512.png` | App icons for Add to Dock / Home Screen and installed web apps |
+| `manifest.webmanifest` | Web app name, colors and icons for installing |
 | `_headers` | Security and caching headers for Cloudflare Pages |
 
 There's no build step and nothing to install.
