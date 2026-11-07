@@ -7,6 +7,10 @@
 <meta name="description" content="Open a floor plan or shop drawing, set its scale and take quick measurements in the browser.">
 <meta name="theme-color" content="#121212">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-title" content="DIM">
 <script>
   // Theme before first paint: saved choice, else the system setting.
   (function () { var t = ''; try { t = localStorage.getItem('dim-theme') || ''; } catch (e) {} if (t !== 'light' && t !== 'dark') t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; document.documentElement.setAttribute('data-theme', t); })();
