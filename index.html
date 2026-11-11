@@ -195,6 +195,15 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
 .item .sw { width: 14px; height: 14px; border: 1px solid var(--line); border-radius: 3px; padding: 0; flex: none; }
 .item .sw.on { outline: 2px solid var(--line); outline-offset: 1px; }
 .item .sw.auto { background: linear-gradient(135deg, var(--green) 0 33%, var(--blue) 33% 66%, var(--purple) 66%); }
+.sty { position: relative; }
+.item .sw.cust { background: conic-gradient(#e5484d, #f5d90a, #30a46c, #3e7bfa, #8e4ec6, #e93d82, #e5484d); position: relative; }
+.item .sw.cust[style*="--cc"] { background: var(--cc); }
+.item .sw.cust::after { content: "+"; position: absolute; inset: 0; display: grid; place-items: center; font: 700 10px/1 system-ui, sans-serif; color: #fff; text-shadow: 0 0 2px rgb(0 0 0 / .8); }
+.cpop { position: absolute; z-index: 20; top: calc(100% + 4px); right: 0; width: 196px; max-width: 100%; box-sizing: border-box; display: grid; gap: 8px; padding: 8px; background: var(--b07); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 6px 18px rgb(0 0 0 / .18); }
+.cpop .cgrid { display: grid; grid-template-columns: repeat(8, 18px); gap: 4px; }
+.cpop .sw { width: 18px; height: 18px; }
+.cpop .clab { font-size: 10.5px; color: var(--b01); margin-bottom: -4px; }
+.cpop .cwheel { width: 100%; height: 72px; padding: 0; border: 1px solid var(--line); border-radius: 4px; background: none; cursor: pointer; }
 .swpick { width: 22px; height: 17px; padding: 0; border: 1px solid var(--line); border-radius: 3px; background: none; flex: none; cursor: pointer; }
 .item .mini { font-size: 11px; color: var(--b00); background: var(--b07); border: 1px solid var(--b04); border-radius: 3px; padding: 1px 5px; }
 .item .mini:hover { color: var(--b00); background: var(--b08); }
@@ -298,6 +307,43 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
 .pb-mode select { font-size: 11px; min-width: 0; }
 .pb-row input.fill { font-style: italic; color: var(--b02); }
 .pb-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 10.5px; color: var(--b01); }
+.lp { min-height: 100%; display: flex; flex-direction: column; }
+.lp-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: flex-start; gap: 8px; padding: 12px 12px 10px; background: var(--b07); border-bottom: 1px solid var(--line); }
+.lp-head > div { flex: 1; min-width: 0; }
+.lp-title { font-size: 15px; font-weight: 700; color: var(--b00); overflow-wrap: anywhere; line-height: 1.25; }
+.lp-sub { font-size: 11.5px; color: var(--b01); margin-top: 3px; }
+.lp-tips { flex: none; width: 26px; height: 26px; display: grid; place-items: center; padding: 0; border-radius: 50%; border: 1px solid var(--line); background: var(--b07); color: var(--b01); cursor: pointer; }
+.lp-tips:hover { background: var(--b08); }
+.lp-tips[aria-pressed="true"] { background: var(--yellow); color: var(--on-yellow); border-color: var(--ink-hard); }
+.lp-body { flex: 1; }
+.lp:not(.tips) .hint:not(.keep) { display: none; }
+.rtabs { display: flex; margin: 10px 12px 0; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
+.rtabs button { flex: 1; min-width: 0; padding: 5px 4px; background: var(--b07); border: 0; border-left: 1px solid var(--line); color: var(--b01); font: inherit; font-size: 12px; cursor: pointer; }
+.rtabs button:first-child { border-left: 0; }
+.rtabs button:hover { background: var(--b08); }
+.rtabs button[aria-selected="true"] { background: var(--yellow); color: var(--on-yellow); font-weight: 700; }
+.rtab-body { padding-top: 10px; border-bottom: 1px solid var(--line); }
+.lp-group { padding: 12px 12px 4px; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--b01); }
+.lp-group + details { border-top: 1px solid var(--line); }
+.lp-bar { position: sticky; bottom: 0; z-index: 2; display: flex; gap: 4px; margin-top: auto; padding: 8px; background: var(--b07); border-top: 1px solid var(--line); }
+.lp-bar button { flex: 1; padding: 6px 4px; background: var(--b07); border: 1px solid var(--line); border-radius: 4px; color: var(--b00); font: inherit; font-size: 12px; cursor: pointer; }
+.lp-bar button:hover { background: var(--b08); }
+.lp-bar button[aria-pressed="true"] { background: var(--yellow); color: var(--on-yellow); border-color: var(--ink-hard); font-weight: 700; }
+summary .st { white-space: nowrap; }
+summary .sum { margin-left: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11.5px; font-weight: 400; color: var(--b01); }
+details[open] > summary .sum { display: none; }
+.dimtog { display: flex; flex-wrap: wrap; gap: 4px; }
+.dimb { width: 34px; height: 30px; display: grid; place-items: center; padding: 0; background: var(--b07); border: 1px solid var(--line); border-radius: 4px; color: var(--b01); cursor: pointer; }
+.dimb:hover { background: var(--b08); }
+.dimb[aria-pressed="true"] { background: var(--yellow); color: var(--on-yellow); border-color: var(--ink-hard); }
+.aseg { display: flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.aseg button { flex: 1; min-width: 0; padding: 4px; border: 0; border-left: 1px solid var(--line); background: var(--b07); color: var(--b01); font: inherit; font-size: 11.5px; cursor: pointer; }
+.aseg button:first-child { border-left: 0; }
+.aseg button:hover { background: var(--b08); }
+.aseg button[aria-pressed="true"] { background: var(--b00); color: var(--b09); }
+.for-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 11px; color: var(--b01); padding: 6px 8px; margin: 0 0 2px; border-left: 2px solid var(--blue); background: color-mix(in srgb, var(--blue) 8%, transparent); }
+.for-row b { color: var(--b00); font-weight: 600; }
+.for-row .linkish { font-size: 11px; white-space: nowrap; }
 .linkish { background: none; border: 0; padding: 0; font: inherit; color: var(--b01); text-decoration: underline; cursor: pointer; }
 .linkish:hover { color: var(--b00); }
 .pb-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 16px 14px; gap: 5px; align-items: center; }
@@ -748,6 +794,20 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       pdfjsReady.catch(function () { pdfjsReady = null; });
     }
     return pdfjsReady;
+  }
+
+  // The first page of a PDF drawn to a canvas. maxPx caps the long side and maxArea the pixel count (browsers refuse very large canvases).
+  // A transparent page keeps a logo's shape on glass; an opaque one is white, like paper.
+  function isPdfFile(f) { return !!f && (f.type === 'application/pdf' || /\.pdf$/i.test(f.name)); }
+  function pdfPageCanvas(file, maxPx, maxArea, transparent) {
+    return Promise.all([getPdfjs(), file.arrayBuffer()]).then(function (r) { return r[0].getDocument({ data: new Uint8Array(r[1]), isEvalSupported: false }).promise; }).then(function (pdf) {
+      return pdf.getPage(1).then(function (pg) {
+        var v1 = pg.getViewport({ scale: 1 }), k = Math.min(maxPx / Math.max(v1.width, v1.height), Math.sqrt(maxArea / (v1.width * v1.height))), vp = pg.getViewport({ scale: k }), c = document.createElement('canvas');
+        c.width = Math.max(1, Math.floor(vp.width)); c.height = Math.max(1, Math.floor(vp.height));
+        var ctx = c.getContext('2d'); if (!transparent) { ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, c.width, c.height); }
+        return pg.render({ canvasContext: ctx, viewport: vp, background: transparent ? 'rgba(0,0,0,0)' : '#ffffff' }).promise.then(function () { return { canvas: c, pages: pdf.numPages }; });
+      });
+    });
   }
 
   function resetDoc(name) {
@@ -2351,7 +2411,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     var ROLLS = [48, 54, 60, 61];
     var L = {
       job: 'graphic', roll: 54, margin: 6,
-      mural: { w: 288, h: 108, bleed: 1, overlap: 1, orient: 'vertical', balance: true, custom: null, marks: true, art: 'gradient', color: '#5b8fbf', g1: '#1f3b57', g2: '#8fd0c8', angle: 0, img: null, imgName: '', fit: 'cover', tileW: 24, dpi: 50 },
+      mural: { w: 288, h: 108, bleed: 1, overlap: 1, orient: 'vertical', balance: true, custom: null, marks: true, art: 'gradient', color: '#5b8fbf', g1: '#1f3b57', g2: '#8fd0c8', angle: 0, img: null, imgName: '', fit: 'cover', tileW: 24, dpi: 50, iw: 0, ix: 0, iy: 0 },
       film: { allow: 1, defH: 96, mode: 'auto', look: 'gradient', c1: '#ffffff', c2: '#9cc8e8', sel: 0, fA: 36, fB: 72, d1: 24, d2: 36, d3: 60, d4: 72, dual: 'frost', person: 'none', sill: 0, balance: true, marks: true, cover: 'full', bandH: 48, bandB: 24,
         curb: 0, fJamb: 2, fHead: 2, fSill: 2, mull: 2, seam: 0.375, fColor: 'black', doorStyle: 'medium', doorTop: 3.5, doorBottom: 10, hw: 'pull', hwH: 46, hwLen: 12, lvH: 38, swing: false, glass: '#d9ecf7',
         panes: [{ name: 'Conference 27-015', w: 60, h: 96, qty: 6 }, { name: 'Conference 27-016', w: 48, h: 96, qty: 4 }, { name: 'Office sidelite', w: 24, h: 96, qty: 6 }] },
@@ -2363,10 +2423,9 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         runs: [{ name: 'Front entrance', kind: 'glass', len: 78, panes: '36 Door | 36', fit: 'add', items: [] }, { name: 'Lobby wall', kind: 'wall', finish: 'paint', color: '#e9e4da', len: 144, wallH: 108, items: [] }] },
       quote: null, note: '', busy: false
     };
-    var open = { m_frame: true, l_size: true, l_roll: true, l_art: true, l_res: true, l_exp: false, f_roll: true, f_cover: true, f_look: false, f_frame: true, f_res: true, f_exp: false, m_bands: true, m_cut: true, m_res: true, m_exp: false };
+    var open = { l_res: true, l_exp: true, f_roll: false, f_cover: false, f_res: true, f_exp: true, m_cut: false, m_res: true, m_exp: true, g_dims: false };
     var canvas = null, nextRow = 100, geo = null, offTarget = null, lastScale = NaN, noSel = false;
     open.q_mural = open.q_film = open.q_markers = open.l_shop = true;
-    open.g_art = open.g_items = open.g_dims = open.g_wall = true;
     var PRICE_DEFAULTS = { mural: { rate: 9.5, basis: 'printed', install: 3, setup: 0, min: 150, rush: 25 }, film: { rate: 7.25, basis: 'glass', install: 2.5, setup: 0, min: 125, rush: 25 }, markers: { rate: 2.5, basis: 'lf', install: 1.25, setup: 25, min: 90, rush: 25 } };
     function loadPrices() {
       var q = JSON.parse(JSON.stringify(PRICE_DEFAULTS));
@@ -2433,8 +2492,17 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     function filmByLf() { return L.quote.film.basis === 'lf'; }
     function filmQty(t) { return filmByLf() ? num(t.run) + ' LF of glass' : num(t.net) + ' sq ft of ' + (isBand() ? 'film' : 'glass'); }
     // A film row is one size of glass (W x H x Qty), or a wall built out like a marker run: panes, mullions and doors in a frame.
-    // A built-out row's length is the frame's and its H is the frame's height above the curb; its frame settings are the Film job's.
-    function filmK(r) { return Object.assign({}, L.film, { glassH: r.h }); }
+    // A built-out row's length is the frame's and its H is the frame's height above the curb.
+    // Each row keeps its own Look and Frame settings (r.s). A new row starts from the selected row's; rows saved before that start from the Film job's.
+    var FILM_LOOK = ['look', 'c1', 'c2', 'fA', 'fB', 'dual', 'd1', 'd2', 'd3', 'd4', 'person', 'sill'];
+    var FILM_FRAME = ['curb', 'fJamb', 'mull', 'fHead', 'fSill', 'seam', 'fColor', 'glass', 'doorStyle', 'doorTop', 'doorBottom', 'hw', 'hwH', 'hwLen', 'lvH', 'swing'];
+    function rowSet(r) {
+      if (!r.s) r.s = {};
+      FILM_LOOK.concat(FILM_FRAME).forEach(function (k) { if (r.s[k] === undefined) r.s[k] = L.film[k]; });
+      return r.s;
+    }
+    function newRowSet() { var sp = L.film.panes[L.film.sel]; return sp ? JSON.parse(JSON.stringify(rowSet(sp))) : undefined; }
+    function filmK(r) { return Object.assign({}, L.film, rowSet(r), { glassH: r.h }); }
     function filmFrame(r) { return runBays(r) ? runFrame(r, filmK(r)) : null; }
     function filmSync() { L.film.panes.forEach(function (r) { var f = filmFrame(r); if (f && !f.fit) r.len = f.len; if (f) r.w = r.len; }); }
     // Coverage: the whole glass, or a band of one height running the length of every row (Band height, and its bottom edge above the floor).
@@ -2449,10 +2517,10 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     // base is the film's bottom edge: above the floor on a built-out row, so fades and gradients line up across doors and sidelites (g is the height
     // range a gradient runs over); above the bottom of the glass on a plain pane, which sits on the Sill height.
     function filmPieces(only) {
-      var out = [], F = L.film, sill = Math.max(0, F.sill || 0); filmSync();
+      var out = [], F = L.film; filmSync();
       F.panes.forEach(function (p, ri) {
         if (only != null && ri !== only) return;
-        var fr = filmFrame(p), seen = {}, pr;
+        var fr = filmFrame(p), seen = {}, pr, sill = Math.max(0, rowSet(p).sill || 0);
         if (!fr) { pr = filmRange(sill, sill + p.h); if (pr) out.push({ name: p.name, w: p.w, h: pr.f1 - pr.f0, qty: p.qty, base: pr.f0 - sill, aB: pr.aB, aT: pr.aT, row: ri }); return; }
         fr.panes.forEach(function (g) {
           var rg = g.gw > 0 && g.gy1 > g.gy0 ? filmRange(g.gy0, g.gy1) : null; if (!rg) return;
@@ -2539,6 +2607,10 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var list = Array.prototype.slice.call(files || []), got = [];
       list.reduce(function (chain, f) {
         return chain.then(function () {
+          if (isPdfFile(f)) return pdfPageCanvas(f, 2000, 4e6, true).then(function (pp) {
+            got.push({ name: f.name.replace(/\.pdf$/i, ''), url: pp.canvas.toDataURL('image/png'), w: pp.canvas.width, h: pp.canvas.height });
+            if (pp.pages > 1) flash(f.name + ' has ' + pp.pages + ' pages; DIM used the first.');
+          }).catch(function () { flash('Could not read ' + f.name + '.'); });
           return new Promise(function (res) {
             var isSvg = /svg/i.test(f.type) || /\.svg$/i.test(f.name);
             (isSvg ? f.text() : Promise.resolve('')).then(function (txt) {
@@ -2741,10 +2813,22 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var A = L.mural; if (A.art !== 'image' || !A.img) return null;
       var iw = A.img.naturalWidth, ih = A.img.naturalHeight, m = muralPanels();
       if (A.fit === 'repeat') return iw / A.tileW;
+      if (A.fit === 'custom' && A.iw > 0) return iw / A.iw;
       if (A.fit === 'stretch') return Math.min(iw / m.W, ih / m.H);
       var r = A.fit === 'cover' ? Math.max(m.W / iw, m.H / ih) : Math.min(m.W / iw, m.H / ih);
       return 1 / r;
     }
+
+    // Placing the image by hand: its width, and its top left corner from the wall's top left (either can be negative, past the wall).
+    // imgRect gives that box for any fit, so switching to Place by hand starts from what was showing.
+    function imgRect(fit) {
+      var A = L.mural, m = muralPanels(), iw = A.img.naturalWidth, ih = A.img.naturalHeight;
+      if (fit === 'custom' && A.iw > 0) return { x: A.ix, y: A.iy, w: A.iw, h: A.iw * ih / iw };
+      var k = fit === 'contain' ? Math.min(m.W / iw, m.H / ih) : Math.max(m.W / iw, m.H / ih), w = iw * k, h = ih * k;
+      return { x: (m.W - w) / 2 - A.bleed, y: (m.H - h) / 2 - A.bleed, w: w, h: h };
+    }
+    function toCustom(fit) { var r = imgRect(fit); L.mural.ix = r8(r.x); L.mural.iy = r8(r.y); L.mural.iw = r8(r.w); L.mural.fit = 'custom'; }
+    function fmtS(x) { return x < 0 ? '-' + fmtIn(-x) : fmtIn(x); }
 
     // ---- Artwork ----
     function drawArt(ctx, s, ox, oy, Wt, Ht) {
@@ -2763,6 +2847,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         var tw = A.tileW * s, th = tw * ih / iw;
         if (tw >= 1 && th >= 1) for (var yy = Yy; yy < Yy + h; yy += th) for (var xx = X; xx < X + w; xx += tw) ctx.drawImage(A.img, xx, yy, tw, th);
       } else if (A.fit === 'stretch') ctx.drawImage(A.img, X, Yy, w, h);
+      else if (A.fit === 'custom' && A.iw > 0) ctx.drawImage(A.img, X + (A.bleed + A.ix) * s, Yy + (A.bleed + A.iy) * s, A.iw * s, A.iw * ih / iw * s);
       else { var k = A.fit === 'cover' ? Math.max(w / iw, h / ih) : Math.min(w / iw, h / ih), dw = iw * k, dh = ih * k; ctx.drawImage(A.img, X + (w - dw) / 2, Yy + (h - dh) / 2, dw, dh); }
       ctx.restore();
     }
@@ -2834,12 +2919,17 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       if (m.vert) dimLine(ctx, ox, oy + m.H * s + 14, ox + r0.w * s, oy + m.H * s + 14, fmtIn(r0.w), 'below');
       if (m.vert && m.n > 1) { var rl = m.rects[m.n - 1]; dimLine(ctx, ox + rl.x * s, oy + m.H * s + 14, ox + (rl.x + rl.w) * s, oy + m.H * s + 14, fmtIn(rl.w), 'below'); }
       geo = { s: s, ox: ox, oy: oy, m: m };
+      if (A.art === 'image' && A.img && A.fit === 'custom' && A.iw > 0 && !offTarget && !noSel) {
+        var ir = muralImgScreen();
+        ctx.save(); ctx.setLineDash([5, 3]); ctx.strokeStyle = '#1f6feb'; ctx.lineWidth = 1.25; ctx.strokeRect(ir.x, ir.y, ir.w, ir.h); ctx.setLineDash([]);
+        ir.corners.forEach(function (c) { ctx.fillStyle = '#ffffff'; ctx.fillRect(c.x - 4, c.y - 4, 8, 8); ctx.strokeRect(c.x - 4, c.y - 4, 8, 8); });
+        ctx.restore();
+      }
       canvas.setAttribute('aria-label', 'Mural split into ' + m.n + ' panels');
     }
     var FROST = '227,227,221';   // Lab 90, -1, +3: frost with the slightest warm tint
-    // How solid the frost is, from 0 (clear) to 1, at h inches above the bottom of the glass.
-    function frostAt(h) {
-      var F = L.film;
+    // How solid the frost is, from 0 (clear) to 1, at h inches above the bottom of the glass. F is the row's settings (filmK).
+    function frostAt(h, F) {
       if (F.look === 'feather') { var a = F.fA, b = F.fB; if (a === b) return h <= a ? 1 : 0; return Math.max(0, Math.min(1, (b - h) / (b - a))); }
       if (F.look === 'dual') {
         var d = [F.d1, F.d2, F.d3, F.d4].sort(function (p, q) { return p - q; });
@@ -2849,17 +2939,17 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       return 1;
     }
     // A bottom-to-top gradient over y..y+h following frostAt; bottom is the bottom of the glass in canvas units.
-    function frostFill(ctx, y, h, bottom, s, alpha) {
-      var F = L.film, h0 = (bottom - (y + h)) / s, h1 = (bottom - y) / s, g = ctx.createLinearGradient(0, y + h, 0, y);
+    function frostFill(ctx, y, h, bottom, s, alpha, F) {
+      var h0 = (bottom - (y + h)) / s, h1 = (bottom - y) / s, g = ctx.createLinearGradient(0, y + h, 0, y);
       var hs = [h0, h1].concat([F.fA, F.fB, F.d1, F.d2, F.d3, F.d4].filter(function (k) { return k > h0 && k < h1; })).sort(function (p, q) { return p - q; });
-      hs.forEach(function (k) { g.addColorStop(Math.max(0, Math.min(1, (k - h0) / (h1 - h0))), 'rgba(' + FROST + ',' + (alpha * frostAt(k)).toFixed(3) + ')'); });
+      hs.forEach(function (k) { g.addColorStop(Math.max(0, Math.min(1, (k - h0) / (h1 - h0))), 'rgba(' + FROST + ',' + (alpha * frostAt(k, F)).toFixed(3) + ')'); });
       return g;
     }
     // The glass, anyone standing behind it (blurred where the film is solid), then the film itself.
     // x, y, w, h is the film (a band covers part of the glass); gx, gy, gw, gh the glass.
     // In a built-out wall (o): base is the glass's bottom above the floor, g the heights a gradient runs between, px where the people stand, from the glass's left edge.
-    function paneLook(ctx, x, y, w, h, gx, gy, gw, gh, s, o) {
-      var F2 = L.film, frost = F2.look !== 'gradient', people = F2.person === 'both' ? ['woman', 'man'] : FIGS[F2.person] ? [F2.person] : [];
+    function paneLook(ctx, x, y, w, h, gx, gy, gw, gh, s, o, F2) {
+      var frost = F2.look !== 'gradient', people = F2.person === 'both' ? ['woman', 'man'] : FIGS[F2.person] ? [F2.person] : [];
       var base = o ? o.base * s : 0, feet = o ? base : F2.sill * s, px = o ? o.px : gw / 2, tint = o && o.glass || '#d9ecf7';
       ctx.fillStyle = tint; ctx.fillRect(gx, gy, gw, gh);
       if (people.length && gw > 0 && gh > 0) {
@@ -2871,11 +2961,33 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         var B = document.createElement('canvas'); B.width = cw; B.height = chh;
         var bc = B.getContext('2d'); bc.filter = 'blur(' + Math.max(1, 2.5 * s * k).toFixed(1) + 'px)'; bc.drawImage(A, 0, 0); bc.filter = 'none';
         bc.setTransform(k, 0, 0, k, 0, 0); bc.globalCompositeOperation = 'destination-in';
-        bc.fillStyle = frost ? frostFill(bc, 0, gh, gh + base, s, 1) : '#000'; bc.fillRect(x - gx, y - gy, w, h);
+        bc.fillStyle = frost ? frostFill(bc, 0, gh, gh + base, s, 1, F2) : '#000'; bc.fillRect(x - gx, y - gy, w, h);
         ctx.drawImage(B, gx, gy, gw, gh);
       }
       if (!frost) { var fl = gy + gh + base, g = o ? ctx.createLinearGradient(0, fl - o.g[0] * s, 0, fl - o.g[1] * s) : ctx.createLinearGradient(0, y + h, 0, y); g.addColorStop(0, F2.c1); g.addColorStop(1, F2.c2); ctx.fillStyle = g; ctx.globalAlpha = .85; ctx.fillRect(x, y, w, h); ctx.globalAlpha = 1; }
-      else { ctx.fillStyle = frostFill(ctx, y, h, gy + gh + base, s, 0.88); ctx.fillRect(x, y, w, h); }
+      else { ctx.fillStyle = frostFill(ctx, y, h, gy + gh + base, s, 0.88, F2); ctx.fillRect(x, y, w, h); }
+    }
+    // Where a feathered film turns solid or clear, as [height, what starts there]. Heights are from the bottom of the glass (from the floor on a built-out row).
+    function fadeStops(K) {
+      if (K.look === 'feather') return [[K.fA, 'Solid'], [K.fB, 'Clear']];
+      if (K.look !== 'dual') return [];
+      var mid = K.dual === 'clear' ? 'Clear' : 'Solid', out = K.dual === 'clear' ? 'Solid' : 'Clear';
+      return [[K.d1, out], [K.d2, mid], [K.d3, mid], [K.d4, out]].sort(function (a, b) { return a[0] - b[0]; });
+    }
+    // A label on a light chip, in the dimension color, so it reads on frost, glass or wall.
+    function dimTag(ctx, label, x, y, align) {
+      ctx.font = '500 10px "JetBrains Mono", ui-monospace, monospace';
+      var lw = ctx.measureText(label).width, lx = align === 'right' ? x - lw : align === 'left' ? x : x - lw / 2;
+      ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fillRect(lx - 2, y - 6.5, lw + 4, 12);
+      txt(ctx, label, lx, y, { size: 10, w: 500, color: GDIM, base: 'middle', align: 'left' });
+    }
+    // A dashed line across the glass (x1 to x2) at each stop between lo and hi, with its tag at tagX.
+    function drawFadeStops(ctx, stops, x1, x2, Yf, lo, hi, tagX, align, aff) {
+      var shown = stops.filter(function (st) { return st[0] > lo + 1e-6 && st[0] < hi - 1e-6; });
+      ctx.save(); ctx.setLineDash([4, 3]); ctx.strokeStyle = GDIM; ctx.lineWidth = 1;
+      shown.forEach(function (st) { var y = Math.round(Yf(st[0])) + .5; ctx.beginPath(); ctx.moveTo(x1, y); ctx.lineTo(x2, y); ctx.stroke(); });
+      ctx.restore();
+      if (tagX != null) shown.forEach(function (st) { dimTag(ctx, st[1] + ' ' + fmtIn(st[0]) + (aff ? ' AFF' : ''), tagX, Yf(st[0]), align); });
     }
     // Plain rows side by side, each with its bleed and seams. A built-out row draws as its elevation; select one to see it on its own.
     // Shop drawing passes the rows it wants (rowIdx).
@@ -2886,15 +2998,14 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       list = rowIdx ? rowIdx.map(function (i) { return F2.panes[i]; }).filter(Boolean).slice(0, 8) : selRow && filmFrame(selRow) ? [selRow] : F2.panes.slice(0, 8);
       if (!list.length) { txt(ctx, 'Pick at least one film row', c.cw / 2, c.ch / 2, { size: 13 }); return; }
       // A plain pane sits on its sill: the glass starts Sill height above the floor, on a wall drawn below it (the bleed laps onto the wall).
-      var sill = Math.max(0, F2.sill || 0);
-      var cells = list.map(function (p) { var fr = filmFrame(p), pc = fr ? null : filmPieces(F2.panes.indexOf(p))[0]; return { p: p, fr: fr, pc: pc, r: pc ? filmPane(pc) : null, W: fr ? fr.len : p.w + 2 * F2.allow, H: fr ? fr.top : p.h + 2 * F2.allow + Math.max(0, sill - F2.allow) }; });
+      var cells = list.map(function (p) { var fr = filmFrame(p), pc = fr ? null : filmPieces(F2.panes.indexOf(p))[0], sill = Math.max(0, rowSet(p).sill || 0); return { p: p, fr: fr, pc: pc, sill: sill, r: pc ? filmPane(pc) : null, W: fr ? fr.len : p.w + 2 * F2.allow, H: fr ? fr.top : p.h + 2 * F2.allow + Math.max(0, sill - F2.allow) }; });
       var totalW = cells.reduce(function (t, k) { return t + k.W; }, 0), gapIn = 18, maxH = Math.max.apply(null, cells.map(function (k) { return k.H; })), one = cells.length === 1 && cells[0].fr;
       // Built-out walls take the same margins as a marker run, and everything is centered top to bottom, so Film and Markers land in the same place on a sheet.
       var walls = cells.every(function (k) { return k.fr; }), mx = walls ? 170 : 60, my = walls ? 110 : 150, span = totalW + gapIn * (cells.length - 1);
       var s = Math.min((c.cw - mx) / span, (c.ch - my) / maxH); if (!(s > 0)) return; lastScale = s;
       var x = (walls ? 90 : 30) + (c.cw - mx - span * s) / 2, base = (walls ? 30 : 40) + maxH * s + (c.ch - my - maxH * s) / 2;
       cells.forEach(function (k, i) {
-        var p = k.p, w = k.W * s, h = k.H * s, y = base - h, on = F2.panes.indexOf(p) === F2.sel && !noSel && cells.length > 1, room = w + gapIn * s - 8;
+        var p = k.p, sill = k.sill, w = k.W * s, h = k.H * s, y = base - h, on = F2.panes.indexOf(p) === F2.sel && !noSel && cells.length > 1, room = w + gapIn * s - 8;
         if (k.fr) drawFilmWall(ctx, p, k.fr, x, base, s, gapIn * s > 40 || i === 0, gapIn * s > 60 || i === cells.length - 1);
         else {
           // The glass with its bleed all round (x, y, w, ph); the film is all of that, or a band across it (fy, fh).
@@ -2905,7 +3016,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
             ctx.strokeStyle = SINK2; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x - 4, base + .5); ctx.lineTo(x + w + 4, base + .5); ctx.stroke();
             if (i === cells.length - 1) dimLine(ctx, x + w + 18, base, x + w + 18, base - sill * s, fmtIn(sill));
           }
-          if (pc) paneLook(ctx, x, fy, w, fh, gx, gy, gw, gh, s); else { ctx.fillStyle = '#d9ecf7'; ctx.fillRect(gx, gy, gw, gh); }
+          if (pc) paneLook(ctx, x, fy, w, fh, gx, gy, gw, gh, s, null, filmK(p)); else { ctx.fillStyle = '#d9ecf7'; ctx.fillRect(gx, gy, gw, gh); }
           ctx.strokeStyle = INK; ctx.lineWidth = 1;
           if (band) { ctx.strokeRect(gx + .5, gy + .5, gw - 1, gh - 1); if (pc) ctx.strokeRect(x + .5, fy + .5, w - 1, fh - 1); } else ctx.strokeRect(x + .5, y + .5, w - 1, ph - 1);
           if (pc) {
@@ -2923,6 +3034,8 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
               r.widths.forEach(function (sw) { dimLine(ctx, x - 8, fy + p0 * s, x - 8, fy + (p0 + sw) * s, fits ? fmtIn(sw) : ''); p0 += sw; });
             }
           }
+          if (pc && dimOn('film', 'fade')) { var FK0 = filmK(p); drawFadeStops(ctx, fadeStops(FK0), gx, gx + gw, function (hh) { return gy + gh - hh * s; }, Math.max(0, pc.base - 1e-6), pc.base + pc.h + 1e-6, gx + gw - 4, 'right', false); }
+          if (pc && dimOn('film', 'film')) { gDim(ctx, x, fy - 10, x + w, fy - 10, fmtIn(r.W)); gDim(ctx, x + w + 10, fy + fh, x + w + 10, fy, fmtIn(r.H), 'right'); }
           ctx.font = '400 10.5px "JetBrains Mono", ui-monospace, monospace';
           var dt = pc ? dropsText(r, p.qty) : 'band misses this glass', nq = pc ? r.strips * (p.qty > 1 ? p.qty : 1) : 0; if (pc && ctx.measureText(dt).width > room + 2) dt = nq + (r.dir === 'vertical' ? ' drop' : ' row') + (nq > 1 ? 's' : '');
           var sz = fmtIn(p.w) + ' × ' + fmtIn(p.h) + ' ×' + p.qty; if (ctx.measureText(sz).width > room + 2) sz = '×' + p.qty;
@@ -2941,22 +3054,27 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     // A built-out row: its frame and doors, with film on each pane of glass (heights from the floor), seams in orange, and openings dimensioned below.
     function drawFilmWall(ctx, p, fr, x0, floor, s, sideDim, rightDim) {
       var K = filmK(p), a = K.allow, w = fr.len * s, band = isBand(), Y = function (inch) { return floor - inch * s; };
+      var fade = dimOn('film', 'fade'), stops = fade ? fadeStops(K) : [], bandDim = dimOn('film', 'band');
       ctx.lineWidth = .75; ctx.strokeStyle = INK2;
       drawFrame(ctx, fr, K, x0, floor, s, fr.len, true, function () {
         fr.panes.forEach(function (g) {
           var gh = g.gy1 - g.gy0, rg = g.gw > 0 && gh > 0 ? filmRange(g.gy0, g.gy1) : null; if (!rg) return;
           var gx = x0 + g.gx * s, gy = Y(g.gy1), gw = g.gw * s, fy = Y(rg.f1), fh = (rg.f1 - rg.f0) * s, r = filmPane({ w: g.gw, h: rg.f1 - rg.f0, aB: rg.aB, aT: rg.aT }), pos = r.dir === 'vertical' ? -a : -r.aT;
           ctx.save(); ctx.beginPath(); ctx.rect(gx, gy, gw, gh * s); ctx.clip();
-          paneLook(ctx, gx, fy, gw, fh, gx, gy, gw, gh * s, s, { base: g.gy0, g: band ? [K.bandB, K.bandB + K.bandH] : [0, fr.top], px: (fr.len / 2 - g.gx) * s, glass: K.glass });
+          paneLook(ctx, gx, fy, gw, fh, gx, gy, gw, gh * s, s, { base: g.gy0, g: band ? [K.bandB, K.bandB + K.bandH] : [0, fr.top], px: (fr.len / 2 - g.gx) * s, glass: K.glass }, K);
           ctx.setLineDash([4, 3]); ctx.strokeStyle = css('--orange'); ctx.lineWidth = 1.5;
           for (var q = 0; q < r.strips - 1; q++) { pos += r.widths[q]; ctx.beginPath(); if (r.dir === 'vertical') { ctx.moveTo(gx + pos * s, fy); ctx.lineTo(gx + pos * s, fy + fh); } else { ctx.moveTo(gx, fy + pos * s); ctx.lineTo(gx + gw, fy + pos * s); } ctx.stroke(); }
           ctx.restore();
           ctx.strokeStyle = INK2; ctx.lineWidth = .75; ctx.strokeRect(gx + .25, gy + .25, gw - .5, gh * s - .5);
           if (band) ctx.strokeRect(gx + .25, fy + .25, gw - .5, fh - .5);
+          if (fade) drawFadeStops(ctx, stops, gx, gx + gw, Y, rg.f0, rg.f1, null);
+          if (dimOn('film', 'film') && gw > 30) { gDim(ctx, gx + 4, fy + 12, gx + gw - 4, fy + 12, fmtIn(g.gw)); gDim(ctx, gx + gw - 12, fy + fh, gx + gw - 12, fy, fmtIn(rg.f1 - rg.f0), 'left'); }
         });
       });
+      // Feather stops are heights from the floor on a built-out row: one dashed line through every pane, tagged once outside the frame.
+      if (fade && rightDim) { var tagX = x0 + w + (band && bandDim ? 64 : 8); stops.forEach(function (st) { if (st[0] > 0 && st[0] < fr.top) dimTag(ctx, st[1] + ' ' + fmtIn(st[0]) + ' AFF', tagX, Y(st[0]), 'left'); }); }
       // A band's bottom edge above the floor and its height, down the right side.
-      if (band && rightDim) { dimLine(ctx, x0 + w + 22, floor, x0 + w + 22, Y(K.bandB), fmtIn(K.bandB), 'right'); dimLine(ctx, x0 + w + 22, Y(K.bandB), x0 + w + 22, Y(K.bandB + K.bandH), fmtIn(K.bandH), 'right'); }
+      if (band && rightDim && bandDim) { dimLine(ctx, x0 + w + 22, floor, x0 + w + 22, Y(K.bandB), fmtIn(K.bandB), 'right'); dimLine(ctx, x0 + w + 22, Y(K.bandB), x0 + w + 22, Y(K.bandB + K.bandH), fmtIn(K.bandH), 'right'); }
       ctx.strokeStyle = SINK2; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x0 - (sideDim ? 50 : 6), floor + .5); ctx.lineTo(x0 + w + 6, floor + .5); ctx.stroke();
       ctx.font = '400 11px "JetBrains Mono", ui-monospace, monospace';
       fr.panes.forEach(function (g) { var lab = fmtIn(g.w); dimLine(ctx, x0 + g.x * s, floor + 22, x0 + (g.x + g.w) * s, floor + 22, ctx.measureText(lab).width + 6 < g.w * s ? lab : '', 'below'); });
@@ -3010,7 +3128,11 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         if (p.door) box(p.x, 0, p.w, fr.top - K.fHead, FC);
         if (p.gw > 0 && p.gy1 > p.gy0) box(p.gx, p.gy0, p.gw, p.gy1, K.glass || GLASS);
         var q = fr.panes[i - 1];
-        if (p.seam && q && p.x > q.x + q.w) box(q.x + q.w, Math.max(p.gy0, q.gy0), p.x - q.x - q.w, Math.min(p.gy1, q.gy1), SEAM);
+        if (p.seam && q && p.x > q.x + q.w) {
+          // A butt joint is glass meeting glass, not frame: cover the two glass edges and draw one faint line, much lighter than a mullion.
+          var sy1 = Math.min(p.gy1, q.gy1), sy0 = Math.max(p.gy0, q.gy0), sxa = x0 + (q.x + q.w) * s, sxb = x0 + p.x * s, sh = (sy1 - sy0) * s - 2, sw2 = Math.max(0.75, sxb - sxa);
+          if (sh > 0) { ctx.save(); ctx.fillStyle = K.glass || GLASS; ctx.fillRect(sxa - 1, Y(sy1) + 1, sxb - sxa + 2, sh); ctx.globalAlpha = 0.38; ctx.fillStyle = SEAM; ctx.fillRect((sxa + sxb - sw2) / 2, Y(sy1) + 1, sw2, sh); ctx.restore(); }
+        }
       });
       if (mid) mid();   // film goes on the glass, under the swing lines and hardware
       drawDoors(ctx, fr, K, x0, floor, s);
@@ -3066,9 +3188,23 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
           else ctx.strokeRect(mx, my, mw, mh);
           if (bad && gim) { ctx.strokeRect(mx - 1, my - 1, mw + 2, mh + 2); }
         });
-        var xd = x0 - 28 - bi * 24;
-        dimLine(ctx, xd, floor, xd, floor - bh * s, fmtIn(bh));
+        if (dimOn('markers', 'bands')) { var xd = x0 - 28 - bi * 24; dimLine(ctx, xd, floor, xd, floor - bh * s, fmtIn(bh)); }
+        if (dimOn('markers', 'top')) { var mtH = K.pattern === 'solid' ? K.barH : seqFor(bi).reduce(function (a, t) { return Math.max(a, markOf(t).h); }, 0), xt = x0 + w + (fr && K.curb + K.fSill > 0 ? 46 : 22) + bi * 24;
+          dimLine(ctx, xt, floor, xt, floor - (bh + mtH) * s, fmtIn(bh + mtH), 'right'); }
       });
+      // One mark's size, on the top band's first mark.
+      if (dimOn('markers', 'size') && hs.length) {
+        var tb0 = hs.length - 1, bh0 = hs[tb0];
+        if (K.pattern === 'solid') { var sp0 = runSpans(run)[0]; if (sp0) gDim(ctx, x0 + sp0[0] * s - 10, floor - bh0 * s, x0 + sp0[0] * s - 10, floor - (bh0 + K.barH) * s, fmtIn(K.barH), 'left'); }
+        else if (ms.length) { var m0 = ms[0], mk0 = markFor(tb0, m0.q), mx0 = x0 + (m0.x + (sw - mk0.w) / 2) * s, my0 = floor - (bh0 + mk0.h) * s;
+          gDim(ctx, mx0, my0 - 8, mx0 + mk0.w * s, my0 - 8, fmtIn(mk0.w)); gDim(ctx, mx0 - 8, floor - bh0 * s, mx0 - 8, my0, fmtIn(mk0.h), 'left'); }
+      }
+      // Spacing on a plain run: end clearance to the first mark, and the gap to the next.
+      if (!fr && dimOn('markers', 'spacing') && hs.length && K.pattern !== 'solid' && ms.length) {
+        var tbp = hs.length - 1, ybp = floor - hs[tbp] * s + 16, lr = -1e9, a0 = ms[0], g0 = function (xa, xb) { if (xb - xa < 0.05 || xa > shown) return; var r3 = smallDim(ctx, x0 + xa * s, x0 + Math.min(xb, shown) * s, ybp, fmtIn(xb - xa), lr); if (r3) lr = r3; };
+        g0(0, a0.x + (sw - markFor(tbp, a0.q).w) / 2);
+        if (ms[1]) { if (K.gapBy === 'oc') g0(a0.x + sw / 2, ms[1].x + sw / 2); else g0(a0.x + sw, ms[1].x); }
+      }
       if (fr) drawDoors(ctx, fr, K, x0, floor, s, true);
       if (fr) {
         // Openings under the floor line, the overall frame below them, where the glass starts on the right, and the spacing in the panes.
@@ -3076,7 +3212,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         fr.panes.forEach(function (p) { var lab = fmtIn(p.w); dimLine(ctx, x0 + p.x * s, floor + 22, x0 + (p.x + p.w) * s, floor + 22, ctx.measureText(lab).width + 6 < p.w * s ? lab : '', 'below'); });
         dimLine(ctx, x0, floor + 52, x0 + w, floor + 52, fmtFt(run.len), 'below');
         var gb = K.curb + K.fSill; if (gb > 0 && fr.panes.some(function (p) { return !p.door; })) dimLine(ctx, x0 + w + 22, floor, x0 + w + 22, Y(gb), fmtIn(gb), 'right');
-        if (hs.length && K.pattern !== 'solid') {
+        if (hs.length && K.pattern !== 'solid' && dimOn('markers', 'spacing')) {
           // Spacing in each pane: glass edge to first mark, the gap, the right edge when it differs, and across a seam when that differs from the gap.
           // A pane spaced exactly like one already dimensioned is skipped, so a row of matching panes shows its numbers once.
           var tb = hs.length - 1, yb = floor - hs[tb] * s + 16, lastR = -1e9, seen = {}, inP = function (pi) { return ms.filter(function (m) { return m.pane === pi; }); };
@@ -3115,8 +3251,36 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     // ---- Graphic tab: logos and graphics placed on a storefront or a wall, with the dimensions you choose ----
     // Each elevation is glass (panes, doors and frame, built like a marker run) or a wall. Each graphic on it has its left edge x
     // (inches from the elevation's left), its bottom edge y (inches above the floor), its width w (its height follows the art's shape) and a surface.
-    var GDIM = '#b0127a', gGeo = [], gDrag = null, gSnap = null, secondCache = typeof WeakMap === 'function' ? new WeakMap() : null;
+    var GDIM = '#b0127a', gGeo = [], gDrag = null, gSnap = null, gMulti = [], gAlignTo = 'area', secondCache = typeof WeakMap === 'function' ? new WeakMap() : null;
     function r8(v) { return Math.round(v * 16) / 16; }   // placement sizes, to 1/16"
+    // Dimension switches, per job: shown on the preview and on the shop drawing. Each button is a small picture of the dimension it adds.
+    var DIMS = {
+      graphic: [['size', 'Size'], ['edges', 'From glass or wall edges'], ['bottom', 'Bottom, above floor'], ['top', 'Top, above floor'], ['center', 'Center, above floor']],
+      film: [['film', 'Film size'], ['fade', 'Where the feather starts and stops'], ['band', 'Band height and bottom edge']],
+      markers: [['bands', 'Band heights, above floor'], ['top', 'Top of marks, above floor'], ['spacing', 'Spacing between marks'], ['size', 'Mark size']] };
+    var DIM_ON = { graphic: { size: true, edges: true, bottom: true }, film: { fade: true, band: true }, markers: { bands: true, spacing: true } };
+    var T = ' stroke-width="1.3" stroke-linecap="round"';
+    var DIM_ICON = {
+      graphic: { size: '<rect x="4" y="6.5" width="9" height="8" rx=".5"/><path d="M4 3.5h9M4 2.5v2M13 2.5v2M16 6.5v8M15 6.5h2M15 14.5h2"' + T + '/>',
+        edges: '<path d="M1.5 3v12M16.5 3v12M1.5 9h4.5M12 9h4.5"' + T + '/><rect x="6" y="6" width="6" height="6" rx=".5"/>',
+        bottom: '<path d="M1.5 16.5h15M14.5 16.5V10M13.3 10h2.4"' + T + '/><rect x="4" y="3" width="7" height="7" rx=".5"/>',
+        top: '<path d="M1.5 16.5h15M14.5 16.5V5M13.3 5h2.4"' + T + '/><rect x="4" y="5" width="7" height="7" rx=".5"/>',
+        center: '<path d="M1.5 16.5h15M14.5 16.5V8M13.3 8h2.4M3 8h9" ' + T + ' stroke-dasharray="0"/><rect x="4" y="4" width="7" height="8" rx=".5"/>' },
+      film: { film: '<rect x="3" y="2" width="9" height="14" rx=".5"/><path d="M3 7l5-5M3 12l9-9M6 16l6-6"' + T + ' opacity=".55"/><path d="M15 2v14M14 2h2M14 16h2"' + T + '/>',
+        fade: '<rect x="2.5" y="2" width="10" height="14" rx=".5"/><path d="M2.5 6.5h10M2.5 11.5h10"' + T + ' stroke-dasharray="1.6 1.4"/><path d="M15.5 16V6.5M15.5 16V11.5M14.4 6.5h2.2M14.4 11.5h2.2"' + T + '/>',
+        band: '<rect x="2.5" y="2" width="10" height="14" rx=".5"/><rect x="2.5" y="7" width="10" height="4.5" fill="currentColor" opacity=".35" stroke="none"/><path d="M15.5 16.5V7M14.4 7h2.2M14.4 11.5h2.2"' + T + '/>' },
+      markers: { bands: '<path d="M1.5 16.5h15M14.5 16.5V5.5M14.5 16.5V11M13.3 11h2.4M13.3 5.5h2.4"' + T + '/><rect x="3" y="9" width="2.5" height="2" /><rect x="7.5" y="9" width="2.5" height="2"/><rect x="3" y="3.5" width="2.5" height="2"/><rect x="7.5" y="3.5" width="2.5" height="2"/>',
+        top: '<path d="M1.5 16.5h15M14.5 16.5V6M13.3 6h2.4"' + T + '/><rect x="3.5" y="6" width="3" height="3"/><rect x="8.5" y="6" width="3" height="3"/>',
+        spacing: '<rect x="1.5" y="6" width="3" height="3"/><rect x="7.5" y="6" width="3" height="3"/><rect x="13.5" y="6" width="3" height="3"/><path d="M4.5 12.5h3M4.5 11.5v2M7.5 11.5v2M10.5 12.5h3M10.5 11.5v2M13.5 11.5v2"' + T + '/>',
+        size: '<rect x="4" y="6" width="7" height="7" rx=".5"/><path d="M4 3.5h7M4 2.5v2M11 2.5v2M14 6v7M13 6h2M13 13h2"' + T + '/>' } };
+    function dimOn(job, k) { var D = L[job].dims || {}; return D[k] != null ? !!D[k] : !!(DIM_ON[job] || {})[k]; }
+    function dimsSec(job, extra) {
+      var list = DIMS[job], on = list.filter(function (d) { return dimOn(job, d[0]); });
+      return lsec(job.charAt(0) + '_dims', 'Dimensions', '<div class="dimtog" role="group" aria-label="Dimensions to show">' + list.map(function (d) {
+        var v = dimOn(job, d[0]);
+        return '<button type="button" class="dimb" data-ldim="' + d[0] + '" aria-pressed="' + v + '" title="' + d[1] + '" aria-label="' + d[1] + '"><svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.2">' + DIM_ICON[job][d[0]] + '</svg></button>';
+      }).join('') + '</div><p class="hint keep" style="margin:0">' + (on.length ? 'Showing: ' + on.map(function (d) { return d[1].toLowerCase(); }).join('; ') + '.' : 'No dimensions shown.') + '</p>' + (extra || ''), on.length ? on.length + ' of ' + list.length + ' on' : 'None');
+    }
     function isWall(r) { return r.kind === 'wall'; }
     function elevFrame(r) { return isWall(r) ? null : runFrame(r, L.graphic); }
     function elevTop(r) { var G = L.graphic; return isWall(r) ? r.wallH : runBays(r) ? G.curb + G.glassH : G.glassH; }
@@ -3269,8 +3433,9 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
           if (!isWall(r) && it.surface === 'second') { ctx.save(); ctx.globalAlpha = 0.78; ctx.drawImage(secondImg(im, G.glass || GLASS), px, py, pw, ph); ctx.restore(); }
           else ctx.drawImage(im, px, py, pw, ph);
         } else { ctx.save(); ctx.setLineDash([3, 3]); ctx.strokeStyle = INK; ctx.strokeRect(px, py, pw, ph); ctx.restore(); }
-        if (!noSel && !offTarget && G.isel === it.id && ri === G.sel) {
-          ctx.save(); ctx.setLineDash([4, 3]); ctx.strokeStyle = '#1f6feb'; ctx.lineWidth = 1.25; ctx.strokeRect(px - 3, py - 3, pw + 6, ph + 6); ctx.restore();
+        if (!noSel && !offTarget && gIsSel(it.id) && ri === G.sel) {
+          var isKey = gMulti.length && G.isel === it.id;
+          ctx.save(); ctx.setLineDash(isKey ? [] : [4, 3]); ctx.strokeStyle = '#1f6feb'; ctx.lineWidth = isKey ? 2 : 1.25; ctx.strokeRect(px - 3, py - 3, pw + 6, ph + 6); ctx.restore();
         }
         if (!offTarget) gGeo.push({ ri: ri, id: it.id, x: px, y: py, w: pw, h: ph, s: s });
       });
@@ -3293,13 +3458,15 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     // The dimensions switched on under Dimensions: from the glass (or wall) edges and the width in a chain above the graphic,
     // the bottom edge and height chained up its right side, and its center height on its left.
     function graphicDims(ctx, r, fr, it, x0, floor, s) {
-      var D = L.graphic.dims || {}, g = artOf(it); if (!g) return;
+      var D = {}, g = artOf(it); if (!g) return;
+      DIMS.graphic.forEach(function (d) { D[d[0]] = dimOn('graphic', d[0]); });
       var h = itemH(it, g), a = areaOf(r, fr, it.x + it.w / 2), Y = function (inch) { return floor - inch * s; };
       var lx = x0 + it.x * s, rx = x0 + (it.x + it.w) * s, ty = Y(it.y + h), by = Y(it.y), yt = ty - 12;
       if (D.edges) { gDim(ctx, x0 + a.x0 * s, yt, lx, yt, fmtIn(it.x - a.x0)); gDim(ctx, rx, yt, x0 + a.x1 * s, yt, fmtIn(a.x1 - it.x - it.w)); }
       if (D.size) { gDim(ctx, lx, yt, rx, yt, fmtIn(it.w)); gDim(ctx, rx + 14, by, rx + 14, ty, fmtIn(h), 'right'); }
       if (D.bottom) gDim(ctx, rx + 14, floor, rx + 14, by, fmtIn(it.y), 'right');
       if (D.center) gDim(ctx, lx - 14, floor, lx - 14, Y(it.y + h / 2), fmtIn(it.y + h / 2), 'left');
+      if (D.top) { var tx = D.center ? lx - 66 : lx - 14; gDim(ctx, tx, floor, tx, ty, fmtIn(it.y + h), 'left'); }
     }
     function graphicAt(cx, cy) {
       if (!canvas) return null;
@@ -3309,6 +3476,38 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     }
     function selElev() { var G = L.graphic; return G.runs[G.sel] || null; }
     function selItem() { var r = selElev(), id = L.graphic.isel; return r && (r.items || []).filter(function (it) { return it.id === id; })[0] || null; }
+    // Several graphics can be selected with Shift+click. isel is the key graphic (the last one clicked); gMulti holds the others.
+    function gIsSel(id) { return L.graphic.isel === id || gMulti.indexOf(id) >= 0; }
+    function gSel() { var r = selElev(); return r ? (r.items || []).filter(function (it) { return gIsSel(it.id) && artOf(it); }) : []; }
+    function gPick(id, add) {
+      var G = L.graphic;
+      if (!add) { G.isel = id; gMulti = []; return; }
+      if (gIsSel(id)) { if (G.isel === id) G.isel = gMulti.length ? gMulti.pop() : null; else gMulti = gMulti.filter(function (x) { return x !== id; }); }
+      else { if (G.isel != null) gMulti.push(G.isel); G.isel = id; }
+    }
+    function gMakeKey(id) { var G = L.graphic; if (G.isel === id) return; gMulti = gMulti.filter(function (x) { return x !== id; }); if (G.isel != null) gMulti.push(G.isel); G.isel = id; }
+    // Align the selected graphics: to the glass or wall each one sits on, to the box around the selection, or to the key graphic (which stays put).
+    var ALIGNS = [['left', 'Align left edges', '<path d="M3 2v14"/><rect x="5" y="4" width="9" height="3" fill="currentColor" stroke="none"/><rect x="5" y="10.5" width="5" height="3" fill="currentColor" stroke="none"/>'],
+      ['hcenter', 'Align centers across', '<path d="M9 2v14"/><rect x="4" y="4" width="10" height="3" fill="currentColor" stroke="none"/><rect x="6" y="10.5" width="6" height="3" fill="currentColor" stroke="none"/>'],
+      ['right', 'Align right edges', '<path d="M15 2v14"/><rect x="4" y="4" width="9" height="3" fill="currentColor" stroke="none"/><rect x="8" y="10.5" width="5" height="3" fill="currentColor" stroke="none"/>'],
+      ['top', 'Align tops', '<path d="M2 3h14"/><rect x="4" y="5" width="3" height="9" fill="currentColor" stroke="none"/><rect x="10.5" y="5" width="3" height="5" fill="currentColor" stroke="none"/>'],
+      ['middle', 'Align middles up and down', '<path d="M2 9h14"/><rect x="4" y="4" width="3" height="10" fill="currentColor" stroke="none"/><rect x="10.5" y="6" width="3" height="6" fill="currentColor" stroke="none"/>'],
+      ['bottom', 'Align bottoms', '<path d="M2 15h14"/><rect x="4" y="4" width="3" height="9" fill="currentColor" stroke="none"/><rect x="10.5" y="8" width="3" height="5" fill="currentColor" stroke="none"/>']];
+    function gAlign(how) {
+      var r = selElev(), list = gSel(); if (!r || !list.length) return;
+      var to = list.length > 1 ? gAlignTo : 'area', fr = elevFrame(r), key = selItem() || list[0];
+      if (gAlignTo !== 'area' && list.length < 2) flash('Shift+click more graphics to align them to each other. This one went to its ' + (isWall(r) ? 'wall' : 'glass') + '.');
+      var box = function (it) { var h = itemH(it, artOf(it)); return { x0: it.x, x1: it.x + it.w, y0: it.y, y1: it.y + h, h: h }; };
+      var T = to === 'key' ? box(key) : to === 'sel' ? list.map(box).reduce(function (a, b) { return { x0: Math.min(a.x0, b.x0), x1: Math.max(a.x1, b.x1), y0: Math.min(a.y0, b.y0), y1: Math.max(a.y1, b.y1) }; }) : null;
+      list.forEach(function (it) {
+        if (to === 'key' && it === key) return;
+        var b = box(it), t = T || areaOf(r, fr, it.x + it.w / 2);
+        if (how === 'left') it.x = t.x0; else if (how === 'right') it.x = t.x1 - it.w; else if (how === 'hcenter') it.x = (t.x0 + t.x1 - it.w) / 2;
+        else if (how === 'bottom') it.y = t.y0; else if (how === 'top') it.y = t.y1 - b.h; else if (how === 'middle') it.y = (t.y0 + t.y1 - b.h) / 2;
+        it.x = r8(it.x); it.y = Math.max(0, r8(it.y));
+      });
+      all();
+    }
     function graphicCount() { return L.graphic.runs.reduce(function (t, r) { return t + (r.items || []).filter(artOf).length; }, 0); }
     function draw() { if (L.job === 'mural') drawMural(); else if (L.job === 'film') drawFilm(offTarget && offTarget.runs); else if (L.job === 'graphic') drawGraphic(offTarget && offTarget.runs); else drawMarkers(offTarget && offTarget.runs); }
     // Draw one job into someone else's canvas (Shop drawing), w × h in points at r pixels per point. Returns real inches per point.
@@ -3321,23 +3520,24 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
 
     // ---- Panels ----
     // The Frame section, for Markers or the Graphic tab: P is the job's key in L.
-    function frameSec(P) {
-      var K = L[P], what = P === 'graphic' ? 'elevation' : P === 'film' ? 'row' : 'run';
-      return '<p class="hint" style="margin:0">For ' + what + 's with panes. Pane sizes are visible glass; a door\u2019s size is its opening.' + (P === 'film' ? ' Each row\u2019s H is its frame height above the curb.' : '') + '</p>' +
-        (P === 'film' ? field('Curb / knee wall', P + '.curb', 'in') : '<div class="row2">' + field('Frame height', P + '.glassH', 'in') + field('Curb / knee wall', P + '.curb', 'in') + '</div>') +
-        '<div class="row2">' + field('Jamb sightline', P + '.fJamb', 'in') + field('Mullion sightline', P + '.mull', 'in') + '</div>' +
-        '<div class="row2">' + field('Head sightline', P + '.fHead', 'in') + field('Sill sightline', P + '.fSill', 'in') + '</div>' +
-        field('Butt joint', P + '.seam', 'in') + '<p class="hint" style="margin:0">Sightline is the frame\u2019s visible face. Glass starts ' + esc(fmtIn(K.curb + K.fSill)) + ' AFF. Curb or knee wall is any base under the frame.</p>' +
-        selectF('Color', P + '.fColor', Object.keys(FRAME_COLORS).map(function (k) { return [k, FRAME_COLORS[k][0]]; })) + colorF('Glass tint', P + '.glass') +
-        '<div class="label" style="margin-top:4px">Doors</div>' +
-        selectF('Style', P + '.doorStyle', Object.keys(DOORS).map(function (k) { return [k, DOORS[k].label]; })) + '<div class="row2">' + field('Top rail', P + '.doorTop', 'in') + field('Bottom rail', P + '.doorBottom', 'in') + '</div>' +
-        selectF('Hardware', P + '.hw', [['pull', 'Pull'], ['lever', 'Lever handle'], ['push', 'Push bar'], ['panic', 'Exit device (panic)'], ['none', 'None']]) +
-        (K.hw === 'pull' ? '<div class="row2">' + field('Height to top, AFF', P + '.hwH', 'in') + field('Pull length', P + '.hwLen', 'in') + '</div>' : K.hw === 'lever' ? field('Height to center, AFF', P + '.lvH', 'in') : K.hw !== 'none' ? field('Height to top, AFF', P + '.hwH', 'in') : '') +
-        selectF('Swing', P + '.swing', [['true', 'Show on drawing'], ['false', 'Hide']]) +
-        '<p class="hint" style="margin:0">Add doors with <b>+ Door</b> under ' + (P === 'graphic' ? 'an elevation' : P === 'film' ? 'a row' : 'a run') + '\u2019s panes; each door can take its own style and hinge side there. Style here is the default.</p>';
+    // Film keeps these per row: pre is the selected row's settings path (film.panes.N.s), and the row's H is its frame height.
+    // part is 'frame' (curb, sightlines, color, glass) or 'doors' (style, rails, hardware, swing).
+    function frameSec(P, pre, part) {
+      pre = pre || P;
+      var K = get(pre), what = P === 'graphic' ? 'elevation' : P === 'film' ? 'row' : 'run';
+      if (part === 'doors') return selectF('Default style', pre + '.doorStyle', Object.keys(DOORS).map(function (k) { return [k, DOORS[k].label]; })) + '<div class="row2">' + field('Top rail', pre + '.doorTop', 'in') + field('Bottom rail', pre + '.doorBottom', 'in') + '</div>' +
+        '<div class="row2">' + selectF('Hardware', pre + '.hw', [['pull', 'Pull'], ['lever', 'Lever handle'], ['push', 'Push bar'], ['panic', 'Exit device (panic)'], ['none', 'None']]) + selectF('Swing', pre + '.swing', [['true', 'Show'], ['false', 'Hide']]) + '</div>' +
+        (K.hw === 'pull' ? '<div class="row2">' + field('Height to top, AFF', pre + '.hwH', 'in') + field('Pull length', pre + '.hwLen', 'in') + '</div>' : K.hw === 'lever' ? field('Height to center, AFF', pre + '.lvH', 'in') : K.hw !== 'none' ? field('Height to top, AFF', pre + '.hwH', 'in') : '') +
+        '<p class="hint" style="margin:0">Add doors with <b>+ Door</b> under ' + (P === 'graphic' ? 'an elevation' : P === 'film' ? 'a row' : 'a run') + '’s panes; each door can take its own style and hinge side there. Style here is the default.</p>';
+      return '<p class="hint" style="margin:0">' + (P === 'film' ? 'Pane sizes are visible glass; a door’s size is its opening. The row’s H is its frame height above the curb.' : 'For ' + what + 's with panes. Pane sizes are visible glass; a door’s size is its opening.') + '</p>' +
+        (P === 'film' ? field('Curb / knee wall', pre + '.curb', 'in') : '<div class="row2">' + field('Frame height', pre + '.glassH', 'in') + field('Curb / knee wall', pre + '.curb', 'in') + '</div>') +
+        '<div class="row2">' + field('Jamb sightline', pre + '.fJamb', 'in') + field('Mullion sightline', pre + '.mull', 'in') + '</div>' +
+        '<div class="row2">' + field('Head sightline', pre + '.fHead', 'in') + field('Sill sightline', pre + '.fSill', 'in') + '</div>' +
+        field('Butt joint', pre + '.seam', 'in') + '<p class="hint keep" style="margin:0">Glass starts ' + esc(fmtIn(K.curb + K.fSill)) + ' AFF.</p><p class="hint" style="margin:0">Sightline is the frame’s visible face. Curb or knee wall is any base under the frame.</p>' +
+        '<div class="row2">' + selectF('Color', pre + '.fColor', Object.keys(FRAME_COLORS).map(function (k) { return [k, FRAME_COLORS[k][0]]; })) + colorF('Glass tint', pre + '.glass') + '</div>';
     }
     function field(label, path, kind, extra) {
-      var v = get(path), shown = kind === 'len' ? fmtFt(v) : kind === 'in' ? fmtIn(v) : v;
+      var v = get(path), shown = kind === 'len' ? fmtFt(v) : kind === 'in' ? fmtIn(v) : kind === 'sin' ? fmtS(v) : v;
       return '<label class="field">' + label + '<input type="text" data-k="' + path + '" data-kind="' + kind + '" value="' + esc(shown) + '"' + (extra || '') + '></label>';
     }
     function selectF(label, path, opts) {
@@ -3345,8 +3545,8 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       return '<label class="field">' + label + '<select data-k="' + path + '" data-kind="sel">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (String(o[0]) === v ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>';
     }
     function colorF(label, path) { return '<label class="field color">' + label + '<input type="color" data-k="' + path + '" data-kind="color" value="' + get(path) + '"></label>'; }
-    function lsec(id, title, body) { return '<details data-lsec="' + id + '"' + (open[id] ? ' open' : '') + '><summary>' + title + '</summary><div class="sec">' + body + '</div></details>'; }
-    var rollSel = function (noMargin) { return selectF('Roll width', 'roll', ROLLS.map(function (r) { return [r, r + '" roll']; })) + (noMargin ? '' : field('Printer margin, both edges', 'margin', 'in') + '<p class="hint" style="margin:0">Prints ' + fmtIn(printW()) + ' wide on a ' + L.roll + '" roll.</p>'); };
+    function lsec(id, title, body, sum) { return '<details data-lsec="' + id + '"' + (open[id] ? ' open' : '') + '><summary><span class="st">' + title + '</span>' + (sum ? '<span class="sum">' + esc(sum) + '</span>' : '') + '</summary><div class="sec">' + body + '</div></details>'; }
+    var rollSel = function (noMargin) { var rw = selectF('Roll width', 'roll', ROLLS.map(function (r) { return [r, r + '" roll']; })); return noMargin ? rw : '<div class="row2">' + rw + field('Printer margin', 'margin', 'in') + '</div><p class="hint keep" style="margin:0">Prints ' + fmtIn(printW()) + ' wide on a ' + L.roll + '" roll. The margin is both edges together.</p>'; };
     // Lengths, runs and rectangles from Measure. With a category, items tagged with it win; untagged ones are used if none are tagged.
     function measuredLengths(cat) {
       var list = M.items.filter(function (it) { return (it.type === 'length' || it.type === 'run' || it.type === 'curve') && scaleFor(it.page); });
@@ -3450,100 +3650,146 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       }
       leftEl.innerHTML = h;
     }
+    // The right panel: what is selected on top, its settings in tabs, the job's own settings folded below with a one-line summary,
+    // and a bar at the bottom to switch to Totals (results and quote) or Export. Tips stay behind the (i) button until asked for.
+    var rview = 'edit', rtab = {}, tips = false;
+    try { tips = localStorage.getItem('dim.tips') === '1'; } catch (err) { tips = false; }
+    var TIP_ICON = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="7" cy="7" r="6"/><path d="M7 6.2v4M7 3.8v.4" stroke-linecap="round"/></svg>';
+    function scope(text, act) { return '<div class="for-row"><span>' + text + '</span>' + (act ? '<button type="button" class="linkish" data-lact="' + act + '">Use on all rows</button>' : '') + '</div>'; }
+    function panel(P) {
+      var views = [['edit', 'Settings']].concat(P.totals ? [['totals', 'Totals']] : []).concat([['export', 'Export']]);
+      if (!views.some(function (v) { return v[0] === rview; })) rview = 'edit';
+      var h = '<div class="lp' + (tips ? ' tips' : '') + '"><div class="lp-head"><div><div class="lp-title">' + esc(P.title) + '</div><div class="lp-sub">' + esc(P.sub) + '</div></div>' +
+        '<button type="button" class="lp-tips" data-tips="1" aria-pressed="' + tips + '" title="' + (tips ? 'Hide tips' : 'Show tips') + '" aria-label="Tips">' + TIP_ICON + '</button></div><div class="lp-body">';
+      if (rview === 'edit') {
+        var tabs = P.tabs.filter(Boolean), cur = tabs.some(function (t) { return t[0] === rtab[L.job]; }) ? rtab[L.job] : tabs[0] && tabs[0][0];
+        if (tabs.length > 1) h += '<div class="rtabs" role="tablist">' + tabs.map(function (t) { return '<button type="button" role="tab" data-rtab="' + t[0] + '" aria-selected="' + (t[0] === cur) + '">' + t[1] + '</button>'; }).join('') + '</div>';
+        else if (tabs.length) h += '<div class="lp-group">' + tabs[0][1] + '</div>';
+        tabs.forEach(function (t) { if (t[0] === cur) h += '<div class="sec rtab-body" role="tabpanel">' + t[2] + '</div>'; });
+        if (P.job && P.job.length) h += (P.jobLabel ? '<div class="lp-group">' + P.jobLabel + '</div>' : '') + P.job.join('');
+      } else h += rview === 'totals' ? P.totals : P.out;
+      h += '</div><div class="lp-bar">' + views.map(function (v) { return '<button type="button" data-rview="' + v[0] + '" aria-pressed="' + (v[0] === rview) + '">' + v[1] + '</button>'; }).join('') + '</div></div>';
+      return h;
+    }
+    var shopSec = function () { return lsec('l_shop', 'Shop drawing', '<div class="row"><button type="button" class="btn strong" data-lact="toshop">Open as shop drawing</button></div><p class="hint" style="margin:0">Puts this layout on a sheet with title block, logo and scale bar.</p>'); };
     function right() {
-      var h = '';
+      var P;
       if (L.job === 'mural') {
         var A = L.mural, m = muralPanels(), ml = measuredLengths('mural'), mr = measuredRects('mural');
-        var size = field('Wall width', 'mural.w', 'len') + field('Wall height', 'mural.h', 'len');
+        var size = '<div class="row2">' + field('Wall width', 'mural.w', 'len') + field('Wall height', 'mural.h', 'len') + '</div>';
         if (ml.length || mr.length) size += '<label class="field">Use Measure item<select data-measure="mural"><option value="">Choose…</option>' + mr.map(function (x) { return '<option value="r:' + x.w + ':' + x.h + '">' + esc(x.name) + ' · ' + fmtFt(x.w) + ' × ' + fmtFt(x.h) + '</option>'; }).join('') + ml.map(function (x) { return '<option value="w:' + x.len + '">' + esc(x.name) + ' · width ' + fmtFt(x.len) + '</option>'; }).join('') + '</select></label><p class="hint" style="margin:0">A rectangle sets width and height; a length sets width.</p>';
-        h += lsec('l_size', 'Wall', size);
-        h += lsec('l_roll', 'Roll and seams', rollSel() + field('Bleed, each edge', 'mural.bleed', 'in') + field('Panel overlap', 'mural.overlap', 'in') +
+        var roll = rollSel() + '<div class="row2">' + field('Bleed, each edge', 'mural.bleed', 'in') + field('Panel overlap', 'mural.overlap', 'in') + '</div>' +
           selectF('Panels run', 'mural.orient', [['vertical', 'Vertically (drops)'], ['horizontal', 'Horizontally (rows)']]) +
           selectF('Panel widths', 'mural.balance', [['false', 'Full rolls, last one trimmed'], ['true', 'All panels equal']]) +
-          '<p class="hint" style="margin:0">Drag a seam on preview to move it off a face or logo.</p>' + (A.custom ? '<div class="row"><button type="button" class="btn" data-lact="resetseams">Reset seams</button></div>' : ''));
+          '<p class="hint" style="margin:0">Drag a seam on preview to move it off a face or logo.</p>' + (A.custom ? '<div class="row"><button type="button" class="btn" data-lact="resetseams">Reset seams</button></div>' : '');
         var art = selectF('Fill', 'mural.art', [['gradient', 'Gradient'], ['solid', 'Solid color'], ['image', 'Image']]);
         if (A.art === 'solid') art += colorF('Color', 'mural.color');
         if (A.art === 'gradient') art += '<div class="row2">' + colorF('From', 'mural.g1') + colorF('To', 'mural.g2') + '</div>' + selectF('Direction', 'mural.angle', [[0, 'Left to right'], [180, 'Right to left'], [90, 'Top to bottom'], [270, 'Bottom to top'], [45, 'Diagonal ↘'], [135, 'Diagonal ↙']]);
         if (A.art === 'image') {
-          art += '<div class="row"><label class="btn strong" for="lay-img">' + (A.img ? 'Replace image' : 'Choose image') + '</label><input type="file" id="lay-img" accept="image/*" hidden></div>';
-          if (A.img) art += '<p class="hint" style="margin:0">' + esc(A.imgName) + ' · ' + A.img.naturalWidth + ' × ' + A.img.naturalHeight + ' px</p>';
-          art += selectF('Fit', 'mural.fit', [['cover', 'Fill wall (crop)'], ['contain', 'Fit inside (no crop)'], ['stretch', 'Stretch'], ['repeat', 'Repeat pattern']]);
+          art += '<div class="row"><label class="btn strong" for="lay-img">' + (A.img ? 'Replace image' : 'Choose image or PDF') + '</label><input type="file" id="lay-img" accept="image/*,application/pdf,.pdf" hidden></div>';
+          if (A.img) art += '<p class="hint keep" style="margin:0">' + esc(A.imgName) + ' · ' + A.img.naturalWidth + ' × ' + A.img.naturalHeight + ' px</p>';
+          art += selectF('Fit', 'mural.fit', [['cover', 'Fill wall (crop)'], ['contain', 'Fit inside (no crop)'], ['custom', 'Place by hand'], ['stretch', 'Stretch'], ['repeat', 'Repeat pattern']]);
           if (A.fit === 'repeat') art += field('Pattern tile width', 'mural.tileW', 'in');
+          if (A.fit === 'custom' && A.img && A.iw > 0) {
+            var ir2 = imgRect('custom');
+            art += '<div class="row2">' + field('Image width', 'mural.iw', 'len') + '<label class="field">Image height<input type="text" value="' + esc(fmtFt(ir2.h)) + '" disabled title="Follows the width"></label></div>' +
+              '<div class="row2">' + field('From left of wall', 'mural.ix', 'sin') + field('From top of wall', 'mural.iy', 'sin') + '</div>' +
+              '<div class="row"><button type="button" class="btn" data-lact="imgcenter">Center</button><button type="button" class="btn" data-lact="imgfill">Fill wall</button><button type="button" class="btn" data-lact="imgfit">Fit inside</button></div>' +
+              '<p class="hint" style="margin:0">Drag the image on the preview to move it, or drag a corner to scale it. A negative distance puts the edge past the wall. Anything outside the wall and bleed is cropped.</p>';
+          }
+          if (A.fit === 'cover' || A.fit === 'contain') art += '<p class="hint" style="margin:0">Drag the image on the preview to place it by hand.</p>';
         }
-        h += lsec('l_art', 'Artwork', art);
         var ppi = imagePpi(), ppiTxt = ppi == null ? '' : '<dt>Image resolution</dt><dd>' + Math.round(ppi) + ' ppi</dd>';
-        h += lsec('l_res', 'Results', '<dl class="kv"><dt>Panels</dt><dd>' + m.n + '</dd><dt>Panel size</dt><dd>' + fmtIn(m.widths[0]) + ' × ' + fmtIn(m.len) + '</dd>' + (m.n > 1 && !A.balance ? '<dt>Last panel</dt><dd>' + fmtIn(m.widths[m.n - 1]) + ' wide</dd>' : '') +
+        var res = lsec('l_res', 'Results', '<dl class="kv"><dt>Panels</dt><dd>' + m.n + '</dd><dt>Panel size</dt><dd>' + fmtIn(m.widths[0]) + ' × ' + fmtIn(m.len) + '</dd>' + (m.n > 1 && !A.balance ? '<dt>Last panel</dt><dd>' + fmtIn(m.widths[m.n - 1]) + ' wide</dd>' : '') +
           '<dt>Wall area</dt><dd>' + num(m.wall) + ' sq ft</dd><dt>Printed area</dt><dd>' + num(m.printed) + ' sq ft</dd><dt>Printable width</dt><dd>' + fmtIn(m.P) + ' of ' + L.roll + '"</dd><dt>Media used</dt><dd>' + num(m.rollFt) + ' ft of ' + L.roll + '"</dd><dt>Media area</dt><dd>' + num(m.material) + ' sq ft</dd>' + ppiTxt + '</dl>' +
-          (ppi != null && ppi < 72 ? '<p class="hint" style="margin:0;color:var(--red-deep)">Low for viewing up close. 100 ppi or more at size looks sharp; 50–72 is fine from a few feet back.</p>' : ''));
-        h += quoteSec();
+          (ppi != null && ppi < 72 ? '<p class="hint keep" style="margin:0;color:var(--red-deep)">Low for viewing up close. 100 ppi or more at size looks sharp; 50–72 is fine from a few feet back.</p>' : ''), m.n + ' panels · ' + num(m.rollFt) + ' ft');
         var maxDpi = Math.floor(Math.sqrt(80e6 / (Math.max.apply(null, m.widths) * m.len)));
-        h += lsec('l_exp', 'Export', '<div class="row"><button type="button" class="btn strong" data-lact="copy">Copy panel list</button><button type="button" class="btn" data-lact="csv" data-dl>CSV</button></div>' +
+        var exp = lsec('l_exp', 'Export', '<div class="row"><button type="button" class="btn strong" data-lact="copy">Copy panel list</button><button type="button" class="btn" data-lact="csv" data-dl>CSV</button></div>' +
           '<div data-dl>' + selectF('Tile resolution', 'mural.dpi', [[25, '25 ppi (proof)'], [50, '50 ppi'], [100, '100 ppi'], [150, '150 ppi']]) +
           '<div class="row" style="margin-top:6px"><button type="button" class="btn strong" data-lact="tilespdf"' + (L.busy ? ' disabled' : '') + '>Panels as PDF</button><button type="button" class="btn" data-lact="tiles"' + (L.busy ? ' disabled' : '') + '>Tiles (.zip)</button><button type="button" class="btn" data-lact="map">Panel map (.png)</button></div>' +
           '<label class="chk"><input type="checkbox" data-lflag="marks"' + (L.mural.marks ? ' checked' : '') + '> Panel labels and seam marks in bleed</label>' +
-          '<p class="hint" style="margin:0">The PDF has one page per panel at true size; the zip has one PNG per panel. Overlap and bleed are included. ' + (L.mural.dpi > maxDpi ? 'At this size DIM caps tiles at ' + maxDpi + ' ppi to stay within browser memory.' : 'Size them by the inches in each file name in your RIP.') + '</p></div>' +
+          '<p class="hint" style="margin:0">The PDF has one page per panel at true size; the zip has one PNG per panel. Overlap and bleed are included. Size them by the inches in each file name in your RIP.</p>' +
+          (L.mural.dpi > maxDpi ? '<p class="hint keep" style="margin:0">At this size DIM caps tiles at ' + maxDpi + ' ppi to stay within browser memory.</p>' : '') + '</div>' +
           (L.note ? '<p class="ok">' + esc(L.note) + '</p>' : '') + '<textarea id="lay-copy" hidden readonly class="copybox"></textarea>');
+        P = { title: 'Mural', sub: fmtFt(A.w) + ' × ' + fmtFt(A.h) + ' wall · ' + m.n + ' panel' + (m.n === 1 ? '' : 's'), tabs: [['wall', 'Wall', size], ['art', 'Artwork', art], ['roll', 'Roll', roll]], totals: res + quoteSec(), out: exp + shopSec() };
       } else if (L.job === 'film') {
-        var F2 = L.film, t = filmTotals(), built = F2.panes.some(runBays), fromFloor = built ? ' On built-out rows, heights are from the floor, so the film lines up across doors and sidelites.' : '';
-        h += lsec('f_roll', 'Roll and bleed', rollSel() + field('Bleed, each edge', 'film.allow', 'in') + selectF('Strips run', 'film.mode', [['auto', 'Whichever uses less film'], ['vertical', 'Vertically (drops)'], ['horizontal', 'Horizontally (rows)']]) + selectF('Strip widths', 'film.balance', [['true', 'All strips equal'], ['false', 'Full rolls, last one trimmed']]) + field('Default glass height', 'film.defH', 'in') + '<p class="hint" style="margin:0">Default glass height is used for panes added from Measure lengths.</p>');
+        var F2 = L.film, t = filmTotals(), sp = F2.panes[F2.sel] || F2.panes[0], pre = sp ? 'film.panes.' + F2.panes.indexOf(sp) + '.s' : '', R = sp ? rowSet(sp) : null, built = !!(sp && runBays(sp)), many = F2.panes.length > 1;
+        var fromFloor = built ? ' On a built-out row, heights are from the floor, so the film lines up across doors and sidelites.' : '';
+        var rollB = rollSel() + '<div class="row2">' + field('Bleed, each edge', 'film.allow', 'in') + field('Default glass height', 'film.defH', 'in') + '</div>' + selectF('Strips run', 'film.mode', [['auto', 'Whichever uses less film'], ['vertical', 'Vertically (drops)'], ['horizontal', 'Horizontally (rows)']]) + selectF('Strip widths', 'film.balance', [['true', 'All strips equal'], ['false', 'Full rolls, last one trimmed']]) + '<p class="hint" style="margin:0">Default glass height is used for panes added from Measure lengths.</p>';
         var cov = selectF('Film covers', 'film.cover', [['full', 'The whole glass'], ['band', 'A band']]);
-        if (F2.cover === 'band') cov += '<div class="row2">' + field('Band height', 'film.bandH', 'in') + field('Bottom edge, AFF', 'film.bandB', 'in') + '</div><p class="hint" style="margin:0">One band runs the length of every row, ' + esc(fmtIn(F2.bandB)) + ' to ' + esc(fmtIn(F2.bandB + F2.bandH)) + ' above the floor, cut for each pane of glass. Its top and bottom edges get no bleed unless they reach the edge of the glass. Plain panes are placed by <b>Sill height</b> under Look.' + (printW() + 1e-9 < F2.bandH ? ' A ' + esc(fmtIn(F2.bandH)) + ' band is taller than the ' + esc(fmtIn(printW())) + ' this roll prints, so rows will seam.' : '') + '</p>';
-        h += lsec('f_cover', 'Coverage', cov);
-        var look = selectF('Film', 'film.look', [['gradient', 'Printed gradient'], ['frost', 'Frost'], ['feather', 'Frost, feathered'], ['dual', 'Frost, dual feather']]);
-        if (F2.look === 'gradient') look += '<div class="row2">' + colorF('Bottom', 'film.c1') + colorF('Top', 'film.c2') + '</div>';
-        if (F2.look === 'feather') look += '<div class="row2">' + field('Solid frost', 'film.fA', 'in') + field('Fully clear', 'film.fB', 'in') + '</div><p class="hint" style="margin:0">Heights from bottom of glass. Clear above solid fades upward; clear below solid fades downward.' + fromFloor + '</p>';
-        if (F2.look === 'dual') {
-          var cb = F2.dual === 'clear', on = cb ? 'Clear' : 'Solid', off = cb ? 'Solid' : 'Clear';
-          look += selectF('Middle band', 'film.dual', [['frost', 'Frost, fading out above and below'], ['clear', 'Clear, frost fading in above and below']]) +
-            '<div class="row2">' + field(on + ' from', 'film.d2', 'in') + field(on + ' to', 'film.d3', 'in') + '</div><div class="row2">' + field(off + ' below', 'film.d1', 'in') + field(off + ' above', 'film.d4', 'in') + '</div><p class="hint" style="margin:0">Heights from bottom of glass. Film fades between ' + off.toLowerCase() + ' below and ' + on.toLowerCase() + ' from, and between ' + on.toLowerCase() + ' to and ' + off.toLowerCase() + ' above.' + fromFloor + '</p>';
+        if (F2.cover === 'band') cov += '<div class="row2">' + field('Band height', 'film.bandH', 'in') + field('Bottom edge, AFF', 'film.bandB', 'in') + '</div><p class="hint" style="margin:0">One band runs the length of every row, ' + esc(fmtIn(F2.bandB)) + ' to ' + esc(fmtIn(F2.bandB + F2.bandH)) + ' above the floor, cut for each pane of glass. Its top and bottom edges get no bleed unless they reach the edge of the glass. Plain panes are placed by <b>Sill height</b> under Look.</p>' + (printW() + 1e-9 < F2.bandH ? '<p class="hint keep" style="margin:0">A ' + esc(fmtIn(F2.bandH)) + ' band is taller than the ' + esc(fmtIn(printW())) + ' this roll prints, so rows will seam.</p>' : '');
+        var tabs = [];
+        if (sp) {
+          var look = scope('Look for <b>' + esc(sp.name) + '</b>', many && 'lookall') + selectF('Film', pre + '.look', [['gradient', 'Printed gradient'], ['frost', 'Frost'], ['feather', 'Frost, feathered'], ['dual', 'Frost, dual feather']]);
+          if (R.look === 'gradient') look += '<div class="row2">' + colorF('Bottom', pre + '.c1') + colorF('Top', pre + '.c2') + '</div>';
+          if (R.look === 'feather') look += '<div class="row2">' + field('Solid frost', pre + '.fA', 'in') + field('Fully clear', pre + '.fB', 'in') + '</div><p class="hint" style="margin:0">Heights from bottom of glass. Clear above solid fades upward; clear below solid fades downward.' + fromFloor + '</p>';
+          if (R.look === 'dual') {
+            var cb = R.dual === 'clear', on = cb ? 'Clear' : 'Solid', off = cb ? 'Solid' : 'Clear';
+            look += selectF('Middle band', pre + '.dual', [['frost', 'Frost, fading out above and below'], ['clear', 'Clear, frost fading in above and below']]) +
+              '<div class="row2">' + field(on + ' from', pre + '.d2', 'in') + field(on + ' to', pre + '.d3', 'in') + '</div><div class="row2">' + field(off + ' below', pre + '.d1', 'in') + field(off + ' above', pre + '.d4', 'in') + '</div><p class="hint" style="margin:0">Heights from bottom of glass. Film fades between ' + off.toLowerCase() + ' below and ' + on.toLowerCase() + ' from, and between ' + on.toLowerCase() + ' to and ' + off.toLowerCase() + ' above.' + fromFloor + '</p>';
+          }
+          var who = selectF('Person behind glass', pre + '.person', [['none', 'Nobody'], ['woman', 'Woman, 5\'-5"'], ['man', 'Man, 5\'-10"'], ['both', 'Both']]);
+          look += built ? who : '<div class="row2">' + who + field('Sill height', pre + '.sill', 'in') + '</div>';
+          if (R.person !== 'none') look += '<p class="hint" style="margin:0">View blurs where film is solid, to show how much it hides.</p>';
+          look += built ? '<p class="hint" style="margin:0">This row is built out, so its glass starts at <b>Curb / knee wall</b> plus <b>Sill sightline</b> under Frame.</p>' : '<p class="hint" style="margin:0">Sill height is the bottom of the glass above the floor: the pane is drawn on a sill wall, and people stand on the floor. Film heights still run from the bottom of the glass.</p>';
+          tabs.push(['look', 'Look', look]);
+          if (built) {
+            tabs.push(['frame', 'Frame', scope('Frame for <b>' + esc(sp.name) + '</b>', many && 'frameall') + frameSec('film', pre, 'frame')]);
+            tabs.push(['doors', 'Doors', scope('Doors for <b>' + esc(sp.name) + '</b>', many && 'frameall') + frameSec('film', pre, 'doors')]);
+          }
         }
-        look += selectF('Person behind glass', 'film.person', [['none', 'Nobody'], ['woman', 'Woman, 5\'-5"'], ['man', 'Man, 5\'-10"'], ['both', 'Both']]);
-        if (F2.person !== 'none') look += '<p class="hint" style="margin:0">View blurs where film is solid, to show how much it hides.</p>';
-        look += field('Sill height', 'film.sill', 'in') + '<p class="hint" style="margin:0">Bottom of the glass above the floor, for plain panes: they are drawn on a sill wall, and people stand on the floor. Film heights still run from the bottom of the glass.' + (built ? ' Built-out rows take theirs from <b>Curb / knee wall</b> and <b>Sill sightline</b> under Frame.' : '') + '</p>';
-        h += lsec('f_look', 'Look', look);
-        if (built) h += lsec('f_frame', 'Frame', frameSec('film'));
-        h += lsec('f_res', 'Results', '<label class="field">Measure glass by<select data-filmunit="1"><option value="sqft"' + (filmByLf() ? '' : ' selected') + '>Square feet</option><option value="lf"' + (filmByLf() ? ' selected' : '') + '>Linear feet</option></select></label><dl class="kv"><dt>Panes</dt><dd>' + t.panes + '</dd><dt>' + (isBand() ? 'Film area' : 'Glass area') + '</dt><dd>' + num(t.net) + ' sq ft</dd><dt>Linear feet (glass)</dt><dd>' + num(t.run) + ' LF</dd><dt>Printable width</dt><dd>' + fmtIn(printW()) + ' of ' + L.roll + '"</dd><dt>Media used</dt><dd>' + num(t.lf) + ' ft of ' + L.roll + '"</dd><dt>Media area</dt><dd>' + num(t.material) + ' sq ft</dd><dt>Seams</dt><dd>' + t.seams + '</dd><dt>Yield</dt><dd>' + (t.material ? Math.round(t.net / t.material * 100) : 0) + '%</dd></dl><p class="hint" style="margin:0">Linear feet is the horizontal run of glass (width × quantity). Media used includes the bleed and printer margin; add your usual waste for setup and spoilage.</p>');
-        h += quoteSec();
-        h += lsec('f_exp', 'Export', '<div class="row"><button type="button" class="btn strong" data-lact="filmpdf" data-dl' + (L.busy ? ' disabled' : '') + '>Print file (PDF)</button></div>' +
+        var res = lsec('f_res', 'Results', '<label class="field">Measure glass by<select data-filmunit="1"><option value="sqft"' + (filmByLf() ? '' : ' selected') + '>Square feet</option><option value="lf"' + (filmByLf() ? ' selected' : '') + '>Linear feet</option></select></label><dl class="kv"><dt>Panes</dt><dd>' + t.panes + '</dd><dt>' + (isBand() ? 'Film area' : 'Glass area') + '</dt><dd>' + num(t.net) + ' sq ft</dd><dt>Linear feet (glass)</dt><dd>' + num(t.run) + ' LF</dd><dt>Printable width</dt><dd>' + fmtIn(printW()) + ' of ' + L.roll + '"</dd><dt>Media used</dt><dd>' + num(t.lf) + ' ft of ' + L.roll + '"</dd><dt>Media area</dt><dd>' + num(t.material) + ' sq ft</dd><dt>Seams</dt><dd>' + t.seams + '</dd><dt>Yield</dt><dd>' + (t.material ? Math.round(t.net / t.material * 100) : 0) + '%</dd></dl><p class="hint" style="margin:0">Linear feet is the horizontal run of glass (width × quantity). Media used includes the bleed and printer margin; add your usual waste for setup and spoilage.</p>', filmQty(t));
+        var anyGrad = F2.panes.some(function (r) { return rowSet(r).look === 'gradient'; }), anyFrost = F2.panes.some(function (r) { return rowSet(r).look !== 'gradient'; }), anyBuilt = F2.panes.some(runBays);
+        var exp = lsec('f_exp', 'Export', '<div class="row"><button type="button" class="btn strong" data-lact="filmpdf" data-dl' + (L.busy ? ' disabled' : '') + '>Print file (PDF)</button></div>' +
           '<label class="chk"><input type="checkbox" data-filmmarks="1"' + (F2.marks ? ' checked' : '') + '> Strip labels and glass-edge marks in bleed</label>' +
-          '<p class="hint" style="margin:0">One true-size page per strip, bleed included. ' + (F2.look === 'gradient' ? 'The gradient runs bottom to top across the whole pane' + (built ? ' (floor to frame top on built-out rows)' : '') + ', so strips line up.' : 'Frost prints as grayscale: black is solid frost, white is clear. Map it to white ink or your frost layer in the RIP.') + ' Panes with a quantity say how many to print.' + (built ? ' Built-out rows print one piece per size of glass, door glass included.' : '') + '</p>' +
+          '<p class="hint" style="margin:0">One true-size page per strip, bleed included. ' + (anyGrad ? 'A gradient runs bottom to top across the whole pane (floor to frame top on built-out rows), so strips line up. ' : '') + (anyFrost ? 'Frost prints as grayscale: black is solid frost, white is clear. Map it to white ink or your frost layer in the RIP. ' : '') + 'Panes with a quantity say how many to print.' + (anyBuilt ? ' Built-out rows print one piece per size of glass, door glass included.' : '') + '</p>' +
           '<div class="row"><button type="button" class="btn" data-lact="copy">Copy cut list</button><button type="button" class="btn" data-lact="csv" data-dl>CSV</button></div>' + (L.note ? '<p class="ok">' + esc(L.note) + '</p>' : '') + '<textarea id="lay-copy" hidden readonly class="copybox"></textarea>');
+        P = { title: sp ? sp.name : 'Privacy film', sub: sp ? (built ? fmtFt(sp.len) + ' wall, built out' : fmtIn(sp.w) + ' × ' + fmtIn(sp.h) + ' glass') + (sp.qty > 1 ? ' ×' + sp.qty : '') : 'Add a pane in the left panel',
+          tabs: tabs, jobLabel: 'Whole job', job: [dimsSec('film'), lsec('f_roll', 'Roll and bleed', rollB, L.roll + '" roll · ' + fmtIn(F2.allow) + ' bleed'), lsec('f_cover', 'Coverage', cov, F2.cover === 'band' ? fmtIn(F2.bandH) + ' band at ' + fmtIn(F2.bandB) : 'Whole glass')],
+          totals: res + quoteSec(), out: exp + shopSec() };
       } else if (L.job === 'graphic') {
-        var G = L.graphic, er = selElev(), efr = er && elevFrame(er);
-        var gh = (G.graphics.length ? '<div class="list" style="margin-top:0">' + G.graphics.map(function (g) { return '<div class="item ro"><span class="chip art" style="--art:url(' + g.url + ')"></span><span>' + esc(g.name) + '</span><b><button type="button" class="linkish" data-gplace="' + g.id + '"' + (er ? '' : ' disabled') + '>Place</button></b><button type="button" data-gdelart="' + g.id + '" aria-label="Remove ' + esc(g.name) + '">×</button></div>'; }).join('') + '</div>' : '') +
-          '<div class="row"><label class="btn strong" for="graphic-art">Upload graphics</label><input type="file" id="graphic-art" accept="image/png,image/svg+xml,.svg,.png" multiple hidden></div>' +
-          '<p class="hint" style="margin:0">PNG or SVG. Each upload is placed on the selected elevation; <b>Place</b> adds another copy.</p>';
-        h += lsec('g_art', 'Graphics', gh);
+        var G = L.graphic, er = selElev(), efr = er && elevFrame(er), anyGlass = G.runs.some(function (r) { return !isWall(r); });
+        var lib = '<div class="label">Your graphics</div>' + (G.graphics.length ? '<div class="list" style="margin-top:0">' + G.graphics.map(function (g) { return '<div class="item ro"><span class="chip art" style="--art:url(' + g.url + ')"></span><span>' + esc(g.name) + '</span><b><button type="button" class="linkish" data-gplace="' + g.id + '"' + (er ? '' : ' disabled') + '>Place</button></b><button type="button" data-gdelart="' + g.id + '" aria-label="Remove ' + esc(g.name) + '">×</button></div>'; }).join('') + '</div>' : '') +
+          '<div class="row"><label class="btn strong" for="graphic-art">Upload graphics</label><input type="file" id="graphic-art" accept="image/png,image/svg+xml,application/pdf,.svg,.png,.pdf" multiple hidden></div>' +
+          '<p class="hint" style="margin:0">PNG, SVG or PDF (its first page). Each upload is placed on the selected elevation; <b>Place</b> adds another copy.</p>';
+        var gt = '', nSel = gSel().length;
+        if (er && nSel) {
+          var at = nSel > 1 ? gAlignTo : 'area';
+          gt += '<div class="label">Align ' + (nSel > 1 ? nSel + ' graphics' : 'graphic') + ' to</div><div class="aseg">' + [['area', isWall(er) ? 'Wall' : 'Glass'], ['sel', 'Selection'], ['key', 'Key graphic']].map(function (o) { return '<button type="button" data-galignto="' + o[0] + '" aria-pressed="' + (at === o[0]) + '">' + o[1] + '</button>'; }).join('') + '</div>' +
+            '<div class="dimtog">' + ALIGNS.map(function (a) { return '<button type="button" class="dimb" data-galign="' + a[0] + '" title="' + a[1] + '" aria-label="' + a[1] + '"><svg width="20" height="20" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.3">' + a[2] + '</svg></button>'; }).join('') + '</div>' +
+            '<p class="hint" style="margin:0">Shift+click graphics on the drawing (or their cards) to select several. Click one that is already selected to make it the key graphic: Key graphic aligns the others to it.</p>';
+        }
         if (er) {
           var items = (er.items || []).filter(artOf);
-          var ih = items.length ? items.map(function (it) {
-            var g = artOf(it), a = areaOf(er, efr, it.x + it.w / 2), on = G.isel === it.id, gid = it.id;
+          gt += items.length ? items.map(function (it) {
+            var g = artOf(it), a = areaOf(er, efr, it.x + it.w / 2), on = gIsSel(it.id), gid = it.id;
             var gf = function (label, f, v) { return '<label class="field">' + label + '<input type="text" data-gi="' + gid + '" data-gf="' + f + '" value="' + esc(v) + '"></label>'; };
-            return '<div class="gitem' + (on ? ' sel' : '') + '" data-gitem="' + gid + '"><div class="gitem-top"><span class="chip art" style="--art:url(' + g.url + ')"></span><span>' + esc(g.name) + '</span><span class="hint">on ' + a.name + '</span><button type="button" data-gdel="' + gid + '" aria-label="Remove ' + esc(g.name) + ' from ' + esc(er.name) + '">×</button></div>' +
+            return '<div class="gitem' + (on ? ' sel' : '') + '" data-gitem="' + gid + '"><div class="gitem-top"><span class="chip art" style="--art:url(' + g.url + ')"></span><span>' + esc(g.name) + '</span><span class="hint keep">' + (on && gMulti.length && G.isel === gid ? 'key · ' : '') + 'on ' + a.name + '</span><button type="button" data-gdel="' + gid + '" aria-label="Remove ' + esc(g.name) + ' from ' + esc(er.name) + '">×</button></div>' +
               '<div class="row2">' + gf('Width', 'w', fmtIn(it.w)) + gf('Height', 'h', fmtIn(itemH(it, g))) + '</div>' +
               '<div class="row2">' + gf('From left edge', 'x', fmtIn(it.x - a.x0)) + gf('Bottom, AFF', 'y', fmtIn(it.y)) + '</div>' +
               (isWall(er) ? '' : '<label class="field">Surface<select data-gi="' + gid + '" data-gf="surface"><option value="first"' + (it.surface !== 'second' ? ' selected' : '') + '>First surface (on the glass)</option><option value="second"' + (it.surface === 'second' ? ' selected' : '') + '>Second surface (behind the glass)</option></select></label>') +
               '<div class="row"><button type="button" class="btn" data-gcenter="' + gid + '">Center across ' + (a.name === 'door' ? 'the door' : a.name === 'wall' ? 'the wall' : a.name === 'glass' ? 'the glass' : a.name) + '</button></div></div>';
-          }).join('') : '<p class="hint" style="margin:0">No graphics here yet. Upload one above, or <b>Place</b> one from the list.</p>';
-          ih += '<p class="hint" style="margin:0">Drag a graphic on the drawing to move it; it snaps to the center of its glass or wall. From left edge is to the edge of the glass ' + (isWall(er) ? 'or wall ' : '') + 'it sits on. Width and height keep its shape.</p>';
-          h += lsec('g_items', 'On ' + esc(er.name), ih);
+          }).join('') : '<p class="hint keep" style="margin:0">No graphics on ' + esc(er.name) + ' yet. Upload one below, or <b>Place</b> one from the list.</p>';
+          gt += '<p class="hint" style="margin:0">Drag a graphic on the drawing to move it; it snaps to the center of its glass or wall. From left edge is to the edge of the glass ' + (isWall(er) ? 'or wall ' : '') + 'it sits on. Width and height keep its shape.</p>';
         }
-        var DT = [['size', 'Size'], ['bottom', 'Bottom AFF'], ['center', 'Center AFF'], ['edges', 'From edges']];
-        h += lsec('g_dims', 'Dimensions', '<div class="tog">' + DT.map(function (d) { var v = !!(G.dims || {})[d[0]]; return '<button type="button" class="btn" data-gdim="' + d[0] + '" aria-pressed="' + v + '">' + d[1] + '</button>'; }).join('') + '</div><p class="hint" style="margin:0">Shown for every graphic, here and on the shop drawing. AFF is above finished floor.</p>');
-        if (er && isWall(er)) { if (!er.color) er.color = wallColor(er); h += lsec('g_wall', 'Wall', colorF((FINISHES[er.finish] || FINISHES.paint)[0] + ' color', 'graphic.runs.' + G.sel + '.color') + '<p class="hint" style="margin:0">Change the finish in the elevation\u2019s Type menu. Brick and block are drawn at true size, coursed from the floor.</p>'); }
-        if (G.runs.some(function (r) { return !isWall(r); })) h += lsec('g_frame', 'Frame', frameSec('graphic'));
+        var wallT = null;
+        if (er && isWall(er)) { if (!er.color) er.color = wallColor(er); wallT = ['wall', 'Wall', colorF((FINISHES[er.finish] || FINISHES.paint)[0] + ' color', 'graphic.runs.' + G.sel + '.color') + '<p class="hint" style="margin:0">Change the finish in the elevation’s Type menu. Brick and block are drawn at true size, coursed from the floor.</p>']; }
+        var dims = dimsSec('graphic', '<p class="hint" style="margin:0">Shown for every graphic, here and on the shop drawing. AFF is above finished floor.</p>');
+        P = { title: er ? er.name : 'Graphic mockup', sub: er ? (isWall(er) ? (FINISHES[er.finish] || FINISHES.paint)[0] + ' · ' + fmtFt(er.len) + ' × ' + fmtFt(er.wallH) : 'Glass · ' + fmtFt(elevLen(er))) : 'Add an elevation in the left panel',
+          tabs: [['art', 'Graphics', gt + lib], wallT, anyGlass ? ['frame', 'Frame', scope('Frame for every glass elevation') + frameSec('graphic', null, 'frame')] : null, anyGlass ? ['doors', 'Doors', scope('Doors for every glass elevation') + frameSec('graphic', null, 'doors')] : null],
+          jobLabel: 'Whole job', job: [dims], out: shopSec() };
       } else {
-        var K = L.markers, mt = markerTotals();
+        var K = L.markers, mt = markerTotals(), anyFrame = K.runs.some(runBays);
         var bnd = '<label class="field">Band heights, bottom edge AFF<input type="text" data-k="markers.bands" data-kind="raw" value="' + esc(K.bands) + '"></label><p class="hint" style="margin:0">AFF is above finished floor. Separate with commas, e.g. 30, 60. Check local code and spec.</p>' +
           selectF('Pattern', 'markers.pattern', [['squares', 'Squares'], ['dots', 'Dots'], ['ticks', 'Vertical ticks'], ['solid', 'Solid line'], ['graphic', 'Your graphics (PNG or SVG)']]);
         if (isArt()) {
-          var G = K.graphics || [];
-          bnd += '<div class="label">Graphics</div>' + (G.length ? '<div class="list">' + G.map(function (g, i) { return '<div class="item ro"><span class="chip art" style="--art:url(' + g.url + ')"></span><span>' + letter(i) + ' · ' + esc(g.name) + '</span><b></b><button type="button" data-delart="' + i + '" aria-label="Remove ' + esc(g.name) + '">×</button></div>'; }).join('') + '</div>' : '<p class="hint" style="margin:0">Upload one or more PNG or SVG files. Each is labeled A, B, C… in the order you add them.</p>') +
-            '<div class="row"><label class="btn" for="marker-art">Upload graphics</label><input type="file" id="marker-art" accept="image/png,image/svg+xml,.svg,.png" multiple hidden></div>';
-          if (G.length) bnd += selectF('Outline on preview', 'markers.artEdge', [['false', 'None'], ['true', 'Thin dark edge']]) + '<p class="hint" style="margin:0">An edge helps white or light graphics show on the glass. It is preview only; it is not printed or cut.</p>';
-          if (G.length) {
+          var MG = K.graphics || [];
+          bnd += '<div class="label">Graphics</div>' + (MG.length ? '<div class="list">' + MG.map(function (g, i) { return '<div class="item ro"><span class="chip art" style="--art:url(' + g.url + ')"></span><span>' + letter(i) + ' · ' + esc(g.name) + '</span><b></b><button type="button" data-delart="' + i + '" aria-label="Remove ' + esc(g.name) + '">×</button></div>'; }).join('') + '</div>' : '<p class="hint keep" style="margin:0">Upload one or more PNG or SVG files. Each is labeled A, B, C… in the order you add them.</p>') +
+            '<div class="row"><label class="btn" for="marker-art">Upload graphics</label><input type="file" id="marker-art" accept="image/png,image/svg+xml,application/pdf,.svg,.png,.pdf" multiple hidden></div>';
+          if (MG.length) bnd += selectF('Outline on preview', 'markers.artEdge', [['false', 'None'], ['true', 'Thin dark edge']]) + '<p class="hint" style="margin:0">An edge helps white or light graphics show on the glass. It is preview only; it is not printed or cut.</p>';
+          if (MG.length) {
             bnd += selectF('Use', 'markers.seq', [['all', 'The same graphic on every marker'], ['order', 'Each graphic in turn (A, B, C…)'], ['custom', 'My own sequence']]);
-            if (K.seq === 'all' && G.length > 1) bnd += selectF('Graphic', 'markers.useIdx', G.map(function (g, i) { return [i, letter(i) + ' · ' + g.name]; }));
+            if (K.seq === 'all' && MG.length > 1) bnd += selectF('Graphic', 'markers.useIdx', MG.map(function (g, i) { return [i, letter(i) + ' · ' + g.name]; }));
             if (K.seq === 'custom') bnd += '<label class="field">Sequence<input type="text" data-k="markers.seqText" data-kind="raw" value="' + esc(K.seqText) + '"></label>' + seqPicker('markers.seqText', K.seqText, '') + '<p class="hint" style="margin:0">Repeats along each band. Click marks to add them in order, or type: ' + SEQ_HINT + ' A, l, l, l puts your logo then three ticks.</p>';
           }
         }
@@ -3554,31 +3800,30 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
             bl.slice().reverse().forEach(function (bh) { var bi = bl.indexOf(bh); bnd += '<label class="field">Band at ' + esc(fmtIn(bh)) + '<input type="text" data-k="markers.bandSeq.' + bi + '" data-kind="raw" value="' + esc((K.bandSeq || [])[bi] || '') + '" placeholder="' + esc(base) + '"></label>' + seqPicker('markers.bandSeq.' + bi, (K.bandSeq || [])[bi] || '', base); });
             bnd += '<p class="hint" style="margin:0">Each band repeats its own sequence; blank uses the pattern above. Click marks to add them in order, or type: ' + SEQ_HINT + ' <b>q, b</b> alternates light and dark squares.</p>';
           }
-          bnd += selectF('Start pattern', 'markers.start', [['center', 'Centered on run'], ['left', 'From left edge'], ['right', 'From right edge']]);
-          bnd += selectF('Gap measured', 'markers.gapBy', [['clear', 'Clear space between marks'], ['oc', 'On center (O.C.)']]);
-          if (K.runs.some(runBays)) bnd += selectF('Spacing on panes', 'markers.gapMode', [['min', 'Minimum gap, fill each pane'], ['exact', 'Exact gap, extra at the edges']]);
         }
-        var anyBar = K.pattern === 'solid' || seqHas('square') || seqHas('dark') || seqHas('tick'), anySize = K.pattern !== 'solid' && bandSeqs().some(function (t) { return t !== 'tick'; });
-        if (anyBar) bnd += field(K.pattern === 'solid' ? 'Band height' : seqHas('tick') && !seqHas('square') && !seqHas('dark') ? 'Tick height' : seqHas('tick') ? 'Square and tick height' : 'Square height', 'markers.barH', 'in');
-        if (K.pattern !== 'solid') bnd += '<div class="row2">' + (anySize ? field(K.pattern === 'dots' && !K.perBand ? 'Dot size' : isArt() ? 'Graphic width' : K.perBand ? 'Mark width' : 'Square size', 'markers.size', 'in') : field('Tick width', 'markers.tickW', 'in')) + field((K.gapMode !== 'exact' && K.runs.some(runBays) ? 'Min ' : '') + (K.gapBy === 'oc' ? 'O.C.' : 'gap'), 'markers.gap', 'in') + '</div>' + (anySize && seqHas('tick') ? field('Tick width', 'markers.tickW', 'in') : '') + (isArt() ? '<p class="hint" style="margin:0">Each graphic keeps its own shape; its height follows the width. The band height is where each graphic’s bottom edge sits.</p>' : '');
-        bnd += field('End clearance', 'markers.margin', 'in');
-        var anyFrame = K.runs.some(runBays);
-        if (K.runs.some(function (r) { return !runBays(r); })) bnd += field('Glass height (preview)', 'markers.glassH', 'in') + (anyFrame ? '' : colorF('Glass tint', 'markers.glass'));
-        h += lsec('m_bands', 'Bands', bnd);
-        // Storefront frame for runs typed as panes.
-        var fm = frameSec('markers');
-        if (anyFrame) h += lsec('m_frame', 'Frame', fm);
-        h += lsec('m_cut', 'Cutting', rollSel(true) + field('Gutter', 'markers.spacing', 'in'));
-        h += lsec('m_res', 'Results', '<dl class="kv"><dt>Glass</dt><dd>' + num(mt.runLen / 12) + ' ft</dd><dt>Bands</dt><dd>' + mt.nb + '</dd><dt>Marker length</dt><dd>' + num(mt.lf) + ' LF</dd>' + (K.pattern !== 'solid' ? '<dt>Pieces</dt><dd>' + num(mt.pieces, 0) + (mt.dark ? ' (' + num(mt.dark, 0) + ' dark)' : '') + '</dd>' : '') + '<dt>Across the roll</dt><dd>' + mt.lanes + ' ' + (K.pattern === 'solid' ? 'strips' : 'pieces') + '</dd><dt>Media used</dt><dd>' + num(Math.ceil(mt.rollFt * 10) / 10) + ' ft of ' + L.roll + '"</dd></dl><p class="hint" style="margin:0">Media used assumes pieces nest across the roll with the gutter above. Add a site-survey allowance before ordering.</p>');
-        h += quoteSec();
+        var spc = '';
+        var anyBar = K.pattern === 'solid' || seqHas('square') || seqHas('dark') || seqHas('tick'), anySize = K.pattern !== 'solid' && bandSeqs().some(function (x) { return x !== 'tick'; });
+        if (K.pattern !== 'solid') {
+          spc += '<div class="row2">' + selectF('Start pattern', 'markers.start', [['center', 'Centered on run'], ['left', 'From left edge'], ['right', 'From right edge']]) + selectF('Gap measured', 'markers.gapBy', [['clear', 'Clear space'], ['oc', 'On center (O.C.)']]) + '</div>';
+          if (anyFrame) spc += selectF('Spacing on panes', 'markers.gapMode', [['min', 'Minimum gap, fill each pane'], ['exact', 'Exact gap, extra at the edges']]);
+        }
+        if (anyBar) spc += field(K.pattern === 'solid' ? 'Band height' : seqHas('tick') && !seqHas('square') && !seqHas('dark') ? 'Tick height' : seqHas('tick') ? 'Square and tick height' : 'Square height', 'markers.barH', 'in');
+        if (K.pattern !== 'solid') spc += '<div class="row2">' + (anySize ? field(K.pattern === 'dots' && !K.perBand ? 'Dot size' : isArt() ? 'Graphic width' : K.perBand ? 'Mark width' : 'Square size', 'markers.size', 'in') : field('Tick width', 'markers.tickW', 'in')) + field((K.gapMode !== 'exact' && anyFrame ? 'Min ' : '') + (K.gapBy === 'oc' ? 'O.C.' : 'gap'), 'markers.gap', 'in') + '</div>' + (anySize && seqHas('tick') ? field('Tick width', 'markers.tickW', 'in') : '') + (isArt() ? '<p class="hint" style="margin:0">Each graphic keeps its own shape; its height follows the width. The band height is where each graphic’s bottom edge sits.</p>' : '');
+        var plain = K.runs.some(function (r) { return !runBays(r); });
+        spc += '<div class="row2">' + field('End clearance', 'markers.margin', 'in') + (plain ? field('Glass height (preview)', 'markers.glassH', 'in') : '') + '</div>' + (plain && !anyFrame ? colorF('Glass tint', 'markers.glass') : '');
+        var res = lsec('m_res', 'Results', '<dl class="kv"><dt>Glass</dt><dd>' + num(mt.runLen / 12) + ' ft</dd><dt>Bands</dt><dd>' + mt.nb + '</dd><dt>Marker length</dt><dd>' + num(mt.lf) + ' LF</dd>' + (K.pattern !== 'solid' ? '<dt>Pieces</dt><dd>' + num(mt.pieces, 0) + (mt.dark ? ' (' + num(mt.dark, 0) + ' dark)' : '') + '</dd>' : '') + '<dt>Across the roll</dt><dd>' + mt.lanes + ' ' + (K.pattern === 'solid' ? 'strips' : 'pieces') + '</dd><dt>Media used</dt><dd>' + num(Math.ceil(mt.rollFt * 10) / 10) + ' ft of ' + L.roll + '"</dd></dl><p class="hint" style="margin:0">Media used assumes pieces nest across the roll with the gutter above. Add a site-survey allowance before ordering.</p>', num(Math.ceil(mt.lf), 0) + ' LF');
         var nr = nest(cutPieces());
-        h += lsec('m_exp', 'Export', '<div class="row"><button type="button" class="btn strong" data-lact="copy">Copy run list</button><button type="button" class="btn" data-lact="csv" data-dl>CSV</button></div>' +
+        var exp = lsec('m_exp', 'Export', '<div class="row"><button type="button" class="btn strong" data-lact="copy">Copy run list</button><button type="button" class="btn" data-lact="csv" data-dl>CSV</button></div>' +
           (K.pattern === 'solid' ? field('Longest strip', 'markers.maxStrip', 'in') : '') +
           '<div class="row" data-dl><button type="button" class="btn strong" data-lact="cutpdf"' + (nr.placed.length ? '' : ' disabled') + '>' + (isArt() ? 'Print and cut (PDF)' : 'Cut file (PDF)') + '</button><button type="button" class="btn" data-lact="cutsvg"' + (nr.placed.length ? '' : ' disabled') + '>' + (isArt() ? 'Print and cut (SVG)' : 'Cut file (SVG)') + '</button></div>' +
-          '<p class="hint" style="margin:0">' + num(nr.placed.length, 0) + ' pieces nested ' + nr.lanes + ' across a ' + L.roll + '" roll, ' + num(nr.len / 12) + ' ft long' + (nr.pages > 1 ? ' over ' + nr.pages + ' pages of up to 10 ft' : '') + '. Cut lines are on a spot color named CutContour (magenta in the SVG).</p>' + (L.note ? '<p class="ok">' + esc(L.note) + '</p>' : '') + '<textarea id="lay-copy" hidden readonly class="copybox"></textarea>');
+          '<p class="hint keep" style="margin:0">' + num(nr.placed.length, 0) + ' pieces nested ' + nr.lanes + ' across a ' + L.roll + '" roll, ' + num(nr.len / 12) + ' ft long' + (nr.pages > 1 ? ' over ' + nr.pages + ' pages of up to 10 ft' : '') + '.</p><p class="hint" style="margin:0">Cut lines are on a spot color named CutContour (magenta in the SVG).</p>' + (L.note ? '<p class="ok">' + esc(L.note) + '</p>' : '') + '<textarea id="lay-copy" hidden readonly class="copybox"></textarea>');
+        P = { title: 'Distraction markers', sub: K.runs.length + ' run' + (K.runs.length === 1 ? '' : 's') + ' · ' + (mt.nb ? mt.nb + ' band' + (mt.nb === 1 ? '' : 's') + ' at ' + bands().map(fmtIn).join(', ') : 'no bands'),
+          tabs: [['bands', 'Bands', scope('Bands for every run') + bnd], ['spacing', 'Spacing', spc], anyFrame ? ['frame', 'Frame', scope('Frame for every run with panes') + frameSec('markers', null, 'frame')] : null, anyFrame ? ['doors', 'Doors', scope('Doors for every run with panes') + frameSec('markers', null, 'doors')] : null],
+          job: [dimsSec('markers'), lsec('m_cut', 'Cutting', rollSel(true) + field('Gutter', 'markers.spacing', 'in'), L.roll + '" roll · ' + fmtIn(K.spacing) + ' gutter')], totals: res + quoteSec(), out: exp + shopSec() };
       }
-      h += lsec('l_shop', 'Shop drawing', '<div class="row"><button type="button" class="btn strong" data-lact="toshop">Open as shop drawing</button></div><p class="hint" style="margin:0">Puts this layout on a sheet with title block, logo and scale bar.</p>');
-      rightEl.innerHTML = h;
+      var keepTop = rightEl.scrollTop;
+      rightEl.innerHTML = panel(P);
+      rightEl.scrollTop = keepTop;
     }
     function status() {
       if (L.job === 'mural') { var m = muralPanels(); statusEl.textContent = 'Mural · ' + m.n + ' panels on ' + L.roll + '" · orange = overlap, light edge = bleed, dashed = wall'; }
@@ -3690,7 +3935,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       b += '<div class="row"><label class="chk"><input type="checkbox" data-qflag="useInstall"' + (L.quote.useInstall ? ' checked' : '') + '> Include install</label><label class="chk"><input type="checkbox" data-qflag="useRush"' + (L.quote.useRush ? ' checked' : '') + '> Rush (+' + q.rush + '%)</label></div>';
       b += '<table class="qlines">' + ql.lines.map(function (l) { return '<tr><td>' + esc(l[0]) + (l[2] ? ' <em>(' + l[2] + ')</em>' : '') + '</td><td>' + money(l[1]) + '</td></tr>'; }).join('') + '<tr class="qtot"><td>Total</td><td>' + money(ql.total) + '</td></tr></table>';
       b += '<div class="row"><button type="button" class="btn strong" data-lact="copyquote">Copy quote</button><button type="button" class="btn" data-lact="resetprices">Reset prices</button></div><p class="hint" style="margin:0">Example prices. Change them to your price book; DIM remembers them in this browser.</p>';
-      return lsec('q_' + j, 'Quote', b);
+      return lsec('q_' + j, 'Quote', b, money(ql.total));
     }
 
     // ---- Distraction marker cut file: pieces nested on the roll, cut lines on a CutContour spot color ----
@@ -3853,14 +4098,14 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     // The film only changes from bottom to top, so each strip is a thin column image stretched across its width: small files, smooth fades.
     // Frost prints as grayscale (black is solid frost, white is clear) to map to white ink or a frost layer in the RIP.
     function filmStripImg(r, p, y0, hIn) {
-      var F = L.film, a = F.allow, ppi = Math.min(150, 30000 / hIn), n = Math.max(2, Math.round(hIn * ppi)), cv = document.createElement('canvas');
+      var F = filmK(L.film.panes[p.row] || {}), a = F.allow, ppi = Math.min(150, 30000 / hIn), n = Math.max(2, Math.round(hIn * ppi)), cv = document.createElement('canvas');
       cv.width = 2; cv.height = n;
       var ctx = cv.getContext('2d'), img = ctx.createImageData(2, n), hex = function (c) { c = String(c || '#000').replace('#', ''); if (c.length === 3) c = c.replace(/./g, '$&$&'); return [0, 2, 4].map(function (i) { return parseInt(c.substr(i, 2), 16) || 0; }); };
       var c1 = hex(F.c1), c2 = hex(F.c2);
       for (var j = 0; j < n; j++) {
         var Y = y0 + hIn * (1 - (j + 0.5) / n), rgb;   // inches up from the bottom of the bleed; a built-out row's film is set out from the floor
         if (F.look === 'gradient') { var t = Math.max(0, Math.min(1, p.g ? (p.base + Y - r.aB - p.g[0]) / (p.g[1] - p.g[0]) : Y / r.H)); rgb = [0, 1, 2].map(function (k) { return Math.round(c1[k] + (c2[k] - c1[k]) * t); }); }
-        else { var v = Math.round(255 * (1 - frostAt(p.base + Y - r.aB))); rgb = [v, v, v]; }
+        else { var v = Math.round(255 * (1 - frostAt(p.base + Y - r.aB, F))); rgb = [v, v, v]; }
         for (var x = 0; x < 2; x++) { var o = (j * 2 + x) * 4; img.data[o] = rgb[0]; img.data[o + 1] = rgb[1]; img.data[o + 2] = rgb[2]; img.data[o + 3] = 255; }
       }
       ctx.putImageData(img, 0, 0);
@@ -3930,6 +4175,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     stage.addEventListener('pointerdown', function (e) {
       if (mode !== 'layout' || L.job !== 'mural' || e.button !== 0) return;
       var i = seamAt(e.clientX, e.clientY); if (i < 1) return;
+      var ch = L.mural.fit === 'custom' ? muralImgHit(e.clientX, e.clientY) : null; if (ch && ch.corner) return;   // the image's corner handles win over a seam under them
       var m = muralPanels(); seamDrag = { i: i, start: m.vert ? e.clientX : e.clientY, widths: m.widths.slice() };
       stage.setPointerCapture(e.pointerId); e.preventDefault();
     });
@@ -3944,6 +4190,43 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       draw(); left(); status();
     });
     stage.addEventListener('pointerup', function () { if (seamDrag) { seamDrag = null; all(); } });
+
+    // ---- Place the mural image by hand: drag it to move, drag a corner to scale (its shape stays). Dragging a filled or fitted image switches it to Place by hand. ----
+    function muralImgScreen() {
+      var A = L.mural, r = imgRect(A.fit), b = A.bleed, x = geo.ox + (b + r.x) * geo.s, y = geo.oy + (b + r.y) * geo.s, w = r.w * geo.s, h = r.h * geo.s;
+      return { x: x, y: y, w: w, h: h, r: r, corners: [{ x: x, y: y, c: 'nw' }, { x: x + w, y: y, c: 'ne' }, { x: x + w, y: y + h, c: 'se' }, { x: x, y: y + h, c: 'sw' }] };
+    }
+    function muralImgHit(cx, cy) {
+      var A = L.mural; if (!geo || !canvas || A.art !== 'image' || !A.img || !/^(custom|cover|contain)$/.test(A.fit)) return null;
+      var rc = canvas.getBoundingClientRect(), x = cx - rc.left, y = cy - rc.top, ir = muralImgScreen();
+      if (A.fit === 'custom') { var c = ir.corners.filter(function (q) { return Math.abs(q.x - x) < 8 && Math.abs(q.y - y) < 8; })[0]; if (c) return { corner: c.c, ir: ir }; }
+      var m = geo.m, inArt = x >= geo.ox && x <= geo.ox + m.W * geo.s && y >= geo.oy && y <= geo.oy + m.H * geo.s;
+      return inArt && x >= ir.x && x <= ir.x + ir.w && y >= ir.y && y <= ir.y + ir.h ? { ir: ir } : null;
+    }
+    var imgDrag = null;
+    stage.addEventListener('pointerdown', function (e) {
+      if (mode !== 'layout' || L.job !== 'mural' || e.button !== 0 || seamDrag) return;
+      var hit = muralImgHit(e.clientX, e.clientY); if (!hit) return;
+      imgDrag = { sx: e.clientX, sy: e.clientY, r: hit.ir.r, corner: hit.corner, moved: false };
+      stage.setPointerCapture(e.pointerId); e.preventDefault();
+    });
+    stage.addEventListener('pointermove', function (e) {
+      if (mode !== 'layout' || L.job !== 'mural') return;
+      if (!imgDrag) { if (!seamDrag) { var h0 = muralImgHit(e.clientX, e.clientY); if (h0 && h0.corner) stage.style.cursor = h0.corner === 'nw' || h0.corner === 'se' ? 'nwse-resize' : 'nesw-resize'; else if (seamAt(e.clientX, e.clientY) < 1) stage.style.cursor = h0 ? 'move' : ''; } return; }
+      var d = imgDrag, A = L.mural, dx = (e.clientX - d.sx) / geo.s, dy = (e.clientY - d.sy) / geo.s, r = d.r;
+      if (!d.moved && Math.abs(e.clientX - d.sx) + Math.abs(e.clientY - d.sy) < 3) return;
+      if (!d.moved && A.fit !== 'custom') toCustom(A.fit);
+      d.moved = true;
+      if (!d.corner) { A.ix = r8(r.x + dx); A.iy = r8(r.y + dy); }
+      else {
+        var sxn = /e/.test(d.corner) ? 1 : -1, syn = /s/.test(d.corner) ? 1 : -1, ar = r.h / r.w;
+        var w = Math.max(1, Math.max(r.w + sxn * dx, (r.h + syn * dy) / ar)), h = w * ar;
+        A.iw = r8(w); A.ix = r8(sxn > 0 ? r.x : r.x + r.w - w); A.iy = r8(syn > 0 ? r.y : r.y + r.h - h);
+      }
+      draw(); status();
+    });
+    function endImgDrag() { if (!imgDrag) return; var m = imgDrag.moved; imgDrag = null; if (m) all(); }
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (t) { stage.addEventListener(t, endImgDrag); });
 
     // ---- Graphic tab: typed sizes, and dragging graphics on the drawing ----
     function graphicEdit(el) {
@@ -3964,9 +4247,12 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     stage.addEventListener('pointerdown', function (e) {
       if (mode !== 'layout' || L.job !== 'graphic' || e.button !== 0) return;
       var G = L.graphic, hit = graphicAt(e.clientX, e.clientY);
-      if (!hit) { if (G.isel != null) { G.isel = null; right(); draw(); status(); } return; }
+      if (!hit) { if (!e.shiftKey && (G.isel != null || gMulti.length)) { G.isel = null; gMulti = []; right(); draw(); status(); } return; }
       var r = G.runs[hit.ri], it = r && (r.items || []).filter(function (x) { return x.id === hit.id; })[0]; if (!it) return;
-      G.isel = it.id; gDrag = { it: it, r: r, ri: hit.ri, sx: e.clientX, sy: e.clientY, x: it.x, y: it.y, s: hit.s, moved: false };
+      // Shift+click adds or removes a graphic; clicking one already in the selection makes it the key and drags them all.
+      if (e.shiftKey) gPick(it.id, true); else if (gIsSel(it.id)) gMakeKey(it.id); else gPick(it.id, false);
+      if (!gIsSel(it.id)) { right(); draw(); status(); return; }
+      gDrag = { it: it, r: r, ri: hit.ri, sx: e.clientX, sy: e.clientY, x: it.x, y: it.y, s: hit.s, moved: false, group: gSel().map(function (x) { return { it: x, x: x.x, y: x.y }; }) };
       stage.setPointerCapture(e.pointerId); e.preventDefault(); right(); draw(); status();
     });
     stage.addEventListener('pointermove', function (e) {
@@ -3974,6 +4260,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       if (!gDrag) { stage.style.cursor = graphicAt(e.clientX, e.clientY) ? 'move' : ''; return; }
       var d = gDrag, it = d.it, dx = (e.clientX - d.sx) / d.s, dy = -(e.clientY - d.sy) / d.s;
       if (!d.moved && Math.abs(e.clientX - d.sx) + Math.abs(e.clientY - d.sy) < 3) return;
+      if (d.group.length > 1) { d.group.forEach(function (o) { o.it.x = r8(o.x + dx); o.it.y = Math.max(0, r8(o.y + dy)); }); d.moved = true; draw(); return; }
       var nx = r8(d.x + dx), ny = Math.max(0, r8(d.y + dy)), a = areaOf(d.r, elevFrame(d.r), nx + it.w / 2), mid = (a.x0 + a.x1) / 2;
       // Within 6 px of the center of its glass or wall, the graphic snaps to it.
       gSnap = null; if (Math.abs(nx + it.w / 2 - mid) * d.s < 6) { nx = mid - it.w / 2; gSnap = { ri: d.ri, x: mid, y0: a.y0, y1: a.y1 }; }
@@ -3981,6 +4268,13 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     });
     function endGraphicDrag() { if (!gDrag) return; var m = gDrag.moved; gDrag = null; gSnap = null; if (m) all(); else draw(); }
     ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(function (t) { stage.addEventListener(t, endGraphicDrag); });
+
+    document.addEventListener('keydown', function (e) {
+      if (mode !== 'layout' || L.job !== 'graphic' || typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
+      var r = selElev(), list = gSel();
+      if ((e.key === 'Delete' || e.key === 'Backspace') && r && list.length) { r.items = r.items.filter(function (it) { return list.indexOf(it) < 0; }); L.graphic.isel = null; gMulti = []; all(); e.preventDefault(); }
+      else if (e.key === 'Escape' && list.length) { L.graphic.isel = null; gMulti = []; right(); draw(); status(); }
+    });
 
     // ---- State for undo, autosave and .dim files ----
     function getState() { return JSON.parse(JSON.stringify(L, function (k, v) { return k === 'img' || k === 'imgBlob' || k === 'busy' || k === 'note' || k === 'graphics' ? undefined : v; })); }
@@ -4003,12 +4297,24 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var el = e.target;
       if (el.id === 'lay-img') {
         var f = el.files && el.files[0]; if (!f) return;
+        if (isPdfFile(f)) {
+          flash('Reading ' + f.name + '…');
+          pdfPageCanvas(f, 12000, 16e6, false).then(function (pp) {
+            pp.canvas.toBlob(function (blob) {
+              if (!blob) { flash('Could not read that PDF.'); return; }
+              blob.dimName = f.name; var im2 = new Image();
+              im2.onload = function () { L.mural.img = im2; L.mural.imgName = f.name; L.mural.imgBlob = blob; all(); Autosave.schedule(); if (pp.pages > 1) flash(f.name + ' has ' + pp.pages + ' pages; DIM used the first.'); };
+              im2.src = URL.createObjectURL(blob);
+            }, 'image/png');
+          }).catch(function () { flash('Could not read that PDF.'); });
+          el.value = ''; return;
+        }
         var img = new Image(); img.onload = function () { L.mural.img = img; L.mural.imgName = f.name; L.mural.imgBlob = f; all(); Autosave.schedule(); }; img.onerror = function () { flash('Could not read that image.'); }; img.src = URL.createObjectURL(f); return;
       }
       if (el.id === 'marker-art') { readGraphics(el.files, function (got) { L.markers.graphics = L.markers.graphics.concat(got); if (L.markers.graphics.length) L.markers.pattern = 'graphic'; }); el.value = ''; return; }
       if (el.id === 'graphic-art') {
         // Each upload joins the list and is placed on the selected elevation.
-        readGraphics(el.files, function (got) { var G = L.graphic, r = selElev(); got.forEach(function (g) { g.id = G.nextId++; G.graphics.push(g); if (r) { r.items = r.items || []; var it = placeNew(r, g); r.items.push(it); G.isel = it.id; } }); });
+        readGraphics(el.files, function (got) { var G = L.graphic, r = selElev(); got.forEach(function (g) { g.id = G.nextId++; G.graphics.push(g); if (r) { r.items = r.items || []; var it = placeNew(r, g); r.items.push(it); G.isel = it.id; gMulti = []; } }); });
         el.value = ''; return;
       }
       if (el.dataset.gf) { graphicEdit(el); return; }
@@ -4024,12 +4330,14 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var k = el.dataset.k; if (!k) return;
       var kind = el.dataset.kind, v;
       if (kind === 'len' || kind === 'in') { v = parseIn(el.value); if (!(v >= 0) || (kind === 'len' && !(v > 0))) { el.value = kind === 'len' ? fmtFt(get(k)) : fmtIn(get(k)); return; } }
+      else if (kind === 'sin') { var neg = /^\s*-/.test(el.value); v = parseIn(String(el.value).replace(/^\s*-\s*/, '')); if (!isFinite(v)) { el.value = fmtS(get(k)); return; } if (neg) v = -v; }
       else if (kind === 'money') { v = parseFloat(String(el.value).replace(/[$,\s]/g, '')); if (!(v >= 0)) { el.value = Number(get(k)).toFixed(2); return; } }
       else if (kind === 'sel') { v = el.value; if (k === 'roll' || k === 'mural.angle' || k === 'mural.dpi' || k === 'markers.useIdx') v = Number(v); if (k === 'mural.balance' || k === 'film.balance' || k === 'markers.perBand' || k === 'markers.artEdge' || /\.swing$/.test(k)) v = v === 'true'; }
       else v = el.value;
       if (k === 'mural.overlap' && v >= printW()) v = printW() - 1;
       if (k === 'margin' && v > L.roll - 6) v = L.roll - 6;
       if (/^(roll|margin|mural\.(w|h|bleed|overlap|orient|balance))$/.test(k)) L.mural.custom = null;
+      if (k === 'mural.fit' && v === 'custom' && L.mural.img && L.mural.fit !== 'custom') toCustom(L.mural.fit === 'contain' ? 'contain' : 'cover');
       set(k, v);
       if (k.indexOf('quote.') === 0) savePrices();
       refocusAfter(rightEl, function (a) { return a.dataset && a.dataset.k ? '[data-k="' + a.dataset.k + '"]' : null; });
@@ -4038,20 +4346,31 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     rightEl.addEventListener('keydown', function (e) { if (mode === 'layout' && e.key === 'Enter' && (e.target.dataset.k || e.target.dataset.gf)) e.target.blur(); });
     rightEl.addEventListener('click', function (e) {
       if (mode !== 'layout') return;
+      var ld = e.target.closest('[data-ldim]');
+      if (ld && L[L.job]) { var LJ = L[L.job], dk = ld.dataset.ldim; LJ.dims = LJ.dims || {}; LJ.dims[dk] = !dimOn(L.job, dk); all(); return; }
+      var nav = e.target.closest('[data-rtab],[data-rview],[data-tips]');
+      if (nav) {
+        if (nav.dataset.rtab) rtab[L.job] = nav.dataset.rtab;
+        else if (nav.dataset.rview) { rview = nav.dataset.rview; right(); rightEl.scrollTop = 0; return; }
+        else { tips = !tips; try { localStorage.setItem('dim.tips', tips ? '1' : '0'); } catch (err) { /* private window */ } }
+        right(); return;
+      }
       if (L.job === 'graphic') {
-        var G = L.graphic, er = selElev(), gb = e.target.closest('[data-gplace],[data-gdelart],[data-gdel],[data-gcenter],[data-gdim]');
+        var G = L.graphic, er = selElev(), gb = e.target.closest('[data-gplace],[data-gdelart],[data-gdel],[data-gcenter],[data-galign],[data-galignto]');
         if (gb) {
           var gd = gb.dataset;
-          if (gd.gplace && er) { var pg = G.graphics.filter(function (g) { return g.id === Number(gd.gplace); })[0]; if (pg) { er.items = er.items || []; var ni = placeNew(er, pg); er.items.push(ni); G.isel = ni.id; } }
+          if (gd.galign) { gAlign(gd.galign); return; }
+          if (gd.galignto) { gAlignTo = gd.galignto; right(); return; }
+          if (gd.gplace && er) { var pg = G.graphics.filter(function (g) { return g.id === Number(gd.gplace); })[0]; if (pg) { er.items = er.items || []; var ni = placeNew(er, pg); er.items.push(ni); G.isel = ni.id; gMulti = []; } }
           else if (gd.gdelart) { var aid = Number(gd.gdelart); G.graphics = G.graphics.filter(function (g) { return g.id !== aid; }); G.runs.forEach(function (r) { r.items = (r.items || []).filter(function (it) { return it.gid !== aid; }); }); Autosave.schedule(); }
-          else if (gd.gdel && er) { var did = Number(gd.gdel); er.items = (er.items || []).filter(function (it) { return it.id !== did; }); if (G.isel === did) G.isel = null; }
+          else if (gd.gdel && er) { var did = Number(gd.gdel); er.items = (er.items || []).filter(function (it) { return it.id !== did; }); if (gIsSel(did)) gPick(did, true); }
           else if (gd.gcenter && er) { var cit = er.items.filter(function (it) { return it.id === Number(gd.gcenter); })[0]; if (cit) { var ca = areaOf(er, elevFrame(er), cit.x + cit.w / 2); cit.x = r8((ca.x0 + ca.x1 - cit.w) / 2); G.isel = cit.id; } }
-          else if (gd.gdim) { G.dims = G.dims || {}; G.dims[gd.gdim] = !G.dims[gd.gdim]; }
+
           all(); return;
         }
         // Clicking a graphic's card (not its fields) selects it on the drawing.
         var card = e.target.closest('[data-gitem]');
-        if (card && !e.target.closest('input, select, button, label')) { var cid = Number(card.dataset.gitem); if (G.isel !== cid) { G.isel = cid; rightEl.querySelectorAll('.gitem').forEach(function (x) { x.classList.toggle('sel', x === card); }); draw(); status(); } return; }
+        if (card && !e.target.closest('input, select, button, label')) { var cid = Number(card.dataset.gitem); if (e.shiftKey) gPick(cid, true); else gPick(cid, false); right(); draw(); status(); return; }
       }
       var da = e.target.closest('[data-delart]');
       if (da) { L.markers.graphics.splice(Number(da.dataset.delart), 1); L.markers.useIdx = 0; if (!L.markers.graphics.length) L.markers.pattern = 'squares'; all(); Autosave.schedule(); return; }
@@ -4071,6 +4390,14 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       else if (a === 'tilespdf' && !L.busy) tilesPdf();
       else if (a === 'filmpdf' && !L.busy) filmPdf();
       else if (a === 'resetseams') { L.mural.custom = null; all(); }
+      else if (a === 'imgcenter' && L.mural.img) { var rc = imgRect('custom'); L.mural.ix = r8((L.mural.w - rc.w) / 2); L.mural.iy = r8((L.mural.h - rc.h) / 2); all(); }
+      else if ((a === 'imgfill' || a === 'imgfit') && L.mural.img) { toCustom(a === 'imgfill' ? 'cover' : 'contain'); all(); }
+      else if (a === 'lookall' || a === 'frameall') {
+        var src = L.film.panes[L.film.sel]; if (!src) return;
+        var ks = a === 'lookall' ? FILM_LOOK : FILM_FRAME, from = rowSet(src);
+        L.film.panes.forEach(function (r) { if (r === src) return; var rs = rowSet(r); ks.forEach(function (k) { rs[k] = from[k]; }); if (a === 'frameall' && runBays(r)) { var fr = filmFrame(r); if (fr && !fr.fit) r.len = fr.len; } });
+        all(); flash((a === 'lookall' ? 'Look' : 'Frame') + ' copied to every row.');
+      }
       else if (a === 'toshop') { Shop.useSource(L.job); setMode('shop'); }
       else if (a === 'resetprices') { L.quote[L.job] = JSON.parse(JSON.stringify(PRICE_DEFAULTS[L.job])); savePrices(); all(); }
       else if (a === 'copyquote') {
@@ -4180,7 +4507,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       if (mode !== 'layout' || L.job === 'mural') return;
       var row = e.target.closest('[data-row]'); if (!row) return;
       var k3 = L.job === 'film' ? L.film : FK(), i3 = Number(row.dataset.row);
-      if (k3.sel !== i3) { k3.sel = i3; leftEl.querySelectorAll('.ed').forEach(function (x) { x.classList.toggle('sel', x === row); }); draw(); }
+      if (k3.sel !== i3) { k3.sel = i3; leftEl.querySelectorAll('.ed').forEach(function (x) { x.classList.toggle('sel', x === row); }); draw(); right(); }
     });
     leftEl.addEventListener('keydown', function (e) { if (mode === 'layout' && e.key === 'Enter' && (e.target.dataset.f || e.target.dataset.pw != null)) e.target.blur(); });
     leftEl.addEventListener('click', function (e) {
@@ -4189,7 +4516,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       if (d) { rows().splice(Number(d.dataset.delrow), 1); var key = L.job === 'film' ? L.film : FK(); key.sel = Math.min(key.sel, Math.max(0, rows().length - 1)); all(); return; }
       if (e.target.closest('[data-addrow]')) {
         nextRow += 1;
-        if (L.job === 'film') L.film.panes.push({ name: 'Pane ' + (L.film.panes.length + 1), w: 48, h: 96, qty: 1 });
+        if (L.job === 'film') { L.film.panes.push({ name: 'Pane ' + (L.film.panes.length + 1), w: 48, h: 96, qty: 1, s: newRowSet() }); L.film.sel = L.film.panes.length - 1; }
         else if (L.job === 'graphic') { L.graphic.runs.push({ name: 'Elevation ' + (L.graphic.runs.length + 1), kind: 'wall', finish: 'paint', color: FINISHES.paint[1], len: 144, wallH: 108, panes: '36 Door', fit: 'add', items: [] }); L.graphic.sel = L.graphic.runs.length - 1; }
         else L.markers.runs.push({ name: 'Run ' + (L.markers.runs.length + 1), len: 120, fit: 'fit' });
         all(); return;
@@ -4199,14 +4526,14 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         var added = 0;
         if (L.job === 'film') {
           L.film.panes.forEach(function (r) { if (r.fromId) have[r.fromId] = 1; });
-          measuredRects('film').forEach(function (x) { if (!have[x.id]) { L.film.panes.push({ name: x.name, w: Math.round(x.w * 16) / 16, h: Math.round(x.h * 16) / 16, qty: 1, fromId: x.id }); added++; } });
-          measuredLengths('film').forEach(function (x) { if (!have[x.id]) { L.film.panes.push({ name: x.name, w: Math.round(x.len * 16) / 16, h: L.film.defH, qty: 1, fromId: x.id }); added++; } });
+          measuredRects('film').forEach(function (x) { if (!have[x.id]) { L.film.panes.push({ name: x.name, w: Math.round(x.w * 16) / 16, h: Math.round(x.h * 16) / 16, qty: 1, fromId: x.id, s: newRowSet() }); added++; } });
+          measuredLengths('film').forEach(function (x) { if (!have[x.id]) { L.film.panes.push({ name: x.name, w: Math.round(x.len * 16) / 16, h: L.film.defH, qty: 1, fromId: x.id, s: newRowSet() }); added++; } });
         } else measuredLengths('markers').forEach(function (x) { if (!have[x.id]) { L.markers.runs.push({ name: x.name, len: x.len, fromId: x.id, fit: 'fit' }); added++; } });
         all(); flash(added ? 'Added ' + added + ' measured length' + (added === 1 ? '' : 's') + '.' : 'Those measurements are already in the list.'); return;
       }
       var row = e.target.closest('[data-row]');
       // Clicking a row selects it. Leave fields, buttons and dropdowns alone (redrawing would close an open dropdown), and only redraw for a new row.
-      if (row && !e.target.closest('input, button, select, label')) { var k2 = L.job === 'film' ? L.film : FK(), ri = Number(row.dataset.row); if (k2.sel !== ri) { k2.sel = ri; left(); draw(); } }
+      if (row && !e.target.closest('input, button, select, label')) { var k2 = L.job === 'film' ? L.film : FK(), ri = Number(row.dataset.row); if (k2.sel !== ri) { k2.sel = ri; left(); draw(); right(); } }
     });
 
     function setMarkerArt(list) { if (Array.isArray(list)) L.markers.graphics = list.filter(function (g) { return g && g.url; }); }
@@ -4226,7 +4553,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     var KIND = { text: 'Text', rect: 'Rectangle', ellipse: 'Ellipse', line: 'Line', arrow: 'Arrow', figure: 'Person', pic: 'Image' };
     var TOOLS = [['select', 'select', 'Select and move (V)'], ['hand', 'hand', 'Slide the drawing in its frame (H)'], ['text', 'text', 'Text box (T)'], ['rect', 'box', 'Rectangle (R)'], ['ellipse', 'ellipse', 'Ellipse (E)'], ['line', 'length', 'Line (L)'], ['arrow', 'arrow', 'Arrow (A)'], ['figure', 'person', 'Person for scale: click where their feet go (P)']];
     var KEYS = { v: 'select', h: 'hand', t: 'text', r: 'rect', e: 'ellipse', l: 'line', a: 'arrow', p: 'figure' };
-    var TOOL_INFO = { select: ['Select', 'V', 'Click to select, drag to move, drag a corner to resize. Arrows nudge, Delete removes.'], hand: ['Hand', 'H', 'Drag to slide drawing in its frame.'],
+    var TOOL_INFO = { select: ['Select', 'V', 'Click to select, Shift+click to select more, drag to move, drag a corner to resize. Arrows nudge, Delete removes.'], hand: ['Hand', 'H', 'Drag to slide drawing in its frame.'],
       text: ['Text', 'T', 'Drag a box on sheet, or click for a default size, then type in panel.'], rect: ['Rectangle', 'R', 'Drag on sheet, or click for a default size.'], ellipse: ['Ellipse', 'E', 'Drag on sheet, or click for a default size.'],
       line: ['Line', 'L', 'Drag from start to end. Shift keeps it straight.'], arrow: ['Arrow', 'A', 'Drag from tail to head. Shift keeps it straight.'], figure: ['Person', 'P', 'Click where their feet go, then drag to place.'] };
     var SICON = {
@@ -4250,7 +4577,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
     function toolCard() { var ti = TOOL_INFO[tool] || TOOL_INFO.select; return '<div class="block toolcard"><div class="tool-name">' + ti[0] + ' <kbd>' + ti[1] + '</kbd></div><p class="tip">' + ti[2] + '</p></div>'; }
     var SIZES = [8, 10, 12, 14, 18, 24, 36, 48, 72], WIDTHS = [0.5, 1, 1.5, 2, 3, 4, 6];
     // S is the open sheet, one of sheets; every sheet keeps its own paper, drawing, title block and items.
-    var S = fresh(), sheets = [S], cur = 0, logo = null, pics = {}, sel = null, selGuide = null, guidesOn = true, tool = 'select', drag = null, metrics = null, svg = null, note = '', busy = false;
+    var S = fresh(), sheets = [S], cur = 0, logo = null, pics = {}, sel = null, multi = [], selGuide = null, guidesOn = true, tool = 'select', drag = null, metrics = null, svg = null, note = '', busy = false;
     var view = { key: '', url: '', gen: 0, info: null, err: '' };
 
     function today() { var d = new Date(); return (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear(); }
@@ -4525,6 +4852,10 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var b = box(n); return [{ x: b.x, y: b.y, h: 'nw' }, { x: b.x + b.w, y: b.y, h: 'ne' }, { x: b.x + b.w, y: b.y + b.h, h: 'se' }, { x: b.x, y: b.y + b.h, h: 'sw' }];
     }
     function noteById(id) { return S.notes.find(function (n) { return n.id === id; }); }
+    // Shift+click selects several items. sel is the key item (its handles and panel show); multi holds the others.
+    function selList() { if (sel == null) return []; multi = multi.filter(function (id) { return id !== sel && noteById(id); }); return [sel].concat(multi).map(noteById).filter(Boolean); }
+    function isSel(id) { return sel != null && (id === sel || multi.indexOf(id) >= 0); }
+    function moveNote(n, o, dx, dy) { if (n.k === 'line' || n.k === 'arrow') { n.x1 = o.x1 + dx; n.y1 = o.y1 + dy; n.x2 = o.x2 + dx; n.y2 = o.y2 + dy; } else { n.x = o.x + dx; n.y = o.y + dy; } }
     function paint() {
       if (mode !== 'shop' || !svg) return;
       ensureView(); fitSvg(); fitFigs();
@@ -4537,6 +4868,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         if (on) { var lab = inStr(gd.p / 72), fs = 11 * k, lw = (lab.length * 6.4 + 8) * k, lx = v ? Math.min(gd.p + 4 * k, g.W - lw) : 4 * k, ly = v ? 4 * k : Math.max(gd.p - 20 * k, 0);
           o += '<rect x="' + lx + '" y="' + ly + '" width="' + lw + '" height="' + 16 * k + '" fill="#00a5c8" pointer-events="none"/><text x="' + (lx + 4 * k) + '" y="' + (ly + 12 * k) + '" font-family="Helvetica, Arial, sans-serif" font-size="' + fs + '" fill="#ffffff" pointer-events="none">' + esc(lab) + '</text>'; }
       });
+      selList().forEach(function (m) { if (m.id === sel) return; if (m.k === 'line' || m.k === 'arrow') o += '<line x1="' + m.x1 + '" y1="' + m.y1 + '" x2="' + m.x2 + '" y2="' + m.y2 + '" stroke="#3e7bfa" stroke-opacity=".5" stroke-width="' + 5 * k + '" pointer-events="none"/>'; else { var mb = box(m); o += '<rect x="' + mb.x + '" y="' + mb.y + '" width="' + mb.w + '" height="' + mb.h + '" fill="none" stroke="#3e7bfa" stroke-width="' + k + '" stroke-dasharray="' + 4 * k + ' ' + 3 * k + '" pointer-events="none"/>'; } });
       var n = sel != null && noteById(sel);
       if (n) {
         if (n.k !== 'line' && n.k !== 'arrow') { var b = box(n); o += '<rect x="' + b.x + '" y="' + b.y + '" width="' + b.w + '" height="' + b.h + '" fill="none" stroke="#3e7bfa" stroke-width="' + k + '"/>'; }
@@ -4595,16 +4927,22 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
         if (tool === 'select') {
           var hh = hitHandle(p);
           if (hh) { drag = { handle: hh, id: sel, orig: JSON.parse(JSON.stringify(noteById(sel))), p: p }; return; }
-          var n = hitNote(p), gh = n ? null : hitGuide(p); sel = n ? n.id : null; selGuide = gh ? gh.id : null;
-          if (n) drag = { move: true, id: n.id, orig: JSON.parse(JSON.stringify(n)), p: p };
+          var n = hitNote(p), gh = n ? null : hitGuide(p);
+          if (n && e.shiftKey) {   // add or remove it; the newest becomes the key item
+            if (isSel(n.id)) { if (sel === n.id) sel = multi.length ? multi.pop() : null; else multi = multi.filter(function (x) { return x !== n.id; }); }
+            else { if (sel != null) multi.push(sel); sel = n.id; }
+            selGuide = null; if (!isSel(n.id)) { paint(); left(); return; }
+          } else if (n && isSel(n.id)) { if (sel !== n.id) { multi = multi.filter(function (x) { return x !== n.id; }); multi.push(sel); sel = n.id; } selGuide = null; }
+          else { sel = n ? n.id : null; multi = []; selGuide = gh ? gh.id : null; }
+          if (n) drag = { move: true, id: n.id, orig: JSON.parse(JSON.stringify(n)), p: p, group: selList().filter(function (x) { return x !== n; }).map(function (x) { return { n: x, orig: JSON.parse(JSON.stringify(x)) }; }) };
           else if (gh) drag = { guide: gh.id, p: p };
           paint(); left(); return;
         }
         if (tool === 'figure') {   // drop a person with their feet where you clicked; drag to place them
-          var fg = newNote('figure', p, p); S.notes.push(fg); sel = fg.id; drag = { move: true, id: fg.id, orig: JSON.parse(JSON.stringify(fg)), p: p };
+          var fg = newNote('figure', p, p); S.notes.push(fg); sel = fg.id; multi = []; drag = { move: true, id: fg.id, orig: JSON.parse(JSON.stringify(fg)), p: p };
           tool = 'select'; tools(); paint(); left(); History.record(); return;
         }
-        var nn = newNote(tool, p, p); S.notes.push(nn); sel = nn.id; drag = { create: true, id: nn.id, p: p }; paint();
+        var nn = newNote(tool, p, p); S.notes.push(nn); sel = nn.id; multi = []; drag = { create: true, id: nn.id, p: p }; paint();
       });
       svg.addEventListener('pointermove', function (e) {
         if (!drag) return;
@@ -4618,8 +4956,11 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
           if (n.k === 'line' || n.k === 'arrow') { var q = straight(n.x1, n.y1, p.x, p.y); n.x2 = q.x; n.y2 = q.y; } else { n.w = p.x - n.x; n.h = p.y - n.y; }
         } else if (drag.move) {
           var o = drag.orig;
-          if (n.k === 'line' || n.k === 'arrow') { n.x1 = o.x1 + dx; n.y1 = o.y1 + dy; n.x2 = o.x2 + dx; n.y2 = o.y2 + dy; } else { n.x = o.x + dx; n.y = o.y + dy; }
-          if (!e.altKey) snapToGuides(n);
+          moveNote(n, o, dx, dy);
+          if (drag.group && drag.group.length) {   // the others follow the key item, snap included
+            if (!e.altKey) { var bx = n.x, by = n.y, bx1 = n.x1, by1 = n.y1; snapToGuides(n); dx += (n.x != null ? n.x - bx : n.x1 - bx1) || 0; dy += (n.y != null ? n.y - by : n.y1 - by1) || 0; }
+            drag.group.forEach(function (gm) { moveNote(gm.n, gm.orig, dx, dy); });
+          } else if (!e.altKey) snapToGuides(n);
         } else if (drag.handle) {
           var o2 = drag.orig, h = drag.handle;
           if (h === 'p1') { var q1 = straight(o2.x2, o2.y2, o2.x1 + dx, o2.y1 + dy); n.x1 = q1.x; n.y1 = q1.y; }
@@ -4672,10 +5013,25 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var tc = leftEl.querySelector('.toolcard'); if (tc) tc.outerHTML = toolCard();
       status();
     }
+    // A short row of everyday colors, then a Custom tile that opens a panel of swatches (colors and grays), with a color wheel and hex as its other view.
+    var QUICK = ['#ffffff', '#1c1c1c', '#e5484d', '#30a46c', '#e93d82'];
+    var CUSTOM_COLORS = ['#e5484d', '#f08c2e', '#f5d90a', '#30a46c', '#12a594', '#3e7bfa', '#8e4ec6', '#e93d82',
+      '#7a1f1f', '#9a5b00', '#8c7a00', '#1d5c3a', '#0b4f6c', '#1f3a93', '#4b2a7b', '#ad7f58'];
+    var GRAYS = ['#ffffff', '#e6e6e6', '#c8c8c8', '#a0a0a0', '#787878', '#505050', '#2e2e2e', '#1c1c1c'];
+    var cpOpen = null, cpMode = 'swatches';
+    function swTile(prop, c, value, label) { return '<button type="button" class="sw' + (value === c ? ' on' : '') + '" data-sc="' + prop + '" data-v="' + c + '" style="background:' + c + '" title="' + (label || c) + '" aria-label="' + (label || c) + '"></button>'; }
     function swatches(prop, value, allowNone) {
-      return (allowNone ? '<button type="button" class="sw none' + (!value ? ' on' : '') + '" data-sc="' + prop + '" data-v="" title="None" aria-label="None"></button>' : '') +
-        PALETTE.map(function (c) { return '<button type="button" class="sw' + (value === c ? ' on' : '') + '" data-sc="' + prop + '" data-v="' + c + '" style="background:' + c + '" aria-label="' + c + '"></button>'; }).join('') +
-        '<input type="color" class="swpick" data-spick="' + prop + '" value="' + (value || '#3e7bfa') + '" title="Any color" aria-label="Pick any color">';
+      var custom = !!value && QUICK.indexOf(value) < 0, names = { '#ffffff': 'White', '#1c1c1c': 'Black', '#e5484d': 'Red', '#30a46c': 'Green', '#e93d82': 'Pink' };
+      var h = (allowNone ? '<button type="button" class="sw none' + (!value ? ' on' : '') + '" data-sc="' + prop + '" data-v="" title="None" aria-label="None"></button>' : '') +
+        QUICK.map(function (c) { return swTile(prop, c, value, names[c]); }).join('') +
+        '<button type="button" class="sw cust' + (custom ? ' on' : '') + '" data-cpopen="' + prop + '"' + (custom ? ' style="--cc:' + value + '"' : '') + ' title="Custom color" aria-label="Custom color" aria-expanded="' + (cpOpen === prop) + '"></button>';
+      if (cpOpen === prop) {
+        h += '<div class="cpop" role="dialog" aria-label="Custom color"><div class="aseg"><button type="button" data-cpmode="swatches" aria-pressed="' + (cpMode === 'swatches') + '">Swatches</button><button type="button" data-cpmode="wheel" aria-pressed="' + (cpMode === 'wheel') + '">Wheel</button></div>';
+        if (cpMode === 'wheel') h += '<input type="color" class="cwheel" data-spick="' + prop + '" value="' + (value || '#3e7bfa') + '" aria-label="Color wheel"><label class="field">Hex<input type="text" data-shex="' + prop + '" value="' + esc(value || '') + '" placeholder="#3e7bfa" spellcheck="false"></label>';
+        else h += '<div class="cgrid">' + CUSTOM_COLORS.map(function (c) { return swTile(prop, c, value); }).join('') + '</div><div class="clab">Grays</div><div class="cgrid">' + GRAYS.map(function (c) { return swTile(prop, c, value); }).join('') + '</div>';
+        h += '</div>';
+      }
+      return h;
     }
     function opts(list, v, fmt) { return list.map(function (x) { return '<option value="' + x + '"' + (String(x) === String(v) ? ' selected' : '') + '>' + (fmt ? fmt(x) : x) + '</option>'; }).join(''); }
     function left() {
@@ -4684,7 +5040,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       if (!S.notes.length) { leftEl.innerHTML = h; return; }
       h += '<div class="block"><div class="label">On sheet · front to back</div>';
       h += '<div class="list">' + S.notes.slice().reverse().map(function (n) {
-        var on = n.id === sel, label = n.k === 'pic' ? (pics[n.pic] ? pics[n.pic].name : 'Image') : n.k === 'text' ? (n.text || '').split('\n')[0].slice(0, 40) || 'Text' : n.k === 'figure' ? (FIGS[n.who] || FIGS.man).label + ', ' + archLen(n.hIn) : KIND[n.k];
+        var on = isSel(n.id), label = n.k === 'pic' ? (pics[n.pic] ? pics[n.pic].name : 'Image') : n.k === 'text' ? (n.text || '').split('\n')[0].slice(0, 40) || 'Text' : n.k === 'figure' ? (FIGS[n.who] || FIGS.man).label + ', ' + archLen(n.hIn) : KIND[n.k];
         var row = '<div class="item' + (on ? ' sel' : '') + '" data-snote="' + n.id + '"><span class="chip" style="background:' + (n.k === 'pic' && pics[n.pic] ? '#ffffff url(' + pics[n.pic].url + ') center/cover' : n.k === 'text' ? n.color : n.fill || n.stroke || '#ffffff') + '"></span><span>' + esc(label) + '</span><b>' + KIND[n.k] + '</b><button type="button" data-sdel="' + n.id + '" aria-label="Delete">×</button>';
         if (on) row += '<div class="item-more">' + props(n) + '</div>';
         return row + '</div>';
@@ -4810,7 +5166,11 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var del = e.target.closest('[data-sdel]');
       if (del) { var id = Number(del.dataset.sdel); S.notes = S.notes.filter(function (n) { return n.id !== id; }); if (sel === id) sel = null; all(); History.record(); return; }
       var sw = e.target.closest('[data-sc]');
-      if (sw) { var prop = sw.dataset.sc, v = sw.dataset.v; edit(function (n) { n[prop] = v; S.style[prop] = v; }); left(); History.record(); return; }
+      if (sw) { var prop = sw.dataset.sc, v = sw.dataset.v; cpOpen = null; edit(function (n) { n[prop] = v; S.style[prop] = v; }); left(); History.record(); return; }
+      var cpo = e.target.closest('[data-cpopen]');
+      if (cpo) { cpOpen = cpOpen === cpo.dataset.cpopen ? null : cpo.dataset.cpopen; left(); return; }
+      var cpm = e.target.closest('[data-cpmode]');
+      if (cpm) { cpMode = cpm.dataset.cpmode; left(); return; }
       var tg = e.target.closest('[data-stog]');
       if (tg) { var tp = tg.dataset.stog; edit(function (n) { n[tp] = !n[tp]; S.style[tp] = n[tp]; }); left(); History.record(); return; }
       var so = e.target.closest('[data-sorder]');
@@ -4818,8 +5178,12 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var ss = e.target.closest('[data-sset]');
       if (ss) { var sp2 = ss.dataset.sset, sv = ss.dataset.v; edit(function (n) { n[sp2] = sv; S.style[sp2] = sv; }); left(); History.record(); return; }
       var row = e.target.closest('[data-snote]');
-      if (row && !e.target.closest('.item-more') && !/INPUT|BUTTON|SELECT|TEXTAREA/.test(e.target.tagName)) { sel = Number(row.dataset.snote); left(); paint(); }
+      if (row && !e.target.closest('.item-more') && !/INPUT|BUTTON|SELECT|TEXTAREA/.test(e.target.tagName)) { var rid = Number(row.dataset.snote);
+        if (e.shiftKey && sel != null) { if (isSel(rid)) { if (sel === rid) sel = multi.length ? multi.pop() : null; else multi = multi.filter(function (x) { return x !== rid; }); } else { multi.push(sel); sel = rid; } }
+        else { sel = rid; multi = []; }
+        left(); paint(); }
     });
+    document.addEventListener('pointerdown', function (e) { if (mode === 'shop' && cpOpen && !e.target.closest('.cpop, [data-cpopen]')) { cpOpen = null; left(); } }, true);
     leftEl.addEventListener('input', function (e) {
       if (mode !== 'shop') return;
       var d = e.target.dataset;
@@ -4831,6 +5195,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       var d = e.target.dataset;
       if (d.sn === 'text') { left(); History.record(); return; }
       if (d.spick) { edit(function (n) { S.style[d.spick] = n[d.spick] = e.target.value; }); left(); History.record(); return; }
+      if (d.shex) { var hx = String(e.target.value).trim().replace(/^#?/, '#'); if (/^#[0-9a-f]{3}$/i.test(hx)) hx = '#' + hx.slice(1).replace(/./g, '$&$&'); if (/^#[0-9a-f]{6}$/i.test(hx)) { hx = hx.toLowerCase(); edit(function (n) { S.style[d.shex] = n[d.shex] = hx; }); History.record(); } left(); return; }
       if (d.sp === 'who') { edit(function (n) { n.who = S.style.who = e.target.value; n.hIn = FIGS[n.who].hIn; fitFig(n); }); left(); History.record(); return; }
       if (d.sp === 'realW') { var rw = parseLen(e.target.value), rr2 = realPerPt(); edit(function (n) { if (rw > 0 && isFinite(rr2)) { var nw = rw / rr2, cx = n.x + n.w / 2, cy = n.y + n.h / 2; n.h = n.h * nw / n.w; n.w = nw; n.x = cx - n.w / 2; n.y = cy - n.h / 2; } }); left(); History.record(); return; }
       if (d.sp === 'hIn') { var hv = parseLen(e.target.value); edit(function (n) { if (hv > 0) { n.hIn = hv; fitFig(n); } }); left(); History.record(); return; }
@@ -4876,12 +5241,13 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       if (mode !== 'shop' || typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
       var k = e.key.toLowerCase(), n = sel != null && noteById(sel);
       if ((e.key === 'Delete' || e.key === 'Backspace') && !n && selGuide != null && guideById(selGuide)) { S.guides = S.guides.filter(function (x) { return x.id !== selGuide; }); selGuide = null; all(); History.record(); e.preventDefault(); }
-      else if ((e.key === 'Delete' || e.key === 'Backspace') && n) { S.notes = S.notes.filter(function (x) { return x !== n; }); sel = null; all(); History.record(); e.preventDefault(); }
+      else if ((e.key === 'Delete' || e.key === 'Backspace') && n) { var gone = selList(); S.notes = S.notes.filter(function (x) { return gone.indexOf(x) < 0; }); sel = null; multi = []; all(); History.record(); e.preventDefault(); }
+      else if (e.key === 'Escape' && cpOpen) { cpOpen = null; left(); }
       else if (e.key === 'Escape') { sel = null; selGuide = null; tool = 'select'; tools(); left(); paint(); }
       else if ((e.key === 'PageDown' || e.key === 'PageUp') && sheets.length > 1) { go(cur + (e.key === 'PageDown' ? 1 : -1)); e.preventDefault(); }
       else if (ARROWS[e.key] && n) {
         var st = (e.shiftKey ? 10 : 1), dx = ARROWS[e.key][0] * st, dy = ARROWS[e.key][1] * st;
-        if (n.k === 'line' || n.k === 'arrow') { n.x1 += dx; n.y1 += dy; n.x2 += dx; n.y2 += dy; } else { n.x += dx; n.y += dy; }
+        selList().forEach(function (m) { moveNote(m, JSON.parse(JSON.stringify(m)), dx, dy); });
         paint(); clearTimeout(nudgeT); nudgeT = setTimeout(function () { History.record(); }, 400); e.preventDefault();
       }
       else if (KEYS[k]) { tool = KEYS[k]; tools(); paint(); }
@@ -4928,7 +5294,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
       function finish() {
         if (++done < list.length) return;
         added = added.filter(Boolean); if (!added.length) { right(); return; }
-        added.forEach(function (n) { S.notes.push(n); }); sel = added[added.length - 1].id; tool = 'select';
+        added.forEach(function (n) { S.notes.push(n); }); sel = added[added.length - 1].id; multi = []; tool = 'select';
         if (mode === 'shop') { tools(); all(); } History.record();
       }
     }
