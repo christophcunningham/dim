@@ -308,7 +308,8 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
 .pb-row input.fill { font-style: italic; color: var(--b02); }
 .pb-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 10.5px; color: var(--b01); }
 .lp { min-height: 100%; display: flex; flex-direction: column; }
-.lp-head { position: sticky; top: 0; z-index: 2; display: flex; align-items: flex-start; gap: 8px; padding: 12px 12px 10px; background: var(--b07); border-bottom: 1px solid var(--line); }
+.lp-top { position: sticky; top: 0; z-index: 2; background: var(--b07); border-bottom: 1px solid var(--line); }
+.lp-head { display: flex; align-items: flex-start; gap: 8px; padding: 10px 12px; }
 .lp-head > div { flex: 1; min-width: 0; }
 .lp-title { font-size: 15px; font-weight: 700; color: var(--b00); overflow-wrap: anywhere; line-height: 1.25; }
 .lp-sub { font-size: 11.5px; color: var(--b01); margin-top: 3px; }
@@ -325,8 +326,8 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
 .rtab-body { padding-top: 10px; border-bottom: 1px solid var(--line); }
 .lp-group { padding: 12px 12px 4px; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--b01); }
 .lp-group + details { border-top: 1px solid var(--line); }
-.lp-bar { position: sticky; bottom: 0; z-index: 2; display: flex; gap: 4px; margin-top: auto; padding: 8px; background: var(--b07); border-top: 1px solid var(--line); }
-.lp-bar button { flex: 1; padding: 6px 4px; background: var(--b07); border: 1px solid var(--line); border-radius: 4px; color: var(--b00); font: inherit; font-size: 12px; cursor: pointer; }
+.lp-bar { display: flex; gap: 4px; padding: 8px 12px 0; }
+.lp-bar button { flex: 1; padding: 3px 4px; background: var(--b07); border: 1px solid var(--line); border-radius: 4px; color: var(--b00); font: inherit; font-size: 11.5px; line-height: 1.35; cursor: pointer; }
 .lp-bar button:hover { background: var(--b08); }
 .lp-bar button[aria-pressed="true"] { background: var(--yellow); color: var(--on-yellow); border-color: var(--ink-hard); font-weight: 700; }
 summary .st { white-space: nowrap; }
@@ -2864,23 +2865,66 @@ details[open] > summary .sum { display: none; }
       var dpr = window.devicePixelRatio || 1;
       canvas.width = Math.round(cw * dpr); canvas.height = Math.round(ch * dpr);
       canvas.style.width = cw + 'px'; canvas.style.height = ch + 'px';
-      var ctx = canvas.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, cw, ch);
+      var ctx = canvas.getContext('2d', { willReadFrequently: true }); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, cw, ch);
       return { ctx: ctx, cw: cw, ch: ch };
     }
     function txt(ctx, t, x, y, o) {
       o = o || {}; ctx.font = (o.w || 400) + ' ' + (o.size || 11) + 'px "JetBrains Mono", ui-monospace, monospace';
       ctx.textAlign = o.align || 'center'; ctx.textBaseline = o.base || 'alphabetic'; ctx.fillStyle = o.color || SINK; ctx.fillText(t, x, y);
     }
-    function dimLine(ctx, x1, y1, x2, y2, label, side) {
-      ctx.save(); ctx.strokeStyle = SINK2; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+    // ---- Dimension labels that adapt to what is under them ----
+    // Every dimension label reads the pixels under it. On a plain, light enough (or dark enough) surface it is just text, in whichever ink reads there;
+    // on a dark, colored or busy one (brick, a black frame, a mural) it gets a white box with dark text. The shop drawing is white paper, so
+    // there the box shows only where the drawing itself is dark or colored. A fixed ink (the magenta on graphics) is kept and boxed when it doesn't read.
+    var rgbCache = {}, probe = null;
+    function rgbOf(c) {
+      if (rgbCache[c]) return rgbCache[c];
+      if (!probe) { probe = document.createElement('canvas'); probe.width = probe.height = 1; }
+      var g = probe.getContext('2d', { willReadFrequently: true }); g.clearRect(0, 0, 1, 1); g.fillStyle = '#000'; g.fillStyle = c; g.fillRect(0, 0, 1, 1);
+      var d = g.getImageData(0, 0, 1, 1).data; return (rgbCache[c] = [d[0], d[1], d[2]]);
+    }
+    function relLum(r, g, b) { var f = function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); }
+    function contrastOf(lumA, lumB) { return (Math.max(lumA, lumB) + 0.05) / (Math.min(lumA, lumB) + 0.05); }
+    // The average color under a box (local coordinates) and how much it varies, with see-through pixels taken as the paper or canvas behind.
+    function underBox(ctx, x, y, w, h) {
+      if (!ctx.getTransform || !ctx.getImageData) return null;
+      var t = ctx.getTransform(), pts = [[x, y], [x + w, y], [x, y + h], [x + w, y + h]].map(function (q) { return [t.a * q[0] + t.c * q[1] + t.e, t.b * q[0] + t.d * q[1] + t.f]; });
+      var cw = ctx.canvas.width, ch = ctx.canvas.height;
+      var bx = Math.max(0, Math.floor(Math.min.apply(null, pts.map(function (q) { return q[0]; })))), by = Math.max(0, Math.floor(Math.min.apply(null, pts.map(function (q) { return q[1]; }))));
+      var bw = Math.min(cw, Math.ceil(Math.max.apply(null, pts.map(function (q) { return q[0]; })))) - bx, bh = Math.min(ch, Math.ceil(Math.max.apply(null, pts.map(function (q) { return q[1]; })))) - by;
+      if (bw < 1 || bh < 1) return null;
+      var d; try { d = ctx.getImageData(bx, by, bw, bh).data; } catch (err) { return null; }
+      var paper = offTarget ? [255, 255, 255] : rgbOf(css('--b06')), n = 0, sum = [0, 0, 0], ls = 0, ls2 = 0, step = Math.max(1, Math.floor(Math.sqrt(bw * bh / 400)));
+      for (var yy = 0; yy < bh; yy += step) for (var xx = 0; xx < bw; xx += step) {
+        var o = (yy * bw + xx) * 4, a = d[o + 3] / 255, r = d[o] * a + paper[0] * (1 - a), g = d[o + 1] * a + paper[1] * (1 - a), b = d[o + 2] * a + paper[2] * (1 - a), l = relLum(r, g, b);
+        sum[0] += r; sum[1] += g; sum[2] += b; ls += l; ls2 += l * l; n++;
+      }
+      var mean = ls / n; return { lum: relLum(sum[0] / n, sum[1] / n, sum[2] / n), sd: Math.sqrt(Math.max(0, ls2 / n - mean * mean)) };
+    }
+    // o: size, w (weight), align, base, color (a fixed ink). Draws the label, boxed only if it needs to be.
+    function dimText(ctx, label, x, y, o) {
+      o = o || {}; var size = o.size || 11, align = o.align || 'center', base = o.base || 'alphabetic';
+      ctx.font = (o.w || 400) + ' ' + size + 'px "JetBrains Mono", ui-monospace, monospace';
+      var lw = ctx.measureText(label).width, lx = align === 'left' ? x : align === 'right' ? x - lw : x - lw / 2, ty = base === 'middle' ? y - size * 0.62 : y - size * 0.86, th = size * 1.15;
+      var bg = underBox(ctx, lx - 2, ty - 1, lw + 4, th + 2), inks = o.color ? [o.color] : [SINK, INK2], ink = inks[0], box = false;
+      if (bg) {
+        var ok = bg.sd < 0.07 ? inks.filter(function (c) { var q = rgbOf(c); return contrastOf(relLum(q[0], q[1], q[2]), bg.lum) >= 3.2; })[0] : null;
+        if (ok) ink = ok; else { box = true; ink = o.color || INK2; }
+      }
+      if (box) { ctx.fillStyle = 'rgba(255,255,255,.92)'; ctx.fillRect(lx - 2, ty - 1, lw + 4, th + 2); }
+      txt(ctx, label, x, y, { size: size, w: o.w, align: align, base: base, color: ink });
+    }
+    function dimLine(ctx, x1, y1, x2, y2, label, side, color) {
+      ctx.save(); ctx.strokeStyle = color || SINK2; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
       var vert = x1 === x2;
       if (vert) { ctx.moveTo(x1 - 5, y1); ctx.lineTo(x1 + 5, y1); ctx.moveTo(x2 - 5, y2); ctx.lineTo(x2 + 5, y2); }
       else { ctx.moveTo(x1, y1 - 5); ctx.lineTo(x1, y1 + 5); ctx.moveTo(x2, y2 - 5); ctx.lineTo(x2, y2 + 5); }
       ctx.stroke(); ctx.restore();
       // 'right' sets a vertical dimension's label level, beside it, so a short one doesn't run over its own ticks.
-      if (vert && side === 'right') txt(ctx, label, x1 + 9, (y1 + y2) / 2, { size: 11, align: 'left', base: 'middle' });
-      else if (vert) { ctx.save(); ctx.translate(x1 - 8, (y1 + y2) / 2); ctx.rotate(-Math.PI / 2); txt(ctx, label, 0, 0, { size: 11 }); ctx.restore(); }
-      else txt(ctx, label, (x1 + x2) / 2, side === 'below' ? y1 + 16 : y1 - 7, { size: 11 });
+      if (!label) return;
+      if (vert && side === 'right') dimText(ctx, label, x1 + 9, (y1 + y2) / 2, { size: 11, align: 'left', base: 'middle' });
+      else if (vert) { ctx.save(); ctx.translate(x1 - 8, (y1 + y2) / 2); ctx.rotate(-Math.PI / 2); dimText(ctx, label, 0, 0, { size: 11 }); ctx.restore(); }
+      else dimText(ctx, label, (x1 + x2) / 2, side === 'below' ? y1 + 16 : y1 - 7, { size: 11 });
     }
     function tag(ctx, x, y, t, fill) {
       ctx.font = '700 11px "JetBrains Mono", monospace'; var w = ctx.measureText(t).width + 12, h = 18;
@@ -2975,19 +3019,14 @@ details[open] > summary .sum { display: none; }
       return [[K.d1, out], [K.d2, mid], [K.d3, mid], [K.d4, out]].sort(function (a, b) { return a[0] - b[0]; });
     }
     // A label on a light chip, in the dimension color, so it reads on frost, glass or wall.
-    function dimTag(ctx, label, x, y, align) {
-      ctx.font = '500 10px "JetBrains Mono", ui-monospace, monospace';
-      var lw = ctx.measureText(label).width, lx = align === 'right' ? x - lw : align === 'left' ? x : x - lw / 2;
-      ctx.fillStyle = 'rgba(255,255,255,.9)'; ctx.fillRect(lx - 2, y - 6.5, lw + 4, 12);
-      txt(ctx, label, lx, y, { size: 10, w: 500, color: GDIM, base: 'middle', align: 'left' });
-    }
+    function dimTag(ctx, label, x, y, align) { dimText(ctx, label, x, y - 5, { size: 10.5, align: align || 'left' }); }
     // A dashed line across the glass (x1 to x2) at each stop between lo and hi, with its tag at tagX.
     function drawFadeStops(ctx, stops, x1, x2, Yf, lo, hi, tagX, align, aff) {
       var shown = stops.filter(function (st) { return st[0] > lo + 1e-6 && st[0] < hi - 1e-6; });
       ctx.save(); ctx.setLineDash([4, 3]); ctx.strokeStyle = GDIM; ctx.lineWidth = 1;
       shown.forEach(function (st) { var y = Math.round(Yf(st[0])) + .5; ctx.beginPath(); ctx.moveTo(x1, y); ctx.lineTo(x2, y); ctx.stroke(); });
       ctx.restore();
-      if (tagX != null) shown.forEach(function (st) { dimTag(ctx, st[1] + ' ' + fmtIn(st[0]) + (aff ? ' AFF' : ''), tagX, Yf(st[0]), align); });
+      if (tagX != null) shown.forEach(function (st) { dimTag(ctx, st[1] + ' ' + fmtIn(st[0]) + (aff ? ' AFF' : ''), tagX, Yf(st[0]), align, true); });
     }
     // Plain rows side by side, each with its bleed and seams. A built-out row draws as its elevation; select one to see it on its own.
     // Shop drawing passes the rows it wants (rowIdx).
@@ -3026,16 +3065,19 @@ details[open] > summary .sum { display: none; }
             ctx.setLineDash([]);
             // Strip widths, dimensioned like Mural panels: under the pane for drops, down its left side for rows.
             ctx.font = '400 11px "JetBrains Mono", ui-monospace, monospace';
-            var fits = r.widths.every(function (sw) { return ctx.measureText(fmtIn(sw)).width + 6 < sw * s; }), p0 = 0;
-            if (r.dir === 'vertical') {
+            var fits = r.widths.every(function (sw) { return ctx.measureText(fmtIn(sw)).width + 6 < sw * s; }), p0 = 0, fdim = dimOn('film', 'film'), side = gapIn * s > 22 || i === 0;
+            // Film size: the strips across one way, and the film's whole size the other way (its height beside drops, its width over rows).
+            if (!fdim) { /* switched off under Dimensions */ }
+            else if (r.dir === 'vertical') {
+              if (side) dimLine(ctx, x - 8, fy + fh, x - 8, fy, fmtIn(r.H));
               r.widths.forEach(function (sw) { dimLine(ctx, x + p0 * s, base + 22, x + (p0 + sw) * s, base + 22, fits ? fmtIn(sw) : ''); p0 += sw; });
               if (!fits) txt(ctx, r.strips + ' @ ' + fmtIn(r.widths[0]) + (r.widths.length > 1 && fmtIn(r.widths[r.widths.length - 1]) !== fmtIn(r.widths[0]) ? '…' : ''), x + w / 2, base + 15, { size: 11 });
-            } else if (gapIn * s > 22 || i === 0) {
-              r.widths.forEach(function (sw) { dimLine(ctx, x - 8, fy + p0 * s, x - 8, fy + (p0 + sw) * s, fits ? fmtIn(sw) : ''); p0 += sw; });
+            } else {
+              dimLine(ctx, x, fy - 10, x + w, fy - 10, fmtIn(r.W), null, fy - 26 > gy ? INK2 : null);   // dark over glass (a band), the theme's ink over the canvas
+              if (side) r.widths.forEach(function (sw) { dimLine(ctx, x - 8, fy + p0 * s, x - 8, fy + (p0 + sw) * s, fits ? fmtIn(sw) : ''); p0 += sw; });
             }
           }
           if (pc && dimOn('film', 'fade')) { var FK0 = filmK(p); drawFadeStops(ctx, fadeStops(FK0), gx, gx + gw, function (hh) { return gy + gh - hh * s; }, Math.max(0, pc.base - 1e-6), pc.base + pc.h + 1e-6, gx + gw - 4, 'right', false); }
-          if (pc && dimOn('film', 'film')) { gDim(ctx, x, fy - 10, x + w, fy - 10, fmtIn(r.W)); gDim(ctx, x + w + 10, fy + fh, x + w + 10, fy, fmtIn(r.H), 'right'); }
           ctx.font = '400 10.5px "JetBrains Mono", ui-monospace, monospace';
           var dt = pc ? dropsText(r, p.qty) : 'band misses this glass', nq = pc ? r.strips * (p.qty > 1 ? p.qty : 1) : 0; if (pc && ctx.measureText(dt).width > room + 2) dt = nq + (r.dir === 'vertical' ? ' drop' : ' row') + (nq > 1 ? 's' : '');
           var sz = fmtIn(p.w) + ' × ' + fmtIn(p.h) + ' ×' + p.qty; if (ctx.measureText(sz).width > room + 2) sz = '×' + p.qty;
@@ -3068,11 +3110,11 @@ details[open] > summary .sum { display: none; }
           ctx.strokeStyle = INK2; ctx.lineWidth = .75; ctx.strokeRect(gx + .25, gy + .25, gw - .5, gh * s - .5);
           if (band) ctx.strokeRect(gx + .25, fy + .25, gw - .5, fh - .5);
           if (fade) drawFadeStops(ctx, stops, gx, gx + gw, Y, rg.f0, rg.f1, null);
-          if (dimOn('film', 'film') && gw > 30) { gDim(ctx, gx + 4, fy + 12, gx + gw - 4, fy + 12, fmtIn(g.gw)); gDim(ctx, gx + gw - 12, fy + fh, gx + gw - 12, fy, fmtIn(rg.f1 - rg.f0), 'left'); }
+          if (dimOn('film', 'film') && gw > 40 && fh > 30) { dimLine(ctx, gx + 6, fy + 22, gx + gw - 6, fy + 22, fmtIn(g.gw), null, INK2); dimLine(ctx, gx + gw - 10, fy + fh - 6, gx + gw - 10, fy + 6, fmtIn(rg.f1 - rg.f0), null, INK2); }
         });
       });
       // Feather stops are heights from the floor on a built-out row: one dashed line through every pane, tagged once outside the frame.
-      if (fade && rightDim) { var tagX = x0 + w + (band && bandDim ? 64 : 8); stops.forEach(function (st) { if (st[0] > 0 && st[0] < fr.top) dimTag(ctx, st[1] + ' ' + fmtIn(st[0]) + ' AFF', tagX, Y(st[0]), 'left'); }); }
+      if (fade && rightDim) { var tagX = x0 + w + (band && bandDim ? 64 : 8); stops.forEach(function (st) { if (st[0] > 0 && st[0] < fr.top) dimTag(ctx, st[1] + ' ' + fmtIn(st[0]) + ' AFF', tagX, Y(st[0]) + 5, 'left'); }); }
       // A band's bottom edge above the floor and its height, down the right side.
       if (band && rightDim && bandDim) { dimLine(ctx, x0 + w + 22, floor, x0 + w + 22, Y(K.bandB), fmtIn(K.bandB), 'right'); dimLine(ctx, x0 + w + 22, Y(K.bandB), x0 + w + 22, Y(K.bandB + K.bandH), fmtIn(K.bandH), 'right'); }
       ctx.strokeStyle = SINK2; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x0 - (sideDim ? 50 : 6), floor + .5); ctx.lineTo(x0 + w + 6, floor + .5); ctx.stroke();
@@ -3195,9 +3237,9 @@ details[open] > summary .sum { display: none; }
       // One mark's size, on the top band's first mark.
       if (dimOn('markers', 'size') && hs.length) {
         var tb0 = hs.length - 1, bh0 = hs[tb0];
-        if (K.pattern === 'solid') { var sp0 = runSpans(run)[0]; if (sp0) gDim(ctx, x0 + sp0[0] * s - 10, floor - bh0 * s, x0 + sp0[0] * s - 10, floor - (bh0 + K.barH) * s, fmtIn(K.barH), 'left'); }
+        if (K.pattern === 'solid') { var sp0 = runSpans(run)[0]; if (sp0) dimLine(ctx, x0 + sp0[0] * s - 10, floor - bh0 * s, x0 + sp0[0] * s - 10, floor - (bh0 + K.barH) * s, fmtIn(K.barH), null, INK2); }
         else if (ms.length) { var m0 = ms[0], mk0 = markFor(tb0, m0.q), mx0 = x0 + (m0.x + (sw - mk0.w) / 2) * s, my0 = floor - (bh0 + mk0.h) * s;
-          gDim(ctx, mx0, my0 - 8, mx0 + mk0.w * s, my0 - 8, fmtIn(mk0.w)); gDim(ctx, mx0 - 8, floor - bh0 * s, mx0 - 8, my0, fmtIn(mk0.h), 'left'); }
+          dimLine(ctx, mx0, my0 - 8, mx0 + mk0.w * s, my0 - 8, fmtIn(mk0.w), null, INK2); dimLine(ctx, mx0 - 8, floor - bh0 * s, mx0 - 8, my0, fmtIn(mk0.h), null, INK2); }
       }
       // Spacing on a plain run: end clearance to the first mark, and the gap to the next.
       if (!fr && dimOn('markers', 'spacing') && hs.length && K.pattern !== 'solid' && ms.length) {
@@ -3244,8 +3286,7 @@ details[open] > summary .sum { display: none; }
       ctx.moveTo(x1, y); ctx.lineTo(x2, y); ctx.moveTo(x1, y - 3); ctx.lineTo(x1, y + 3); ctx.moveTo(x2, y - 3); ctx.lineTo(x2, y + 3); ctx.stroke(); ctx.restore();
       ctx.font = '400 9.5px "JetBrains Mono", ui-monospace, monospace';
       var tw2 = ctx.measureText(label).width, cx = Math.max((x1 + x2) / 2, x1 + tw2 / 2 - 2);
-      ctx.fillStyle = L.markers.glass || GLASS; ctx.globalAlpha = .92; ctx.fillRect(cx - tw2 / 2 - 2, y + 4, tw2 + 4, 11); ctx.globalAlpha = 1;
-      txt(ctx, label, cx, y + 12.5, { size: 9.5, color: '#b0127a' });
+      dimText(ctx, label, cx, y + 12.5, { size: 9.5, color: '#b0127a' });
       return cx + tw2 / 2 + 2;
     }
     // ---- Graphic tab: logos and graphics placed on a storefront or a wall, with the dimensions you choose ----
@@ -3258,7 +3299,7 @@ details[open] > summary .sum { display: none; }
       graphic: [['size', 'Size'], ['edges', 'From glass or wall edges'], ['bottom', 'Bottom, above floor'], ['top', 'Top, above floor'], ['center', 'Center, above floor']],
       film: [['film', 'Film size'], ['fade', 'Where the feather starts and stops'], ['band', 'Band height and bottom edge']],
       markers: [['bands', 'Band heights, above floor'], ['top', 'Top of marks, above floor'], ['spacing', 'Spacing between marks'], ['size', 'Mark size']] };
-    var DIM_ON = { graphic: { size: true, edges: true, bottom: true }, film: { fade: true, band: true }, markers: { bands: true, spacing: true } };
+    var DIM_ON = { graphic: { size: true, edges: true, bottom: true }, film: { film: true, fade: true, band: true }, markers: { bands: true, spacing: true } };
     var T = ' stroke-width="1.3" stroke-linecap="round"';
     var DIM_ICON = {
       graphic: { size: '<rect x="4" y="6.5" width="9" height="8" rx=".5"/><path d="M4 3.5h9M4 2.5v2M13 2.5v2M16 6.5v8M15 6.5h2M15 14.5h2"' + T + '/>',
@@ -3334,9 +3375,8 @@ details[open] > summary .sum { display: none; }
       var lw = ctx.measureText(label).width, cx, cy;
       if (vert) { cy = (y1 + y2) / 2; cx = side === 'left' ? x1 - 6 - lw / 2 : x1 + 6 + lw / 2; }
       else { cx = (x1 + x2) / 2; cy = y1 - 7 - (lw + 6 > Math.abs(x2 - x1) ? 10 : 0); }
-      ctx.fillStyle = 'rgba(255,255,255,.88)'; ctx.fillRect(cx - lw / 2 - 2, cy - 6.5, lw + 4, 12);
       ctx.restore();
-      txt(ctx, label, cx, cy, { size: 10, w: 500, color: GDIM, base: 'middle' });
+      dimText(ctx, label, cx, cy, { size: 10, w: 500, color: GDIM, base: 'middle' });
     }
     // Wall finishes, drawn at true size from the floor up: modular brick (7 5/8 x 2 1/4 with 3/8 joints, so three courses make 8"),
     // 8 x 16 concrete block, and cast concrete with a few long, subtle hairline cracks.
@@ -3659,8 +3699,9 @@ details[open] > summary .sum { display: none; }
     function panel(P) {
       var views = [['edit', 'Settings']].concat(P.totals ? [['totals', 'Totals']] : []).concat([['export', 'Export']]);
       if (!views.some(function (v) { return v[0] === rview; })) rview = 'edit';
-      var h = '<div class="lp' + (tips ? ' tips' : '') + '"><div class="lp-head"><div><div class="lp-title">' + esc(P.title) + '</div><div class="lp-sub">' + esc(P.sub) + '</div></div>' +
-        '<button type="button" class="lp-tips" data-tips="1" aria-pressed="' + tips + '" title="' + (tips ? 'Hide tips' : 'Show tips') + '" aria-label="Tips">' + TIP_ICON + '</button></div><div class="lp-body">';
+      var bar = '<div class="lp-bar">' + views.map(function (v) { return '<button type="button" data-rview="' + v[0] + '" aria-pressed="' + (v[0] === rview) + '">' + v[1] + '</button>'; }).join('') + '</div>';
+      var h = '<div class="lp' + (tips ? ' tips' : '') + '"><div class="lp-top">' + bar + '<div class="lp-head"><div><div class="lp-title">' + esc(P.title) + '</div><div class="lp-sub">' + esc(P.sub) + '</div></div>' +
+        '<button type="button" class="lp-tips" data-tips="1" aria-pressed="' + tips + '" title="' + (tips ? 'Hide tips' : 'Show tips') + '" aria-label="Tips">' + TIP_ICON + '</button></div></div><div class="lp-body">';
       if (rview === 'edit') {
         var tabs = P.tabs.filter(Boolean), cur = tabs.some(function (t) { return t[0] === rtab[L.job]; }) ? rtab[L.job] : tabs[0] && tabs[0][0];
         if (tabs.length > 1) h += '<div class="rtabs" role="tablist">' + tabs.map(function (t) { return '<button type="button" role="tab" data-rtab="' + t[0] + '" aria-selected="' + (t[0] === cur) + '">' + t[1] + '</button>'; }).join('') + '</div>';
@@ -3668,7 +3709,7 @@ details[open] > summary .sum { display: none; }
         tabs.forEach(function (t) { if (t[0] === cur) h += '<div class="sec rtab-body" role="tabpanel">' + t[2] + '</div>'; });
         if (P.job && P.job.length) h += (P.jobLabel ? '<div class="lp-group">' + P.jobLabel + '</div>' : '') + P.job.join('');
       } else h += rview === 'totals' ? P.totals : P.out;
-      h += '</div><div class="lp-bar">' + views.map(function (v) { return '<button type="button" data-rview="' + v[0] + '" aria-pressed="' + (v[0] === rview) + '">' + v[1] + '</button>'; }).join('') + '</div></div>';
+      h += '</div></div>';
       return h;
     }
     var shopSec = function () { return lsec('l_shop', 'Shop drawing', '<div class="row"><button type="button" class="btn strong" data-lact="toshop">Open as shop drawing</button></div><p class="hint" style="margin:0">Puts this layout on a sheet with title block, logo and scale bar.</p>'); };
