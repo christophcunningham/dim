@@ -2416,7 +2416,7 @@ details[open] > summary .sum { display: none; }
       film: { allow: 1, defH: 96, mode: 'auto', look: 'gradient', c1: '#ffffff', c2: '#9cc8e8', sel: 0, fA: 36, fB: 72, d1: 24, d2: 36, d3: 60, d4: 72, dual: 'frost', person: 'none', sill: 0, balance: true, marks: true, cover: 'full', bandH: 48, bandB: 24,
         curb: 0, fJamb: 2, fHead: 2, fSill: 2, mull: 2, seam: 0.375, fColor: 'black', doorStyle: 'medium', doorTop: 3.5, doorBottom: 10, hw: 'pull', hwH: 46, hwLen: 12, lvH: 38, swing: false, glass: '#d9ecf7',
         panes: [{ name: 'Conference 27-015', w: 60, h: 96, qty: 6 }, { name: 'Conference 27-016', w: 48, h: 96, qty: 4 }, { name: 'Office sidelite', w: 24, h: 96, qty: 6 }] },
-      markers: { bands: '30, 60', barH: 2, maxStrip: 96, pattern: 'squares', size: 2, tickW: 0.25, gap: 7.5, margin: 0, glassH: 96, spacing: 0.5, sel: 0, graphics: [], seq: 'all', useIdx: 0, seqText: 'A, B', start: 'center', gapMode: 'exact', gapBy: 'clear', perBand: false, bandSeq: [], artEdge: false, mull: 2,
+      markers: { bands: '30, 60', barH: 2, maxStrip: 96, pattern: 'squares', size: 2, tickW: 0.25, gap: 7.5, margin: 0, glassH: 96, spacing: 0.5, sel: 0, graphics: [], seq: 'all', useIdx: 0, seqText: 'A, B', start: 'center', gapMode: 'run', gapBy: 'clear', perBand: false, bandSeq: [], artEdge: false, mull: 2,
         curb: 0, fJamb: 2, fHead: 2, fSill: 2, seam: 0.375, fColor: 'black', doorStyle: 'medium', doorTop: 3.5, doorBottom: 10, hw: 'pull', hwH: 46, hwLen: 12, lvH: 38, swing: true, glass: '#d9ecf7',
         runs: [{ name: 'Reception glass', len: 384 }, { name: 'Conference front', len: 240 }, { name: 'Office fronts, east', len: 1104 }] },
       graphic: { sel: 0, isel: null, nextId: 1, graphics: [], dims: { size: true, bottom: true, center: false, edges: true },
@@ -2748,6 +2748,7 @@ details[open] > summary .sum { display: none; }
         for (var q = 0; q < n; q++) out.push({ x: start + q * (sw + K.gap), q: fromRight ? n - 1 - q : q });
         return out;
       }
+      if (K.gapMode === 'run') return runMarksStraight(K, fr, sw, out);
       var mine = [], flush = function () { mine.forEach(function (m, i) { m.q = fromRight ? mine.length - 1 - i : i; out.push(m); }); mine = []; };
       fr.panes.forEach(function (p, pi) {
         if (pi && !p.seam) flush();
@@ -2760,6 +2761,37 @@ details[open] > summary .sum { display: none; }
         p.n = n; p.gap = n > 1 ? pitch - sw : null; p.edge = n ? K.margin + lead + (pitch - sw) / 2 : null; p.edgeR = n ? K.margin + extra - lead + (pitch - sw) / 2 : null;
       });
       flush();
+      return out;
+    }
+    // Exact gap straight across the run, the way a shop cuts one long strip at an even spacing and applies it over the glass.
+    // The spacing never restarts, so a mark can land on a butt joint; marks that would sit on a mullion, jamb or door stile are left off.
+    // Start pattern sets where the strip starts: centered on the glass, or at the end clearance from the first or last glass edge.
+    function runMarksStraight(K, fr, sw, out) {
+      var pitch = sw + K.gap, spans = [], fromRight = K.start === 'right';
+      // Glass you can put a mark on: panes joined by a butt joint count as one piece, since a mark can bridge the joint.
+      fr.panes.forEach(function (p, pi) {
+        if (p.gw <= 0) return;
+        var last = spans[spans.length - 1];
+        if (last && p.seam && p.gx - last.x1 <= K.seam + 1e-6) last.x1 = p.gx + p.gw; else spans.push({ x0: p.gx, x1: p.gx + p.gw });
+      });
+      fr.panes.forEach(function (p) { p.n = 0; p.gap = null; p.edge = null; p.edgeR = null; });
+      if (!spans.length || pitch <= 0) return out;
+      var a = spans[0].x0 + K.margin, b = spans[spans.length - 1].x1 - K.margin; if (b - a < sw) return out;
+      var n = Math.floor((b - a - sw) / pitch + 1e-9) + 1, used = (n - 1) * pitch + sw;
+      var start = K.start === 'left' ? a : fromRight ? b - used : a + (b - a - used) / 2;
+      var kept = [];
+      for (var i = 0; i < n; i++) {
+        var x = start + i * pitch, c = x + sw / 2;
+        if (!spans.some(function (sp) { return x >= sp.x0 + K.margin - 1e-6 && x + sw <= sp.x1 - K.margin + 1e-6; })) continue;
+        var pi = -1; fr.panes.forEach(function (p, j) { if (p.gw > 0 && p.gx <= c + 1e-6) pi = j; });
+        kept.push({ x: x, pane: pi });
+      }
+      kept.forEach(function (m, i) { m.q = fromRight ? kept.length - 1 - i : i; out.push(m); });
+      fr.panes.forEach(function (p, pi) {
+        var mine = kept.filter(function (m) { return m.pane === pi; }); if (!mine.length) return;
+        p.n = mine.length; p.gap = mine.length > 1 ? K.gap : null;
+        p.edge = mine[0].x - p.gx; p.edgeR = p.gx + p.gw - (mine[mine.length - 1].x + sw);
+      });
       return out;
     }
     // Lengths of solid band, as [from, to] along the run: one per pane of glass when the run has panes.
@@ -3605,7 +3637,7 @@ details[open] > summary .sum { display: none; }
       ms.panes.forEach(function (p) {
         var k = p.w.toFixed(3) + (p.door ? 'd' + p.gw.toFixed(3) : ''); if (seen[k]) return; seen[k] = 1;
         var nm = p.door ? p.name.replace(DOOR_WORDS, '').replace(/\s+/g, ' ').trim() : p.name;
-        out.push('<b>' + esc(fmtIn(p.w)) + (nm ? ' ' + esc(nm) : '') + '</b> ' + (p.door ? '(glass ' + esc(fmtIn(p.gw)) + ') ' : '') + (p.n ? p.n + ' mark' + (p.n > 1 ? 's' : '') + (p.gap != null ? ', ' + (L.markers.gapBy === 'oc' ? esc(fmtIn(p.gap + slotW())) + ' O.C.' : esc(fmtIn(p.gap)) + ' apart') : '') + ', ' + (Math.abs(p.edge - p.edgeR) < 0.01 ? esc(fmtIn(p.edge)) + ' from glass edges' : esc(fmtIn(p.edge)) + ' from left glass edge, ' + esc(fmtIn(p.edgeR)) + ' from right') : 'too narrow for a mark'));
+        out.push('<b>' + esc(fmtIn(p.w)) + (nm ? ' ' + esc(nm) : '') + '</b> ' + (p.door ? '(glass ' + esc(fmtIn(p.gw)) + ') ' : '') + (p.n ? p.n + ' mark' + (p.n > 1 ? 's' : '') + (p.gap != null ? ', ' + (L.markers.gapBy === 'oc' ? esc(fmtIn(p.gap + slotW())) + ' O.C.' : esc(fmtIn(p.gap)) + ' apart') : '') + ', ' + (Math.abs(p.edge - p.edgeR) < 0.01 && p.edge >= 0 ? esc(fmtIn(p.edge)) + ' from glass edges' : (p.edge < 0 ? 'first one over the left joint' : esc(fmtIn(p.edge)) + ' from left glass edge') + ', ' + (p.edgeR < 0 ? 'last one over the right joint' : esc(fmtIn(p.edgeR)) + ' from right')) : 'too narrow for a mark'));
       });
       return '<div class="ed-out spacing">' + out.join('<br>') + '</div>';
     }
@@ -3846,10 +3878,10 @@ details[open] > summary .sum { display: none; }
         var anyBar = K.pattern === 'solid' || seqHas('square') || seqHas('dark') || seqHas('tick'), anySize = K.pattern !== 'solid' && bandSeqs().some(function (x) { return x !== 'tick'; });
         if (K.pattern !== 'solid') {
           spc += '<div class="row2">' + selectF('Start pattern', 'markers.start', [['center', 'Centered on run'], ['left', 'From left edge'], ['right', 'From right edge']]) + selectF('Gap measured', 'markers.gapBy', [['clear', 'Clear space'], ['oc', 'On center (O.C.)']]) + '</div>';
-          if (anyFrame) spc += selectF('Spacing on panes', 'markers.gapMode', [['min', 'Minimum gap, fill each pane'], ['exact', 'Exact gap, extra at the edges']]);
+          if (anyFrame) spc += selectF('Spacing on panes', 'markers.gapMode', [['run', 'Exact gap straight across the run'], ['exact', 'Exact gap in each pane, extra at the edges'], ['min', 'Minimum gap, fill each pane']]);
         }
         if (anyBar) spc += field(K.pattern === 'solid' ? 'Band height' : seqHas('tick') && !seqHas('square') && !seqHas('dark') ? 'Tick height' : seqHas('tick') ? 'Square and tick height' : 'Square height', 'markers.barH', 'in');
-        if (K.pattern !== 'solid') spc += '<div class="row2">' + (anySize ? field(K.pattern === 'dots' && !K.perBand ? 'Dot size' : isArt() ? 'Graphic width' : K.perBand ? 'Mark width' : 'Square size', 'markers.size', 'in') : field('Tick width', 'markers.tickW', 'in')) + field((K.gapMode !== 'exact' && anyFrame ? 'Min ' : '') + (K.gapBy === 'oc' ? 'O.C.' : 'gap'), 'markers.gap', 'in') + '</div>' + (anySize && seqHas('tick') ? field('Tick width', 'markers.tickW', 'in') : '') + (isArt() ? '<p class="hint" style="margin:0">Each graphic keeps its own shape; its height follows the width. The band height is where each graphic’s bottom edge sits.</p>' : '');
+        if (K.pattern !== 'solid') spc += '<div class="row2">' + (anySize ? field(K.pattern === 'dots' && !K.perBand ? 'Dot size' : isArt() ? 'Graphic width' : K.perBand ? 'Mark width' : 'Square size', 'markers.size', 'in') : field('Tick width', 'markers.tickW', 'in')) + field((K.gapMode === 'min' && anyFrame ? 'Min ' : '') + (K.gapBy === 'oc' ? 'O.C.' : 'gap'), 'markers.gap', 'in') + '</div>' + (anySize && seqHas('tick') ? field('Tick width', 'markers.tickW', 'in') : '') + (isArt() ? '<p class="hint" style="margin:0">Each graphic keeps its own shape; its height follows the width. The band height is where each graphic’s bottom edge sits.</p>' : '');
         var plain = K.runs.some(function (r) { return !runBays(r); });
         spc += '<div class="row2">' + field('End clearance', 'markers.margin', 'in') + (plain ? field('Glass height (preview)', 'markers.glassH', 'in') : '') + '</div>' + (plain && !anyFrame ? colorF('Glass tint', 'markers.glass') : '');
         var res = lsec('m_res', 'Results', '<dl class="kv"><dt>Glass</dt><dd>' + num(mt.runLen / 12) + ' ft</dd><dt>Bands</dt><dd>' + mt.nb + '</dd><dt>Marker length</dt><dd>' + num(mt.lf) + ' LF</dd>' + (K.pattern !== 'solid' ? '<dt>Pieces</dt><dd>' + num(mt.pieces, 0) + (mt.dark ? ' (' + num(mt.dark, 0) + ' dark)' : '') + '</dd>' : '') + '<dt>Across the roll</dt><dd>' + mt.lanes + ' ' + (K.pattern === 'solid' ? 'strips' : 'pieces') + '</dd><dt>Media used</dt><dd>' + num(Math.ceil(mt.rollFt * 10) / 10) + ' ft of ' + L.roll + '"</dd></dl><p class="hint" style="margin:0">Media used assumes pieces nest across the roll with the gutter above. Add a site-survey allowance before ordering.</p>', num(Math.ceil(mt.lf), 0) + ' LF');
