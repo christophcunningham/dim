@@ -2892,7 +2892,7 @@ details[open] > summary .sum { display: none; }
     function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim() || '#888'; }
     function setupCanvas() {
       SINK = offTarget ? INK2 : css('--canvas-ink'); SINK2 = offTarget ? INK : css('--canvas-ink2');
-      if (offTarget) { var oc = offTarget.canvas.getContext('2d'); oc.setTransform(offTarget.r, 0, 0, offTarget.r, 0, 0); return { ctx: oc, cw: offTarget.w, ch: offTarget.h }; }
+      if (offTarget) { var oc = offTarget.canvas.getContext('2d'); oc.setTransform(offTarget.r, 0, 0, offTarget.r, (offTarget.dx || 0) * offTarget.r, (offTarget.dy || 0) * offTarget.r); return { ctx: oc, cw: offTarget.w, ch: offTarget.h }; }
       var cs = getComputedStyle(stage), pad = parseFloat(cs.paddingLeft);
       var cw = Math.max(240, stage.clientWidth - 2 * pad), ch = Math.max(220, stage.clientHeight - 2 * pad);
       if (!canvas || !stage.contains(canvas)) { stage.innerHTML = '<canvas class="lay-canvas" role="img"></canvas>'; canvas = stage.querySelector('canvas'); }
@@ -2971,7 +2971,7 @@ details[open] > summary .sum { display: none; }
     function drawMural() {
       var c = setupCanvas(), ctx = c.ctx, m = muralPanels(), A = L.mural;
       var padL = 54, padT = 44, padR = 24, padB = 56;
-      var s = Math.min((c.cw - padL - padR) / m.W, (c.ch - padT - padB) / m.H); lastScale = s;
+      var s = fixS() || Math.min((c.cw - padL - padR) / m.W, (c.ch - padT - padB) / m.H); lastScale = s;
       var ox = padL + (c.cw - padL - padR - m.W * s) / 2, oy = padT + (c.ch - padT - padB - m.H * s) / 2;
       ctx.save(); ctx.translate(ox, oy);
       drawArt(ctx, s, 0, 0, m.W, m.H);
@@ -3075,7 +3075,7 @@ details[open] > summary .sum { display: none; }
       var totalW = cells.reduce(function (t, k) { return t + k.W; }, 0), gapIn = 18, maxH = Math.max.apply(null, cells.map(function (k) { return k.H; })), one = cells.length === 1 && cells[0].fr;
       // Built-out walls take the same margins as a marker run, and everything is centered top to bottom, so Film and Markers land in the same place on a sheet.
       var walls = cells.every(function (k) { return k.fr; }), mx = walls ? 170 : 60, my = walls ? 110 : 150, span = totalW + gapIn * (cells.length - 1);
-      var s = Math.min((c.cw - mx) / span, (c.ch - my) / maxH); if (!(s > 0)) return; lastScale = s;
+      var s = fixS() || Math.min((c.cw - mx) / span, (c.ch - my) / maxH); if (!(s > 0)) return; lastScale = s;
       var x = (walls ? 90 : 30) + (c.cw - mx - span * s) / 2, base = (walls ? 30 : 40) + maxH * s + (c.ch - my - maxH * s) / 2;
       cells.forEach(function (k, i) {
         var p = k.p, sill = k.sill, w = k.W * s, h = k.H * s, y = base - h, on = F2.panes.indexOf(p) === F2.sel && !noSel && cells.length > 1, room = w + gapIn * s - 8;
@@ -3179,7 +3179,7 @@ details[open] > summary .sum { display: none; }
         var rows = Math.ceil(list.length / cols), sc = Math.min((c.cw - cols * 170) / (cols * maxShown), (c.ch - rows * 110) / (rows * H));
         if (!best || sc > best.s) best = { s: sc, cols: cols, rows: rows };
       }
-      var s = best.s; if (!(s > 0)) return; lastScale = s;
+      var s = fixS() || best.s; if (!(s > 0)) return; lastScale = s;
       var cellW = c.cw / best.cols, cellH = c.ch / best.rows;
       list.forEach(function (run, i) {
         var col = i % best.cols, row = Math.floor(i / best.cols), h = H * s, rx = col * cellW + 90 + (cellW - 170 - maxShown * s) / 2, rf = row * cellH + 30 + h + (cellH - 110 - h) / 2;
@@ -3381,6 +3381,8 @@ details[open] > summary .sum { display: none; }
         top: '<path d="M1.5 16.5h15M14.5 16.5V6M13.3 6h2.4"' + T + '/><rect x="3.5" y="6" width="3" height="3"/><rect x="8.5" y="6" width="3" height="3"/>',
         spacing: '<rect x="1.5" y="6" width="3" height="3"/><rect x="7.5" y="6" width="3" height="3"/><rect x="13.5" y="6" width="3" height="3"/><path d="M4.5 12.5h3M4.5 11.5v2M7.5 11.5v2M10.5 12.5h3M10.5 11.5v2M13.5 11.5v2"' + T + '/>',
         size: '<rect x="4" y="6" width="7" height="7" rx=".5"/><path d="M4 3.5h7M4 2.5v2M11 2.5v2M14 6v7M13 6h2M13 13h2"' + T + '/>' } };
+    // A Shop drawing box at a set scale (points per real inch) draws at that scale instead of fitting the box.
+    function fixS() { return offTarget && offTarget.scale > 0 ? offTarget.scale : 0; }
     function spacingOn() { return dimOn('markers', 'spacing') && !(offTarget && offTarget.noSpacing); }
     function dimOn(job, k) { var D = L[job].dims || {}; return D[k] != null ? !!D[k] : !!(DIM_ON[job] || {})[k]; }
     function dimsSec(job, extra) {
@@ -3513,7 +3515,7 @@ details[open] > summary .sum { display: none; }
         var rows = Math.ceil(list.length / cols), sc = Math.min((c.cw - cols * 190) / (cols * W), (c.ch - rows * 130) / (rows * H));
         if (!best || sc > best.s) best = { s: sc, cols: cols, rows: rows };
       }
-      var s = best.s; if (!(s > 0)) return; lastScale = s;
+      var s = fixS() || best.s; if (!(s > 0)) return; lastScale = s;
       var cellW = c.cw / best.cols, cellH = c.ch / best.rows;
       list.forEach(function (x, k) {
         var col = k % best.cols, row = Math.floor(k / best.cols), h = H * s;
@@ -3622,7 +3624,7 @@ details[open] > summary .sum { display: none; }
     function renderTo(cv, w, h, r, job, opts) {
       var keep = { canvas: canvas, job: L.job, geo: geo };
       var g = { runs: [] };
-      offTarget = { canvas: cv, w: w, h: h, r: r, runs: opts && opts.runs, noSpacing: !!(opts && opts.noSpacing), geo: g }; canvas = cv; L.job = job; noSel = true;
+      offTarget = { canvas: cv, w: w, h: h, r: r, runs: opts && opts.runs, noSpacing: !!(opts && opts.noSpacing), scale: opts && opts.scale, dx: opts && opts.dx, dy: opts && opts.dy, geo: g }; canvas = cv; L.job = job; noSel = true;
       try { draw(); } finally { canvas = keep.canvas; L.job = keep.job; geo = keep.geo; offTarget = null; noSel = false; }
       return { realInPerPt: lastScale > 0 ? 1 / lastScale : NaN, runs: g.runs };
     }
@@ -4694,7 +4696,7 @@ details[open] > summary .sum { display: none; }
   var Shop = (function () {
     var PAPERS = { letter: [11, 8.5, 'Letter, 8.5 × 11'], tabloid: [17, 11, 'Tabloid, 11 × 17'], archc: [24, 18, 'Arch C, 18 × 24'], archd: [36, 24, 'Arch D, 24 × 36'] };
     var SOURCES = { graphic: 'Graphic mockup', mural: 'Mural layout', film: 'Privacy film layout', markers: 'Distraction marker layout' };
-    var KIND = { text: 'Text', rect: 'Rectangle', ellipse: 'Ellipse', line: 'Line', arrow: 'Arrow', figure: 'Person', pic: 'Image', dim: 'Dimension' };
+    var KIND = { text: 'Text', rect: 'Rectangle', ellipse: 'Ellipse', line: 'Line', arrow: 'Arrow', figure: 'Person', pic: 'Image', dim: 'Dimension', view: 'Drawing' };
     var TOOLS = [['select', 'select', 'Select and move (V)'], ['hand', 'hand', 'Slide the drawing in its frame (H)'], ['text', 'text', 'Text box (T)'], ['rect', 'box', 'Rectangle (R)'], ['ellipse', 'ellipse', 'Ellipse (E)'], ['line', 'length', 'Line (L)'], ['arrow', 'arrow', 'Arrow (A)'], ['dim', 'dim', 'Dimension (D): click two points, then where the line goes'], ['figure', 'person', 'Person for scale: click where their feet go (P)']];
     var KEYS = { v: 'select', h: 'hand', t: 'text', r: 'rect', e: 'ellipse', l: 'line', a: 'arrow', d: 'dim', p: 'figure' };
     var TOOL_INFO = { select: ['Select', 'V', 'Click to select, Shift+click to select more, drag to move, drag a corner to resize. Arrows nudge, Delete removes.'], hand: ['Hand', 'H', 'Drag to slide drawing in its frame.'],
@@ -4723,7 +4725,18 @@ details[open] > summary .sum { display: none; }
     var SIZES = [8, 10, 12, 14, 18, 24, 36, 48, 72], WIDTHS = [0.5, 1, 1.5, 2, 3, 4, 6];
     // S is the open sheet, one of sheets; every sheet keeps its own paper, drawing, title block and items.
     var S = fresh(), sheets = [S], cur = 0, logo = null, pics = {}, sel = null, multi = [], selGuide = null, guidesOn = true, tool = 'select', drag = null, metrics = null, svg = null, note = '', busy = false;
-    var view = { key: '', url: '', gen: 0, info: null, err: '' };
+    // A sheet shows its main drawing in the frame (the sheet itself holds its settings) and any number of drawing boxes,
+    // which are sheet items (k: 'view') with the same settings plus a caption. Each keeps its own rendered image here, by id.
+    var vstate = {};
+    function vid(V) { return !V || V === S ? 'm' : 'v' + V.id; }
+    function VS(V) { var k = vid(V); return vstate[k] || (vstate[k] = { key: '', url: '', gen: 0, info: null, err: '' }); }
+    function views() { return [S].concat(S.notes.filter(function (n) { return n.k === 'view'; })); }
+    function viewById(id) { return id === 'm' ? S : views().find(function (V) { return vid(V) === id; }) || null; }
+    function rectOf(V) { return !V || V === S ? geom().frame : box(V); }
+    // The topmost drawing box under a sheet point, or the main drawing.
+    function viewAt(p) { var vs = views(); for (var i = vs.length - 1; i > 0; i--) { var b = box(vs[i]); if (p.x >= b.x && p.x <= b.x + b.w && p.y >= b.y && p.y <= b.y + b.h) return vs[i]; } return S; }
+    function presetOf(V) { return V.scale && V.scale !== 'fit' ? PRESETS.find(function (p) { return p.id === V.scale; }) : null; }
+    function resetViews() { Object.keys(vstate).forEach(function (k) { if (vstate[k].url) URL.revokeObjectURL(vstate[k].url); }); vstate = {}; }
 
     function today() { var d = new Date(); return (d.getMonth() + 1) + '/' + d.getDate() + '/' + d.getFullYear(); }
     function fresh() {
@@ -4765,10 +4778,11 @@ details[open] > summary .sum { display: none; }
       return { W: W, H: H, border: B, tbY: ty, cells: cells, frame: { x: B.x + pad, y: B.y + pad, w: B.w - 2 * pad, h: ty - B.y - 2 * pad } };
     }
     // The part of the Measure page shown in the frame, and how big it's drawn (z = sheet points per page unit).
-    function region() {
-      if (S.src !== 'measure' || M.src === 'none') return null;
-      var F = geom().frame, sc = scaleFor(M.page), base = { x: 0, y: 0, w: M.w, h: M.h };
-      if (S.fitTo === 'items') {
+    function region(V) {
+      V = V || S;
+      if (V.src !== 'measure' || M.src === 'none') return null;
+      var F = rectOf(V), sc = scaleFor(M.page), base = { x: 0, y: 0, w: M.w, h: M.h };
+      if (V.fitTo === 'items') {
         var pts = []; M.items.forEach(function (it) { if (it.page === M.page) pts = pts.concat(geomPts(it)); });
         if (pts.length) {
           var x0 = Math.min.apply(null, pts.map(function (q) { return q.x; })), x1 = Math.max.apply(null, pts.map(function (q) { return q.x; }));
@@ -4777,23 +4791,31 @@ details[open] > summary .sum { display: none; }
           base = { x: x0 - padU, y: y0 - padU, w: x1 - x0 + 2 * padU, h: y1 - y0 + 2 * padU };
         }
       }
-      var z = Math.min(F.w / base.w, F.h / base.h), preset = S.scale !== 'fit' && PRESETS.find(function (p) { return p.id === S.scale; }), warn = '';
+      var z = Math.min(F.w / base.w, F.h / base.h), preset = presetOf(V), warn = '';
       if (preset) { if (sc) z = sc.inPerUnit / preset.inPerUnit; else warn = 'Set a scale in Measure first; the drawing is fitted to the frame for now.'; }
-      var w = F.w / z, h = F.h / z, cx = base.x + base.w / 2 + S.pan.x, cy = base.y + base.h / 2 + S.pan.y;
+      var w = F.w / z, h = F.h / z, cx = base.x + base.w / 2 + V.pan.x, cy = base.y + base.h / 2 + V.pan.y;
       var real = sc ? sc.inPerUnit / z : NaN;
       return { x: cx - w / 2, y: cy - h / 2, w: w, h: h, z: z, realInPerPt: real, warn: warn,
         label: preset && sc ? preset.label : sc ? '1" = ' + archLen(72 * real) : 'Not to scale' };
     }
-    function scaleInfo() {
-      if (S.src === 'measure') return region();
-      var i = view.info; return i && isFinite(i.realInPerPt) ? { realInPerPt: i.realInPerPt, label: '1" = ' + archLen(72 * i.realInPerPt) } : null;
+    function scaleInfo(V) {
+      V = V || S;
+      if (V.src === 'measure') return region(V);
+      var i = VS(V).info, pr = presetOf(V); return i && isFinite(i.realInPerPt) ? { realInPerPt: i.realInPerPt, label: pr ? pr.label : '1" = ' + archLen(72 * i.realInPerPt) } : null;
+    }
+    // The title block's scale: the drawings' one scale, or As noted when the boxes differ (each box shows its own under its caption).
+    function sheetScale() {
+      var list = views().map(function (V) { return scaleInfo(V); }).filter(Boolean);
+      if (!list.length) return null;
+      var same = list.every(function (x) { return x.label === list[0].label; });
+      return same ? list[0] : { realInPerPt: NaN, label: 'As noted' };
     }
 
     // ---- The shapes that make up the sheet ----
     function prims(forPdf) {
       var g = geom(), P = [], B = g.border, k = '#000000', gray = '#666666';
       if (!forPdf) P.push({ k: 'rect', x: 0, y: 0, w: g.W, h: g.H, fill: '#ffffff', paper: true });
-      P.push({ k: 'image', src: 'view', x: g.frame.x, y: g.frame.y, w: g.frame.w, h: g.frame.h });
+      P.push({ k: 'image', src: 'view', vid: 'm', x: g.frame.x, y: g.frame.y, w: g.frame.w, h: g.frame.h });
       S.notes.forEach(function (n) { notePrims(n, P, forPdf); });
       if (S.tbStyle === 'none') { P.push({ k: 'rect', x: B.x, y: B.y, w: B.w, h: B.h, stroke: k, sw: 1.5 }); return { P: P, g: g }; }
       if (S.tbStyle === 'mini') {
@@ -4815,7 +4837,7 @@ details[open] > summary .sum { display: none; }
       } else if (!forPdf) P.push({ k: 'text', x: c0.x + c0.w / 2 - tw('Your logo', 9, false) / 2, y: c0.y + c0.h / 2 + 3, size: 9, color: '#aaaaaa', text: 'Your logo', hint: true });
       fields(P, g.cells[1], [['CLIENT', S.tb.client], ['PROJECT', S.tb.project], ['LOCATION', S.tb.location]]);
       fields(P, g.cells[2], [['DRAWING', S.tb.title || defaultTitle()], ['DATE', S.tb.date], ['SHEET', S.tb.sheet]]);
-      var c3 = g.cells[3], si = scaleInfo();
+      var c3 = g.cells[3], si = sheetScale();
       P.push({ k: 'text', x: c3.x + 8, y: c3.y + 13, size: 6.5, bold: true, color: gray, text: 'SCALE' });
       P.push({ k: 'text', x: c3.x + 8, y: c3.y + 29, size: Math.min(11, c3.h * 0.16), bold: true, color: k, text: fitText(si ? si.label : 'Not to scale', 11, true, c3.w - 16) });
       if (S.scaleBar && si && isFinite(si.realInPerPt)) scaleBar(P, c3, si.realInPerPt);
@@ -4824,7 +4846,7 @@ details[open] > summary .sum { display: none; }
     // Minimal title block: one line of small type along the bottom (logo, the same fields, scale and scale bar).
     // Aligned left, center or right, or spread evenly across the sheet. Empty fields are left out.
     function miniBlock(P, g) {
-      var B = g.border, pad = 10, avail = B.w - 2 * pad, cy = g.tbY + (B.y + B.h - g.tbY) / 2, si = scaleInfo();
+      var B = g.border, pad = 10, avail = B.w - 2 * pad, cy = g.tbY + (B.y + B.h - g.tbY) / 2, si = sheetScale();
       var rows = [['CLIENT', S.tb.client], ['PROJECT', S.tb.project], ['LOCATION', S.tb.location], ['DRAWING', S.tb.title || defaultTitle()], ['DATE', S.tb.date], ['SHEET', S.tb.sheet], ['SCALE', si ? si.label : 'Not to scale']].filter(function (r) { return String(r[1] || '').trim(); });
       var bar = S.scaleBar && si && isFinite(si.realInPerPt) ? si.realInPerPt : 0;
       var build = function (f) {
@@ -4875,7 +4897,7 @@ details[open] > summary .sum { display: none; }
       [[0, '0'], [w / 2, lab(len / 2)], [w, lab(len)]].forEach(function (t) { P.push({ k: 'text', x: x + t[0] - tw(t[1], 6.5, false) / 2, y: y + h + 9, size: 6.5, color: '#000000', text: t[1] }); });
     }
     function box(n) { return { x: Math.min(n.x, n.x + n.w), y: Math.min(n.y, n.y + n.h), w: Math.abs(n.w), h: Math.abs(n.h) }; }
-    function realPerPt() { var si = scaleInfo(); return si && isFinite(si.realInPerPt) ? si.realInPerPt : NaN; }
+    function realPerPt(V) { var si = scaleInfo(V); return si && isFinite(si.realInPerPt) ? si.realInPerPt : NaN; }
 
     // ---- Dimensions you draw: two measured points and a line placed where you want it ----
     // Each end keeps where it sits on the drawing (a), so dimensions follow the drawing when it slides, rescales or the paper changes:
@@ -4883,12 +4905,13 @@ details[open] > summary .sum { display: none; }
     // An end that snapped to a glass edge or mark remembers it (snap); if the layout changes and nothing is there anymore, the dimension turns red.
     // The line sits off from the first point by off (sheet points); lt slides the label along the line.
     var dimDraft = null, dimHover = null, dimMouse = null;
-    function dimOrigin() { var F = geom().frame; return { x: F.x + S.pan.x, y: F.y + S.pan.y }; }
-    function runGeo(ri) { var i = view.info; return i && i.runs ? i.runs.find(function (R) { return R.ri === ri; }) : null; }
+    // Each end belongs to the drawing it was placed on (v: 'm' for the main drawing, or a box), so it follows that box too.
+    function dimOrigin(V) { var F = rectOf(V); return { x: F.x + V.pan.x, y: F.y + V.pan.y }; }
+    function runGeo(V, ri) { var i = VS(V).info; return i && i.runs ? i.runs.find(function (R) { return R.ri === ri; }) : null; }
     function anchorOf(pt) {
-      var F = geom().frame, o = dimOrigin(), info = view.info;
-      if (S.src === 'measure') { var r = region(); return r ? { src: 'measure', pg: true, x: r.x + (pt.x - F.x) / r.z, y: r.y + (pt.y - F.y) / r.z } : null; }
-      if (S.src === 'markers' && info && info.runs && info.runs.length) {
+      var V = viewAt(pt), F = rectOf(V), o = dimOrigin(V), info = VS(V).info, v = vid(V);
+      if (V.src === 'measure') { var r = region(V); return r ? { v: v, src: 'measure', pg: true, x: r.x + (pt.x - F.x) / r.z, y: r.y + (pt.y - F.y) / r.z } : null; }
+      if (V.src === 'markers' && info && info.runs && info.runs.length) {
         var best = null;
         info.runs.forEach(function (R) {
           var xs = [], ys = []; R.segs.forEach(function (g) { xs.push(g[0], g[2]); ys.push(g[1], g[3]); });
@@ -4896,29 +4919,34 @@ details[open] > summary .sum { display: none; }
           var d = Math.hypot(Math.max(bx0 - pt.x, 0, pt.x - bx1), Math.max(by0 - pt.y, 0, pt.y - by1));
           if (!best || d < best.d) best = { d: d, R: R };
         });
-        var R = best.R; return { src: 'markers', ri: R.ri, x: (pt.x - o.x - R.x0) / R.s, y: (R.floor - (pt.y - o.y)) / R.s };
+        var R = best.R; return { v: v, src: 'markers', ri: R.ri, x: (pt.x - o.x - R.x0) / R.s, y: (R.floor - (pt.y - o.y)) / R.s };
       }
-      return { src: S.src, fx: pt.x - o.x, fy: pt.y - o.y };
+      return { v: v, src: V.src, fx: pt.x - o.x, fy: pt.y - o.y };
     }
+    function anchorView(a) { var V = a && viewById(a.v || 'm'); return V && V.src === a.src ? V : null; }
     function placeOf(a) {
-      if (!a || a.src !== S.src) return null;
-      var F = geom().frame, o = dimOrigin();
-      if (a.pg) { var r = region(); return r ? { x: F.x + (a.x - r.x) * r.z, y: F.y + (a.y - r.y) * r.z } : null; }
-      if (a.ri != null) { var R = runGeo(a.ri); return R ? { x: o.x + R.x0 + a.x * R.s, y: o.y + R.floor - a.y * R.s } : null; }
+      var V = anchorView(a); if (!V) return null;
+      var F = rectOf(V), o = dimOrigin(V);
+      if (a.pg) { var r = region(V); return r ? { x: F.x + (a.x - r.x) * r.z, y: F.y + (a.y - r.y) * r.z } : null; }
+      if (a.ri != null) { var R = runGeo(V, a.ri); return R ? { x: o.x + R.x0 + a.x * R.s, y: o.y + R.floor - a.y * R.s } : null; }
       return { x: o.x + a.fx, y: o.y + a.fy };
     }
     function syncDim(n) { [n.p1, n.p2].forEach(function (p) { var q = placeOf(p.a); if (q) { p.x = q.x; p.y = q.y; } }); }
-    // The nearest glass edge, frame edge, mark edge or mark center within a few screen pixels, in sheet points.
+    // The nearest glass edge, frame edge, mark edge or mark center within a few screen pixels, in sheet points, on any marker drawing.
     function snapAt(pt) {
-      var info = view.info; if (S.src !== 'markers' || !info || !info.runs) return null;
-      var o = dimOrigin(), tol = 8 / pxPerPt(), best = null;
-      info.runs.forEach(function (R) {
-        R.segs.forEach(function (g) {
-          var ax = o.x + R.x0 + g[0] * R.s, ay = o.y + R.floor - g[1] * R.s, bx = o.x + R.x0 + g[2] * R.s, by = o.y + R.floor - g[3] * R.s;
-          var dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy, t = L2 ? Math.max(0, Math.min(1, ((pt.x - ax) * dx + (pt.y - ay) * dy) / L2)) : 0;
-          [[ax, ay, 0.6], [bx, by, 0.6], [ax + t * dx, ay + t * dy, 1]].forEach(function (c) {
-            var sc = Math.hypot(pt.x - c[0], pt.y - c[1]) * c[2];
-            if (sc < tol && (!best || sc < best.sc)) best = { sc: sc, x: c[0], y: c[1] };
+      var tol = 8 / pxPerPt(), best = null;
+      views().forEach(function (V) {
+        var info = VS(V).info; if (V.src !== 'markers' || !info || !info.runs) return;
+        var o = dimOrigin(V), F = rectOf(V);
+        if (pt.x < F.x - tol || pt.x > F.x + F.w + tol || pt.y < F.y - tol || pt.y > F.y + F.h + tol) return;
+        info.runs.forEach(function (R) {
+          R.segs.forEach(function (g) {
+            var ax = o.x + R.x0 + g[0] * R.s, ay = o.y + R.floor - g[1] * R.s, bx = o.x + R.x0 + g[2] * R.s, by = o.y + R.floor - g[3] * R.s;
+            var dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy, t = L2 ? Math.max(0, Math.min(1, ((pt.x - ax) * dx + (pt.y - ay) * dy) / L2)) : 0;
+            [[ax, ay, 0.6], [bx, by, 0.6], [ax + t * dx, ay + t * dy, 1]].forEach(function (c) {
+              var sc = Math.hypot(pt.x - c[0], pt.y - c[1]) * c[2];
+              if (sc < tol && (!best || sc < best.sc)) best = { sc: sc, x: c[0], y: c[1] };
+            });
           });
         });
       });
@@ -4927,16 +4955,16 @@ details[open] > summary .sum { display: none; }
     function dimPt(q, snapped) { return { x: q.x, y: q.y, a: anchorOf(q), snap: !!snapped }; }
     // The measured length in inches: from the drawing itself when both ends sit on the same run, otherwise from the sheet scale.
     function dimValue(n) {
-      var a1 = n.p1.a, a2 = n.p2.a, h = n.o === 'h';
-      if (a1 && a2 && a1.src === S.src && a2.src === S.src && a1.ri != null && a1.ri === a2.ri) return Math.abs(h ? a2.x - a1.x : a2.y - a1.y);
-      var r = realPerPt(); return isFinite(r) ? Math.abs(h ? n.p2.x - n.p1.x : n.p2.y - n.p1.y) * r : NaN;
+      var a1 = n.p1.a, a2 = n.p2.a, h = n.o === 'h', V1 = anchorView(a1);
+      if (V1 && anchorView(a2) === V1 && a1.ri != null && a1.ri === a2.ri) return Math.abs(h ? a2.x - a1.x : a2.y - a1.y);
+      var r = realPerPt(V1 || (a1 ? null : viewAt(n.p1)) || S); return isFinite(r) ? Math.abs(h ? n.p2.x - n.p1.x : n.p2.y - n.p1.y) * r : NaN;
     }
     function dimLabel(n) { var v = dimValue(n); return isFinite(v) ? Lay.fmtIn(v) : '?'; }
     // An end that snapped to the layout but no longer lands on anything there (within 1/32").
     function dimStale(n) {
       return [n.p1, n.p2].some(function (p) {
-        var a = p.a; if (!p.snap || !a || a.src !== S.src || a.ri == null) return false;
-        var R = runGeo(a.ri); if (!R) return false;
+        var a = p.a, V = anchorView(a); if (!p.snap || !V || a.ri == null) return false;
+        var R = runGeo(V, a.ri); if (!R) return false;
         return !R.segs.some(function (g) { var dx = g[2] - g[0], dy = g[3] - g[1], L2 = dx * dx + dy * dy, t = L2 ? Math.max(0, Math.min(1, ((a.x - g[0]) * dx + (a.y - g[1]) * dy) / L2)) : 0; return Math.hypot(a.x - (g[0] + t * dx), a.y - (g[1] + t * dy)) < 1 / 32; });
       });
     }
@@ -4971,6 +4999,16 @@ details[open] > summary .sum { display: none; }
     function fitFigs() { S.notes.forEach(function (n) { if (n.k === 'figure' && !(drag && drag.handle && drag.id === n.id)) fitFig(n); }); }
     function notePrims(n, P, forPdf) {
       if (n.k === 'dim') { syncDim(n); dimPrims(n, P, !forPdf && dimStale(n) ? '#d0342c' : null); return; }
+      if (n.k === 'view') {
+        var vb = box(n), si = scaleInfo(n), cap = String(n.cap || '').trim();
+        P.push({ k: 'rect', x: vb.x, y: vb.y, w: vb.w, h: vb.h, fill: '#ffffff' });
+        P.push({ k: 'image', src: 'view', vid: vid(n), x: vb.x, y: vb.y, w: vb.w, h: vb.h });
+        if (n.border !== false) P.push({ k: 'rect', x: vb.x, y: vb.y, w: vb.w, h: vb.h, stroke: n.stroke || '#1c1c1c', sw: n.sw || 0.75 });
+        var cy = vb.y + vb.h + 13;
+        if (cap) { P.push({ k: 'text', x: vb.x + vb.w / 2 - tw(cap.toUpperCase(), 10, true) / 2, y: cy, size: 10, bold: true, color: '#000000', text: cap.toUpperCase(), font: 'sans' }); cy += 11; }
+        if (cap || presetOf(n)) { var sl = si ? 'Scale: ' + si.label : 'Not to scale'; P.push({ k: 'text', x: vb.x + vb.w / 2 - tw(sl, 7.5, false) / 2, y: cy, size: 7.5, color: '#333333', text: sl, font: 'sans' }); }
+        return;
+      }
       if (n.k === 'pic') {
         var pb = box(n);
         if (pics[n.pic]) P.push({ k: 'image', src: 'pic', pic: n.pic, x: pb.x, y: pb.y, w: pb.w, h: pb.h });
@@ -5006,18 +5044,19 @@ details[open] > summary .sum { display: none; }
     }
 
     // ---- The drawing in the frame: rendered to a canvas (the editor and the PDF use the same code, at different sharpness) ----
-    function renderView(ppp) {
-      var F = geom().frame, cw = Math.max(1, Math.round(F.w * ppp)), ch = Math.max(1, Math.round(F.h * ppp));
+    function renderView(ppp, V) {
+      V = V || S;
+      var F = rectOf(V), cw = Math.max(1, Math.round(F.w * ppp)), ch = Math.max(1, Math.round(F.h * ppp));
       var cv = document.createElement('canvas'); cv.width = cw; cv.height = ch;
       var ctx = cv.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cw, ch);
-      if (S.src !== 'measure') {
-        // A Layout drawing fills the frame; the hand tool slides it (pan is in sheet points here), so it is drawn on its own canvas and placed.
-        var slid = S.pan.x || S.pan.y, lc = cv; if (slid) { lc = document.createElement('canvas'); lc.width = cw; lc.height = ch; }
-        renderView.info = Lay.renderTo(lc, F.w, F.h, ppp, S.src, S.src === 'markers' ? { runs: shopRuns(), noSpacing: S.layDims === false } : S.src === 'graphic' ? { runs: shopElevs() } : S.src === 'film' ? { runs: shopFilm() } : null);
-        if (slid) ctx.drawImage(lc, Math.round(S.pan.x * ppp), Math.round(S.pan.y * ppp));
+      if (V.src !== 'measure') {
+        // A Layout drawing fills its box; the hand tool slides it (pan is in sheet points here), drawn already shifted so what slides in is drawn too.
+        var pr = presetOf(V), ro = { scale: pr ? 1 / pr.inPerUnit : 0, dx: V.pan.x, dy: V.pan.y };
+        if (V.src === 'markers') { ro.runs = shopRuns(V); ro.noSpacing = V.layDims === false; } else if (V.src === 'graphic') ro.runs = shopElevs(V); else if (V.src === 'film') ro.runs = shopFilm(V);
+        renderView.info = Lay.renderTo(cv, F.w, F.h, ppp, V.src, ro);
         return Promise.resolve({ canvas: cv, info: renderView.info });
       }
-      var r = region(); if (!r) return Promise.resolve({ canvas: cv, info: null, empty: true });
+      var r = region(V); if (!r) return Promise.resolve({ canvas: cv, info: null, empty: true });
       var f = r.z * ppp, paint;
       if (M.src === 'pdf') paint = M.pdf.getPage(M.page).then(function (pg) { return pg.render({ canvasContext: ctx, viewport: pg.getViewport({ scale: f, offsetX: -r.x * f, offsetY: -r.y * f }) }).promise; });
       else if (M.src === 'image') { ctx.setTransform(f, 0, 0, f, -r.x * f, -r.y * f); ctx.drawImage(M.img, 0, 0); ctx.setTransform(1, 0, 0, 1, 0, 0); paint = Promise.resolve(); }
@@ -5032,28 +5071,30 @@ details[open] > summary .sum { display: none; }
         return { canvas: cv, info: r };
       });
     }
-    function shopElevs() { return Lay.graphicRuns().map(function (x, i) { return i; }).filter(function (i) { return (S.grunsOff || []).indexOf(i) < 0; }); }
-    function shopFilm() { return Lay.filmRows().map(function (x, i) { return i; }).filter(function (i) { return (S.frowsOff || []).indexOf(i) < 0; }); }
-    function shopRuns() { return Lay.markerRuns().map(function (x, i) { return i; }).filter(function (i) { return (S.mrunsOff || []).indexOf(i) < 0; }); }
+    function shopElevs(V) { V = V || S; return Lay.graphicRuns().map(function (x, i) { return i; }).filter(function (i) { return (V.grunsOff || []).indexOf(i) < 0; }); }
+    function shopFilm(V) { V = V || S; return Lay.filmRows().map(function (x, i) { return i; }).filter(function (i) { return (V.frowsOff || []).indexOf(i) < 0; }); }
+    function shopRuns(V) { V = V || S; return Lay.markerRuns().map(function (x, i) { return i; }).filter(function (i) { return (V.mrunsOff || []).indexOf(i) < 0; }); }
     // Pixels per point, kept under what browsers allow for one canvas (Safari: about 16 million pixels).
-    function sharpness(want, cap) { var F = geom().frame; return Math.min(want, Math.sqrt(cap / (F.w * F.h))); }
-    function viewKey() {
-      var F = geom().frame, r = region();
-      return JSON.stringify([S.src, S.grid, S.layDims, S.mrunsOff, S.grunsOff, S.frowsOff, S.src === 'measure' ? 0 : [Math.round(S.pan.x), Math.round(S.pan.y)], F, r && [r.x, r.y, r.w, r.h].map(function (v) { return Math.round(v * 10); }), S.src === 'measure' ? [M.src, M.name, M.page, M.items.filter(function (it) { return it.page === M.page; }), M.scales[M.page]] : [Lay.getState(), Lay.imageName(), UNITS, Lay.markerArt().map(function (g) { return g.name + g.w; }), Lay.graphicArt().map(function (g) { return g.id + g.name + g.w; })]]);
+    function sharpness(want, cap, V) { var F = rectOf(V); return Math.min(want, Math.sqrt(cap / Math.max(1, F.w * F.h))); }
+    function viewKey(V) {
+      V = V || S;
+      var F = rectOf(V), r = region(V);
+      return JSON.stringify([V.src, V.grid, V.layDims, V.scale, V.mrunsOff, V.grunsOff, V.frowsOff, V.src === 'measure' ? 0 : [Math.round(V.pan.x), Math.round(V.pan.y)], [F.w, F.h].map(Math.round), r && [r.x, r.y, r.w, r.h].map(function (v) { return Math.round(v * 10); }), V.src === 'measure' ? [M.src, M.name, M.page, M.items.filter(function (it) { return it.page === M.page; }), M.scales[M.page]] : [Lay.getState(), Lay.imageName(), UNITS, Lay.markerArt().map(function (g) { return g.name + g.w; }), Lay.graphicArt().map(function (g) { return g.id + g.name + g.w; })]]);
     }
-    function ensureView() {
-      var key = viewKey(); if (key === view.key) return;
-      view.key = key; var my = ++view.gen; view.err = '';
-      renderView(sharpness(2, 6e6)).then(function (res) {
-        if (my !== view.gen) return;
-        var scaleChanged = S.src !== 'measure' && JSON.stringify(view.info) !== JSON.stringify(res.info);
-        view.info = res.info;
+    function ensureViews() { views().forEach(ensureView); }
+    function ensureView(V) {
+      var st = VS(V), key = viewKey(V); if (key === st.key) return;
+      st.key = key; var my = ++st.gen; st.err = '';
+      renderView(sharpness(2, V === S ? 6e6 : 3e6, V), V).then(function (res) {
+        if (my !== st.gen) return;
+        var scaleChanged = V.src !== 'measure' && JSON.stringify(st.info) !== JSON.stringify(res.info);
+        st.info = res.info;
         if (scaleChanged) left();
-        if (res.empty) { setUrl(''); paint(); return; }
-        res.canvas.toBlob(function (b) { if (my !== view.gen) return; setUrl(b ? URL.createObjectURL(b) : ''); paint(); }, 'image/png');
-      }).catch(function (err) { if (my === view.gen) { view.err = err && err.message ? err.message : String(err); paint(); } });
+        if (res.empty) { setUrl(V, ''); paint(); return; }
+        res.canvas.toBlob(function (b) { if (my !== st.gen) return; setUrl(V, b ? URL.createObjectURL(b) : ''); paint(); }, 'image/png');
+      }).catch(function (err) { if (my === st.gen) { st.err = err && err.message ? err.message : String(err); paint(); } });
     }
-    function setUrl(u) { if (view.url) URL.revokeObjectURL(view.url); view.url = u; }
+    function setUrl(V, u) { var st = VS(V); if (st.url) URL.revokeObjectURL(st.url); st.url = u; }
 
     // ---- Editor ----
     function pxPerPt() { var g = geom(); return svg ? svg.clientWidth / g.W : 1; }
@@ -5074,8 +5115,9 @@ details[open] > summary .sum { display: none; }
       if (p.k === 'image' && p.src === 'pic') return '<image href="' + pics[p.pic].url + '" x="' + p.x + '" y="' + p.y + '" width="' + p.w + '" height="' + p.h + '" preserveAspectRatio="none"/>';
       if (p.k === 'image' && p.src === 'logo') return '<image href="' + logo.url + '" x="' + p.x + '" y="' + p.y + '" width="' + p.w + '" height="' + p.h + '" preserveAspectRatio="none"/>';
       if (p.k === 'image') {
-        if (view.url) return '<image href="' + view.url + '" x="' + p.x + '" y="' + p.y + '" width="' + p.w + '" height="' + p.h + '" preserveAspectRatio="none"/>';
-        var msg = view.err ? 'Could not draw it: ' + view.err : S.src === 'measure' && M.src === 'none' ? 'Open a drawing in Measure, or pick a Layout as the source.' : 'Drawing…';
+        var vw = VS(viewById(p.vid) || S);
+        if (vw.url) return '<image href="' + vw.url + '" x="' + p.x + '" y="' + p.y + '" width="' + p.w + '" height="' + p.h + '" preserveAspectRatio="none"/>';
+        var pv = viewById(p.vid) || S, msg = vw.err ? 'Could not draw it: ' + vw.err : pv.src === 'measure' && M.src === 'none' ? 'Open a drawing in Measure, or pick a Layout as the source.' : 'Drawing…';
         return '<text x="' + (p.x + p.w / 2) + '" y="' + (p.y + p.h / 2) + '" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#888888">' + esc(msg) + '</text>';
       }
       return '';
@@ -5093,7 +5135,7 @@ details[open] > summary .sum { display: none; }
     function moveNote(n, o, dx, dy) { if (n.k === 'dim') { n.off = o.off + (n.o === 'h' ? dy : dx); return; } if (n.k === 'line' || n.k === 'arrow') { n.x1 = o.x1 + dx; n.y1 = o.y1 + dy; n.x2 = o.x2 + dx; n.y2 = o.y2 + dy; } else { n.x = o.x + dx; n.y = o.y + dy; } }
     function paint() {
       if (mode !== 'shop' || !svg) return;
-      ensureView(); fitSvg(); fitFigs();
+      ensureViews(); fitSvg(); fitFigs();
       var built = prims(false), g = built.g, o = built.P.map(primSvg).join(''), k = 1 / pxPerPt(), F = g.frame;
       o += '<rect x="' + F.x + '" y="' + F.y + '" width="' + F.w + '" height="' + F.h + '" fill="none" stroke="#3e7bfa" stroke-opacity=".35" stroke-width="' + k + '" stroke-dasharray="' + 4 * k + ' ' + 3 * k + '" pointer-events="none"/>';
       // Guides: cyan lines across the sheet that never print. The selected one shows how far it is from the sheet's left or top edge.
@@ -5127,6 +5169,19 @@ details[open] > summary .sum { display: none; }
       if (dimHover) o += '<rect x="' + (dimHover.x - 3.5 * k) + '" y="' + (dimHover.y - 3.5 * k) + '" width="' + 7 * k + '" height="' + 7 * k + '" fill="none" stroke="#00a5c8" stroke-width="' + 1.5 * k + '" pointer-events="none"/>';
       return o;
     }
+    // Scale choices for a drawing: fit its box, or a set scale.
+    function scaleOpts(v, fitLabel) {
+      var groups = {}; PRESETS.forEach(function (p) { (groups[p.group] = groups[p.group] || []).push(p); });
+      return '<option value="fit"' + (!v || v === 'fit' ? ' selected' : '') + '>' + fitLabel + '</option>' + Object.keys(groups).map(function (gname) { return '<optgroup label="' + gname + '">' + groups[gname].map(function (p) { return '<option value="' + p.id + '"' + (v === p.id ? ' selected' : '') + '>' + esc(p.label) + '</option>'; }).join('') + '</optgroup>'; }).join('');
+    }
+    // A new drawing box goes in the upper right of the frame, a third of its size, captioned Detail A, B, C...
+    function addView(src) {
+      var F = geom().frame, nth = views().length - 1, w = F.w * 0.36, h = F.h * 0.4;
+      var n = { id: S.nextId++, k: 'view', src: src, x: F.x + F.w - w - 12 - nth * 14, y: F.y + 12 + nth * 14, w: w, h: h, pan: { x: 0, y: 0 }, scale: 'fit', fitTo: 'page', grid: true,
+        mrunsOff: [], grunsOff: [], frowsOff: [], layDims: true, border: true, cap: 'Detail ' + String.fromCharCode(65 + (nth % 26)), stroke: '#1c1c1c', sw: 0.75 };
+      S.notes.push(n); sel = n.id; multi = []; tool = 'select';
+    }
+    function srcName(src) { return src === 'measure' ? 'Measure: ' + (M.src === 'none' ? 'no drawing open' : baseName()) : 'Layout: ' + SOURCES[src]; }
     function guideById(id) { return (S.guides || []).find(function (gd) { return gd.id === id; }); }
     function hitGuide(p) { if (!guidesOn) return null; var tol = 5 / pxPerPt(); return (S.guides || []).slice().reverse().find(function (gd) { return Math.abs((gd.o === 'v' ? p.x : p.y) - gd.p) < tol; }) || null; }
     // A new guide goes through the middle of the drawing frame, stepped aside if one is already there.
@@ -5174,8 +5229,9 @@ details[open] > summary .sum { display: none; }
         if (e.button !== 0) return;
         var p = toSheet(e); svg.setPointerCapture(e.pointerId);
         if (tool === 'hand') {   // Measure pans in page units against the drag; a Layout drawing moves with it, in sheet points
-          if (S.src !== 'measure') drag = { pan: true, p: p, pan0: { x: S.pan.x, y: S.pan.y }, z: -1 };
-          else if (region()) drag = { pan: true, p: p, pan0: { x: S.pan.x, y: S.pan.y }, z: region().z };
+          var PV = viewAt(p);
+          if (PV.src !== 'measure') drag = { pan: true, V: PV, p: p, pan0: { x: PV.pan.x, y: PV.pan.y }, z: -1 };
+          else if (region(PV)) drag = { pan: true, V: PV, p: p, pan0: { x: PV.pan.x, y: PV.pan.y }, z: region(PV).z };
           paint(); return;
         }
         if (tool === 'select') {
@@ -5212,7 +5268,7 @@ details[open] > summary .sum { display: none; }
         if (!drag) return;
         var p = toSheet(e), dx = p.x - drag.p.x, dy = p.y - drag.p.y, n = drag.id != null && noteById(drag.id);
         drag.moved = drag.moved || Math.hypot(dx, dy) * pxPerPt() > 2;
-        if (drag.pan) { S.pan.x = drag.pan0.x - dx / drag.z; S.pan.y = drag.pan0.y - dy / drag.z; paint(); return; }
+        if (drag.pan) { drag.V.pan.x = drag.pan0.x - dx / drag.z; drag.V.pan.y = drag.pan0.y - dy / drag.z; paint(); return; }
         if (drag.guide != null) { var gm = guideById(drag.guide); if (gm) { var gv = gm.o === 'v' ? p.x : p.y; gm.p = e.shiftKey ? Math.round(gv / 9) * 9 : gv; } paint(); return; }   // Shift: whole 1/8" of sheet
         if (!n) return;
         var straight = function (ax, ay, bx, by) { return e.shiftKey ? (Math.abs(bx - ax) > Math.abs(by - ay) ? { x: bx, y: ay } : { x: ax, y: by }) : { x: bx, y: by }; };
@@ -5307,15 +5363,28 @@ details[open] > summary .sum { display: none; }
       if (!S.notes.length) { leftEl.innerHTML = h; return; }
       h += '<div class="block"><div class="label">On sheet · front to back</div>';
       h += '<div class="list">' + S.notes.slice().reverse().map(function (n) {
-        var on = isSel(n.id), label = n.k === 'pic' ? (pics[n.pic] ? pics[n.pic].name : 'Image') : n.k === 'text' ? (n.text || '').split('\n')[0].slice(0, 40) || 'Text' : n.k === 'figure' ? (FIGS[n.who] || FIGS.man).label + ', ' + archLen(n.hIn) : n.k === 'dim' ? (n.o === 'h' ? 'Across ' : 'Up ') + dimLabel(n) + (dimStale(n) ? ' (check)' : '') : KIND[n.k];
+        var on = isSel(n.id), label = n.k === 'pic' ? (pics[n.pic] ? pics[n.pic].name : 'Image') : n.k === 'text' ? (n.text || '').split('\n')[0].slice(0, 40) || 'Text' : n.k === 'figure' ? (FIGS[n.who] || FIGS.man).label + ', ' + archLen(n.hIn) : n.k === 'dim' ? (n.o === 'h' ? 'Across ' : 'Up ') + dimLabel(n) + (dimStale(n) ? ' (check)' : '') : n.k === 'view' ? (n.cap || (n.src === 'measure' ? 'Measure' : SOURCES[n.src])) : KIND[n.k];
         var row = '<div class="item' + (on ? ' sel' : '') + '" data-snote="' + n.id + '"><span class="chip" style="background:' + (n.k === 'pic' && pics[n.pic] ? '#ffffff url(' + pics[n.pic].url + ') center/cover' : n.k === 'text' ? n.color : n.fill || n.stroke || '#ffffff') + '"></span><span>' + esc(label) + '</span><b>' + KIND[n.k] + '</b><button type="button" data-sdel="' + n.id + '" aria-label="Delete">×</button>';
         if (on) row += '<div class="item-more">' + props(n) + '</div>';
         return row + '</div>';
       }).join('') + '</div>';
       leftEl.innerHTML = h + '</div>';
     }
+    function viewProps(n) {
+      var h = '<label class="field">Caption<input type="text" data-vk="cap" value="' + esc(n.cap || '') + '" placeholder="Detail A"></label>';
+      h += '<label class="field">Show<select data-vk="src">' + ['graphic', 'markers', 'film', 'mural', 'measure'].map(function (k) { return '<option value="' + k + '"' + (n.src === k ? ' selected' : '') + '>' + esc(srcName(k)) + '</option>'; }).join('') + '</select></label>';
+      if (n.src === 'measure') h += '<label class="field">Frame<select data-vk="fitTo"><option value="page"' + (n.fitTo !== 'items' ? ' selected' : '') + '>Whole page</option><option value="items"' + (n.fitTo === 'items' ? ' selected' : '') + '>Measurements only</option></select></label>';
+      h += '<label class="field">Scale<select data-vk="scale">' + scaleOpts(n.scale, 'Fit box') + '</select></label>';
+      var rr = region(n); if (rr && rr.warn) h += '<p class="err" style="margin:0">' + esc(rr.warn) + '</p>';
+      var list = n.src === 'markers' ? ['m', 'mrunsOff', 'Glass runs', Lay.markerRuns()] : n.src === 'graphic' ? ['g', 'grunsOff', 'Elevations', Lay.graphicRuns()] : n.src === 'film' ? ['f', 'frowsOff', 'Film rows', Lay.filmRows()] : null;
+      if (list) h += '<div class="label">' + list[2] + ' shown</div>' + list[3].map(function (nm, i) { return '<label class="chk"><input type="checkbox" data-vrun="' + list[0] + ':' + i + '"' + ((n[list[1]] || []).indexOf(i) < 0 ? ' checked' : '') + '> ' + esc(nm) + '</label>'; }).join('');
+      if (n.src === 'markers') h += '<label class="chk"><input type="checkbox" data-vk="layDims"' + (n.layDims !== false ? ' checked' : '') + '> Spacing dimensions from Layout</label>';
+      h += '<label class="chk"><input type="checkbox" data-vk="border"' + (n.border !== false ? ' checked' : '') + '> Border</label>';
+      h += '<div class="row"><button type="button" class="btn" data-vact="center"' + (n.pan.x || n.pan.y ? '' : ' disabled') + '>Center drawing</button></div><p class="hint" style="margin:0">Drag the box to move it, a corner to resize it. The hand tool (H) slides the drawing inside it.</p>';
+      return h;
+    }
     function props(n) {
-      var h = '';
+      var h = n.k === 'view' ? viewProps(n) : '';
       if (n.k === 'dim') {
         h += '<p class="hint keep" style="margin:0">' + (n.o === 'h' ? 'Horizontal' : 'Vertical') + ', ' + esc(dimLabel(n)) + '. Drag it to move the line, drag the number to slide it along, drag an end to change what it measures.</p>';
         if (dimStale(n)) h += '<p class="err" style="margin:0">An end no longer lands on a glass edge or mark; the layout changed. Drag the red end back onto the drawing.</p>';
@@ -5337,8 +5406,8 @@ details[open] > summary .sum { display: none; }
         else h += '<p class="hint" style="margin:0">The drawing has no scale, so drag a corner to size this person.</p>';
       }
       if (n.k === 'pic' && isFinite(realPerPt())) h += '<label class="sty"><span class="sty-l">Width</span><input type="text" data-sp="realW" value="' + esc(archLen(Math.round(Math.abs(n.w) * realPerPt() * 4) / 4)) + '" aria-label="Real width"></label>';
-      h += '<div class="sty"><span class="sty-s">' + (n.k === 'pic' ? 'Border' : 'Stroke') + '</span>' + swatches('stroke', n.stroke, n.k !== 'line' && n.k !== 'arrow') + '</div>';
-      if (n.k !== 'line' && n.k !== 'arrow' && n.k !== 'pic') h += '<div class="sty"><span class="sty-s">Fill</span>' + swatches('fill', n.fill, true) + '</div>';
+      h += '<div class="sty"><span class="sty-s">' + (n.k === 'pic' || n.k === 'view' ? 'Border' : 'Stroke') + '</span>' + swatches('stroke', n.stroke, n.k !== 'line' && n.k !== 'arrow' && n.k !== 'view') + '</div>';
+      if (n.k !== 'line' && n.k !== 'arrow' && n.k !== 'pic' && n.k !== 'view') h += '<div class="sty"><span class="sty-s">Fill</span>' + swatches('fill', n.fill, true) + '</div>';
       h += '<div class="sty"><span class="sty-l">Width</span><select data-sp="sw" aria-label="Stroke width">' + opts(WIDTHS, n.sw, function (x) { return x + ' pt'; }) + '</select><span class="seg">' + ib('dash', 'data-stog="dash"', n.dash, 'Dashed') + '</span></div>';
       var at = S.notes.indexOf(n), top = at === S.notes.length - 1, bottom = at === 0, mod = /Mac/.test(navigator.platform) ? '⌘' : 'Ctrl+';
       h += '<div class="sty"><span class="sty-l">Arrange</span><span class="seg">' + [['back', 'Send to back', mod + '⇧['], ['bwd', 'Send backward', mod + '['], ['fwd', 'Bring forward', mod + ']'], ['front', 'Bring to front', mod + '⇧]']].map(function (a) {
@@ -5366,12 +5435,16 @@ details[open] > summary .sum { display: none; }
         if (M.src === 'blank') dv += '<label class="chk"><input type="checkbox" data-sk="grid"' + (S.grid !== false ? ' checked' : '') + '> Canvas grid</label>';
         dv += '<div class="row"><button type="button" class="btn" data-sact="center"' + (S.pan.x || S.pan.y ? '' : ' disabled') + '>Center drawing</button></div><p class="hint" style="margin:0">Hand tool (H) slides the drawing in its frame. Measurements show as in Measure.</p>';
       } else {
+        dv += '<label class="field">Sheet scale<select data-sk="scale">' + scaleOpts(S.scale, 'Fit frame') + '</select></label>';
         dv += '<div class="row"><button type="button" class="btn" data-sact="center"' + (S.pan.x || S.pan.y ? '' : ' disabled') + '>Center drawing</button></div><p class="hint" style="margin:0">Layout fills the frame; the hand tool (H) slides it. Change the drawing in Layout.</p>';
         if (S.src === 'graphic') dv += '<div class="label" style="margin-top:4px">Elevations shown</div>' + Lay.graphicRuns().map(function (nm, i) { return '<label class="chk"><input type="checkbox" data-grun="' + i + '"' + ((S.grunsOff || []).indexOf(i) < 0 ? ' checked' : '') + '> ' + esc(nm) + '</label>'; }).join('');
         if (S.src === 'film') dv += '<div class="label" style="margin-top:4px">Film rows shown</div>' + Lay.filmRows().map(function (nm, i) { return '<label class="chk"><input type="checkbox" data-frow="' + i + '"' + ((S.frowsOff || []).indexOf(i) < 0 ? ' checked' : '') + '> ' + esc(nm) + '</label>'; }).join('');
         if (S.src === 'markers') dv += '<div class="label" style="margin-top:4px">Glass runs shown</div>' + Lay.markerRuns().map(function (nm, i) { return '<label class="chk"><input type="checkbox" data-srun="' + i + '"' + ((S.mrunsOff || []).indexOf(i) < 0 ? ' checked' : '') + '> ' + esc(nm) + '</label>'; }).join('') +
           '<label class="chk" style="margin-top:4px"><input type="checkbox" data-sk="layDims"' + (S.layDims !== false ? ' checked' : '') + '> Spacing dimensions from Layout</label><p class="hint keep" style="margin:0">Turn these off to place your own with the Dimension tool (D).</p>';
       }
+      var nv = views().length - 1;
+      dv += '<div class="label" style="margin-top:6px">More drawings on this sheet' + (nv ? ' (' + nv + ')' : '') + '</div><div class="row"><select data-addsrc aria-label="Drawing to add">' + ['graphic', 'markers', 'film', 'mural', 'measure'].map(function (k) { return '<option value="' + k + '">' + esc(srcName(k)) + '</option>'; }).join('') + '</select><button type="button" class="btn" data-sact="addview">+ Add</button></div>' +
+        '<p class="hint keep" style="margin:0">Adds a drawing box you can move and resize, with its own runs, scale and caption. Select it to set those in the left panel.</p>';
       h += sec('sh_view', 'Drawing', dv);
       var ng = (S.guides || []).length;
       h += sec('sh_guides', 'Guides', '<div class="row"><button type="button" class="btn" data-sact="guidev">+ Vertical</button><button type="button" class="btn" data-sact="guideh">+ Horizontal</button>' + (ng ? '<button type="button" class="btn" data-sact="guideclear">Clear</button>' : '') + '</div>' +
@@ -5405,7 +5478,7 @@ details[open] > summary .sum { display: none; }
       var el = $('sheet-tabs'); if (!el || mode !== 'shop') return;
       el.innerHTML = sheets.map(function (sh, i) { return '<button type="button" role="tab" class="' + (i === cur ? 'on' : '') + '" data-stab="' + i + '" aria-selected="' + (i === cur) + '" title="' + esc(sh.tb.title || 'Sheet ' + (i + 1)) + '">' + esc(String(sh.tb.sheet || '').trim() || 'Sheet ' + (i + 1)) + '</button>'; }).join('') + '<button type="button" data-sact="addsheet" title="New sheet" aria-label="New sheet">+</button>';
     }
-    function go(i) { cur = Math.max(0, Math.min(sheets.length - 1, i)); S = sheets[cur]; sel = null; selGuide = null; drag = null; setUrl(''); view.key = '';   // no drawing from the sheet just left while this one renders
+    function go(i) { cur = Math.max(0, Math.min(sheets.length - 1, i)); S = sheets[cur]; sel = null; selGuide = null; drag = null; resetViews();   // no drawing from the sheet just left while this one renders
       if (mode === 'shop') all(); }
     // The next sheet number after the last one: SD-1, SD-2 … (A-101 gives A-102).
     function nextSheetNo() { var m = /^(.*?)(\d+)$/.exec(String(sheets[sheets.length - 1].tb.sheet || '').trim()); return m ? m[1] + String(Number(m[2]) + 1).padStart(m[2].length, '0') : 'SD-' + (sheets.length + 1); }
@@ -5442,6 +5515,8 @@ details[open] > summary .sum { display: none; }
       if (mode !== 'shop') return;
       var del = e.target.closest('[data-sdel]');
       if (del) { var id = Number(del.dataset.sdel); S.notes = S.notes.filter(function (n) { return n.id !== id; }); if (sel === id) sel = null; all(); History.record(); return; }
+      var va = e.target.closest('[data-vact]');
+      if (va) { edit(function (n) { if (n.k === 'view') n.pan = { x: 0, y: 0 }; }); left(); History.record(); return; }
       var sw = e.target.closest('[data-sc]');
       if (sw) { var prop = sw.dataset.sc, v = sw.dataset.v; cpOpen = null; edit(function (n) { n[prop] = v; S.style[prop] = v; }); left(); History.record(); return; }
       var cpo = e.target.closest('[data-cpopen]');
@@ -5473,6 +5548,16 @@ details[open] > summary .sum { display: none; }
       if (d.sn === 'text') { left(); History.record(); return; }
       if (d.spick) { edit(function (n) { S.style[d.spick] = n[d.spick] = e.target.value; }); left(); History.record(); return; }
       if (d.shex) { var hx = String(e.target.value).trim().replace(/^#?/, '#'); if (/^#[0-9a-f]{3}$/i.test(hx)) hx = '#' + hx.slice(1).replace(/./g, '$&$&'); if (/^#[0-9a-f]{6}$/i.test(hx)) { hx = hx.toLowerCase(); edit(function (n) { S.style[d.shex] = n[d.shex] = hx; }); History.record(); } left(); return; }
+      if (d.vk) {
+        var vv = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+        edit(function (n) { if (n.k !== 'view') return; n[d.vk] = vv; if (d.vk === 'src' || d.vk === 'fitTo') n.pan = { x: 0, y: 0 }; });
+        left(); History.record(); return;
+      }
+      if (d.vrun) {
+        var vp = d.vrun.split(':'), key = { m: 'mrunsOff', g: 'grunsOff', f: 'frowsOff' }[vp[0]], vi = Number(vp[1]), on = e.target.checked;
+        edit(function (n) { if (n.k !== 'view') return; n[key] = (n[key] || []).filter(function (x) { return x !== vi; }); if (!on) n[key].push(vi); });
+        left(); History.record(); return;
+      }
       if (d.sp === 'who') { edit(function (n) { n.who = S.style.who = e.target.value; n.hIn = FIGS[n.who].hIn; fitFig(n); }); left(); History.record(); return; }
       if (d.sp === 'realW') { var rw = parseLen(e.target.value), rr2 = realPerPt(); edit(function (n) { if (rw > 0 && isFinite(rr2)) { var nw = rw / rr2, cx = n.x + n.w / 2, cy = n.y + n.h / 2; n.h = n.h * nw / n.w; n.w = nw; n.x = cx - n.w / 2; n.y = cy - n.h / 2; } }); left(); History.record(); return; }
       if (d.sp === 'hIn') { var hv = parseLen(e.target.value); edit(function (n) { if (hv > 0) { n.hIn = hv; fitFig(n); } }); left(); History.record(); return; }
@@ -5511,6 +5596,7 @@ details[open] > summary .sum { display: none; }
       if (a === 'pdf') exportPdf();
       else if (a === 'pdfone') exportPdf(true);
       else if (a === 'center') { S.pan = { x: 0, y: 0 }; all(); History.record(); }
+      else if (a === 'addview') { var as = rightEl.querySelector('[data-addsrc]'); addView(as ? as.value : 'graphic'); tools(); all(); History.record(); }
       else if (a === 'tbalign') { S.tbAlign = b.dataset.v; all(); History.record(); }
       else if (a === 'nologo') { logo = null; keepLogo(); all(); Autosave.schedule(); }
     });
@@ -5595,14 +5681,17 @@ details[open] > summary .sum { display: none; }
       busy = true; note = 'Making the PDF…'; right();
       var list = onlyCur ? [S] : sheets.slice(), PL, doc, fonts = {}, picImg = {}, logoImg = null, firstTitle = '';
       function page(sh) {
-        var keepS = S, keepInfo = view.info, built, vp, g;
-        S = sh;
-        try { vp = renderView(sharpness(300 / 72, 16e6)); if (S.src !== 'measure') view.info = renderView.info; fitFigs(); built = prims(true); if (!firstTitle) firstTitle = S.tb.title || defaultTitle(); }
-        finally { S = keepS; view.info = keepInfo; }
+        var keepS = S, keepState = vstate, built, vps = [], ids = [], g;
+        S = sh; vstate = {};
+        try {
+          views().forEach(function (V) { var st = keepS === sh && keepState[vid(V)] ? keepState[vid(V)] : null; ids.push(vid(V)); vps.push(renderView(sharpness(300 / 72, V === S ? 16e6 : 8e6, V), V)); VS(V).info = V.src !== 'measure' ? renderView.info : (st && st.info) || region(V); });
+          fitFigs(); built = prims(true); if (!firstTitle) firstTitle = S.tb.title || defaultTitle();
+        } finally { S = keepS; vstate = keepState; }
         g = built.g;
-        return vp.then(function (vr) {
+        var jpgOf = function (vr) { return vr.empty ? null : new Promise(function (res, rej) { vr.canvas.toBlob(function (b) { if (b) b.arrayBuffer().then(res); else rej(new Error('the drawing is too large for this browser')); }, 'image/jpeg', 0.95); }).then(function (b) { return doc.embedJpg(b); }); };
+        return Promise.all(vps).then(function (vrs) {
           var pg = doc.addPage([g.W, g.H]);
-          var jpg = vr.empty ? null : new Promise(function (res, rej) { vr.canvas.toBlob(function (b) { if (b) b.arrayBuffer().then(res); else rej(new Error('the drawing is too large for this browser')); }, 'image/jpeg', 0.95); }).then(function (b) { return doc.embedJpg(b); });
+          var jpg = Promise.all(vrs.map(jpgOf)).then(function (imgs) { var m = {}; ids.forEach(function (id, i) { m[id] = imgs[i]; }); return m; });
           var names = [], picIds = [];
           built.P.forEach(function (p) {
             var nm = p.k === 'text' && fontOf(p.font, p.bold, p.ital); if (nm && !fonts[nm] && names.indexOf(nm) < 0) names.push(nm);
@@ -5612,7 +5701,7 @@ details[open] > summary .sum { display: none; }
             Promise.all(names.map(function (nm) { return doc.embedFont(PL.StandardFonts[nm]).then(function (f) { fonts[nm] = f; }); })),
             Promise.all(picIds.map(function (id) { return (pics[id].jpg ? doc.embedJpg(pics[id].url) : doc.embedPng(pics[id].url)).then(function (im) { picImg[id] = im; }); })),
             logo && !logoImg ? doc.embedPng(logo.url).then(function (im) { logoImg = im; }) : null]).then(function (e) {
-            var viewImg = e[0], Y = function (y) { return g.H - y; }, C = function (h) { var a = hexArr(h); return PL.rgb(a[0], a[1], a[2]); };
+            var viewImgs = e[0] || {}, Y = function (y) { return g.H - y; }, C = function (h) { var a = hexArr(h); return PL.rgb(a[0], a[1], a[2]); };
             built.P.forEach(function (p) {
               if (p.k === 'rect') pg.drawRectangle({ x: p.x, y: Y(p.y + p.h), width: p.w, height: p.h, color: p.fill ? C(p.fill) : undefined, borderColor: p.stroke ? C(p.stroke) : undefined, borderWidth: p.stroke ? p.sw : 0, borderDashArray: p.dash || undefined });
               else if (p.k === 'ellipse') pg.drawEllipse({ x: p.cx, y: Y(p.cy), xScale: p.rx, yScale: p.ry, color: p.fill ? C(p.fill) : undefined, borderColor: p.stroke ? C(p.stroke) : undefined, borderWidth: p.stroke ? p.sw : 0, borderDashArray: p.dash || undefined });
@@ -5620,7 +5709,7 @@ details[open] > summary .sum { display: none; }
               else if (p.k === 'poly' && p.fill) pg.drawSvgPath('M ' + p.pts.map(function (q) { return q.x.toFixed(2) + ' ' + q.y.toFixed(2); }).join(' L ') + ' Z', { x: 0, y: g.H, color: C(p.fill), borderWidth: 0 });
               else if (p.k === 'path') pg.drawSvgPath(p.d, { x: p.x, y: Y(p.y), scale: p.sc, color: p.fill ? C(p.fill) : undefined, borderColor: p.stroke ? C(p.stroke) : undefined, borderWidth: p.stroke ? p.sw / p.sc : 0 });
               else if (p.k === 'text' && p.text) pg.drawText(pdfText(p.text), { x: p.x, y: Y(p.y), size: p.size, font: fonts[fontOf(p.font, p.bold, p.ital)], color: C(p.color) });
-              else if (p.k === 'image' && p.src === 'view' && viewImg) pg.drawImage(viewImg, { x: p.x, y: Y(p.y + p.h), width: p.w, height: p.h });
+              else if (p.k === 'image' && p.src === 'view' && viewImgs[p.vid || 'm']) pg.drawImage(viewImgs[p.vid || 'm'], { x: p.x, y: Y(p.y + p.h), width: p.w, height: p.h });
               else if (p.k === 'image' && p.src === 'pic' && picImg[p.pic]) pg.drawImage(picImg[p.pic], { x: p.x, y: Y(p.y + p.h), width: p.w, height: p.h });
               else if (p.k === 'image' && p.src === 'logo' && logoImg) pg.drawImage(logoImg, { x: p.x, y: Y(p.y + p.h), width: p.w, height: p.h });
             });
@@ -5645,7 +5734,7 @@ details[open] > summary .sum { display: none; }
       var list = Array.isArray(st.sheets) && st.sheets.length ? st.sheets : [st];
       sheets = list.map(function (o) { var sh = Object.assign(fresh(), JSON.parse(JSON.stringify(o))); sh.tb = Object.assign(fresh().tb, sh.tb || {}); sh.style = Object.assign(fresh().style, sh.style || {}); sh.pan = sh.pan || { x: 0, y: 0 }; sh.notes = sh.notes || []; sh.guides = sh.guides || []; return sh; });
       cur = Math.max(0, Math.min(sheets.length - 1, st.sheets ? st.cur | 0 : 0)); S = sheets[cur];
-      if (sel != null && !noteById(sel)) sel = null; if (selGuide != null && !guideById(selGuide)) selGuide = null; view.key = '';
+      if (sel != null && !noteById(sel)) sel = null; if (selGuide != null && !guideById(selGuide)) selGuide = null; resetViews();
     }
     return { enter: enter, paint: paint, getState: getState, setState: setState, setLogo: setLogo, getLogo: function () { return logo; }, getPics: getPics, setPics: setPics, addPics: function (files, e) { addPics(files, e && dropAt(e)); },
       // Open as shop drawing: go to the sheet that already shows this layout, or put it on the open sheet.
