@@ -2416,7 +2416,7 @@ details[open] > summary .sum { display: none; }
       film: { allow: 1, defH: 96, mode: 'auto', look: 'gradient', c1: '#ffffff', c2: '#9cc8e8', sel: 0, fA: 36, fB: 72, d1: 24, d2: 36, d3: 60, d4: 72, dual: 'frost', person: 'none', sill: 0, balance: true, marks: true, cover: 'full', bandH: 48, bandB: 24,
         curb: 0, fJamb: 2, fHead: 2, fSill: 2, mull: 2, seam: 0.375, fColor: 'black', doorStyle: 'medium', doorTop: 3.5, doorBottom: 10, hw: 'pull', hwH: 46, hwLen: 12, lvH: 38, swing: false, glass: '#d9ecf7',
         panes: [{ name: 'Conference 27-015', w: 60, h: 96, qty: 6 }, { name: 'Conference 27-016', w: 48, h: 96, qty: 4 }, { name: 'Office sidelite', w: 24, h: 96, qty: 6 }] },
-      markers: { bands: '30, 60', barH: 2, maxStrip: 96, pattern: 'squares', size: 2, tickW: 0.25, gap: 7.5, margin: 0, glassH: 96, spacing: 0.5, sel: 0, graphics: [], seq: 'all', useIdx: 0, seqText: 'A, B', start: 'center', gapMode: 'run', gapBy: 'clear', perBand: false, bandSeq: [], artEdge: false, mull: 2,
+      markers: { bands: '30, 60', barH: 2, maxStrip: 96, pattern: 'squares', size: 2, tickW: 0.25, gap: 7.5, margin: 0, glassH: 96, spacing: 0.5, sel: 0, graphics: [], seq: 'all', useIdx: 0, seqText: 'A, B', start: 'center', gapMode: 'run', roll: 48, gapBy: 'clear', perBand: false, bandSeq: [], artEdge: false, mull: 2,
         curb: 0, fJamb: 2, fHead: 2, fSill: 2, seam: 0.375, fColor: 'black', doorStyle: 'medium', doorTop: 3.5, doorBottom: 10, hw: 'pull', hwH: 46, hwLen: 12, lvH: 38, swing: true, glass: '#d9ecf7',
         runs: [{ name: 'Reception glass', len: 384 }, { name: 'Conference front', len: 240 }, { name: 'Office fronts, east', len: 1104 }] },
       graphic: { sel: 0, isel: null, nextId: 1, graphics: [], dims: { size: true, bottom: true, center: false, edges: true },
@@ -2599,7 +2599,11 @@ details[open] > summary .sum { display: none; }
     function seqHas(shape) { return bandSeqs().indexOf(shape) >= 0; }
     // Width of one marker's slot along the band. Every band shares the slots, so marks line up from band to band.
     // The clear space between marks. A gap measured on center (O.C.) is center to center, so the mark's own width comes off it.
-    function clearGap() { var K = L.markers; return K.gapBy === 'oc' ? Math.max(0, K.gap - slotW()) : K.gap; }
+    // Each run keeps its own gap (as typed: clear space or O.C.); a run that was never given one uses the job's gap.
+    function runGap(r) { return r && r.gap != null ? r.gap : L.markers.gap; }
+    function clearGap(r) { var K = L.markers, g = runGap(r); return K.gapBy === 'oc' ? Math.max(0, g - slotW()) : g; }
+    // The clear gap when every run shares one, or null when they differ.
+    function sharedGap() { var gs = L.markers.runs.map(clearGap); return gs.every(function (g) { return Math.abs(g - gs[0]) < 1e-6; }) ? (gs.length ? gs[0] : clearGap()) : null; }
     function slotW() { var all = bandSeqs(); return all.length && all.every(function (t) { return t === 'tick'; }) ? L.markers.tickW : L.markers.size; }
     function graphicH(g) { return g ? L.markers.size * g.h / g.w : L.markers.size; }
     function isArt() { return L.markers.pattern === 'graphic'; }
@@ -2738,7 +2742,7 @@ details[open] > summary .sum { display: none; }
     // A plain run spaces marks at the gap, centered or from one end. A run with panes spreads marks evenly through each pane's glass, half a gap
     // at each edge, so none lands on a seam, mullion or door stile; the sequence carries on across seams and starts again after each mullion.
     function runMarks(r) {
-      var K = Object.assign({}, L.markers, { gap: clearGap() }), sw = slotW(), out = [], fr = runFrame(r), fromRight = K.start === 'right';
+      var K = Object.assign({}, L.markers, { gap: clearGap(r) }), sw = slotW(), out = [], fr = runFrame(r), fromRight = K.start === 'right';
       out.panes = fr ? fr.panes : [];
       if (K.pattern === 'solid') return out;
       if (!fr) {
@@ -2834,12 +2838,9 @@ details[open] > summary .sum { display: none; }
         for (var b = 0; b < nb; b++) ms.forEach(function (m) { var mk = markFor(b, m.q); t.pieces++; hSum += mk.h; if (mk.dark) t.dark++; });
       });
       t.lf = t.runLen * nb / 12;
-      var R = L.roll;
+      var R = mRoll();
       if (K.pattern === 'solid') { t.lanes = Math.max(1, Math.floor(R / (K.barH + K.spacing))); t.rollFt = t.solidLen * nb / 12 / t.lanes; }
-      else {
-        t.lanes = Math.max(1, Math.floor(R / (slotW() + K.spacing)));
-        t.rollFt = Math.ceil(t.pieces / t.lanes) * ((t.pieces ? hSum / t.pieces : K.size) + K.spacing) / 12;
-      }
+      else { var nr = nest(cutPieces()); t.lanes = nr.lanes; t.rows = nr.rows; t.rollFt = nr.len / 12; }
       return t;
     }
     function imagePpi() {
@@ -3273,11 +3274,12 @@ details[open] > summary .sum { display: none; }
         else if (ms.length) { var m0 = ms[0], mk0 = markFor(tb0, m0.q), mx0 = x0 + (m0.x + (sw - mk0.w) / 2) * s, my0 = floor - (bh0 + mk0.h) * s;
           dimLine(ctx, mx0, my0 - 8, mx0 + mk0.w * s, my0 - 8, fmtIn(mk0.w), null, INK2); dimLine(ctx, mx0 - 8, floor - bh0 * s, mx0 - 8, my0, fmtIn(mk0.h), null, INK2); }
       }
-      // Spacing on a plain run: end clearance to the first mark, and the gap to the next.
+      // Spacing on a plain run: the gap between marks, then end clearance to the first mark.
       if (!fr && dimOn('markers', 'spacing') && hs.length && K.pattern !== 'solid' && ms.length) {
-        var tbp = hs.length - 1, ybp = floor - hs[tbp] * s + 16, lr = -1e9, a0 = ms[0], g0 = function (xa, xb) { if (xb - xa < 0.05 || xa > shown) return; var r3 = smallDim(ctx, x0 + xa * s, x0 + Math.min(xb, shown) * s, ybp, fmtIn(xb - xa), lr); if (r3) lr = r3; };
-        g0(0, a0.x + (sw - markFor(tbp, a0.q).w) / 2);
+        var tbp = hs.length - 1, a0 = ms[0], pl = [], g0 = function (xa, xb) { if (xb - xa >= 0.05 && xa <= shown) pl.push([xa, Math.min(xb, shown), xb - xa]); };
         if (ms[1]) { if (K.gapBy === 'oc') g0(a0.x + sw / 2, ms[1].x + sw / 2); else g0(a0.x + sw, ms[1].x); }
+        g0(0, a0.x + (sw - markFor(tbp, a0.q).w) / 2);
+        spacingDims(ctx, pl, x0, s, floor - hs[tbp] * s + 16);
       }
       if (fr) drawDoors(ctx, fr, K, x0, floor, s, true);
       if (fr) {
@@ -3287,26 +3289,40 @@ details[open] > summary .sum { display: none; }
         dimLine(ctx, x0, floor + 52, x0 + w, floor + 52, fmtFt(run.len), 'below');
         var gb = K.curb + K.fSill; if (gb > 0 && fr.panes.some(function (p) { return !p.door; })) dimLine(ctx, x0 + w + 22, floor, x0 + w + 22, Y(gb), fmtIn(gb), 'right');
         if (hs.length && K.pattern !== 'solid' && dimOn('markers', 'spacing')) {
-          // Spacing in each pane: glass edge to first mark, the gap, the right edge when it differs, and across a seam when that differs from the gap.
-          // A pane spaced exactly like one already dimensioned is skipped, so a row of matching panes shows its numbers once.
-          var tb = hs.length - 1, yb = floor - hs[tb] * s + 16, lastR = -1e9, seen = {}, inP = function (pi) { return ms.filter(function (m) { return m.pane === pi; }); };
-          var gd = function (xa, xb) { if (xb - xa < 0.05) return; var r2 = smallDim(ctx, x0 + xa * s, x0 + xb * s, yb, fmtIn(xb - xa), lastR); if (r2) lastR = r2; };
+          // Spacing in the panes: the gap between marks first, since that's the number the shop cuts to; then glass edge to the first mark,
+          // the right edge when it differs, and across a seam when that differs from the gap. Each number shows once.
+          var tb = hs.length - 1, gaps = [], edges = [], seen = {}, inP = function (pi) { return ms.filter(function (m) { return m.pane === pi; }); };
+          var want = function (list, xa, xb, kind) { var k = kind + Math.round((xb - xa) * 64); if (xb - xa < 0.05 || seen[k]) return; seen[k] = 1; list.push([xa, xb, xb - xa]); };
+          var inset = function (m) { return (sw - markFor(tb, m.q).w) / 2; };
           fr.panes.forEach(function (p, pi) {
-            var a = inP(pi), e = ms.panes[pi], nx = fr.panes[pi + 1], segs = []; if (!a.length) return;
+            var a = inP(pi), e = ms.panes[pi], nx = fr.panes[pi + 1]; if (!a.length) return;
             var aL = a[a.length - 1];
-            segs.push([p.gx, a[0].x + (sw - markFor(tb, a[0].q).w) / 2]);
-            if (a.length > 1) segs.push(K.gapBy === 'oc' ? [a[0].x + sw / 2, a[1].x + sw / 2] : [a[0].x + sw, a[1].x]);
-            if (e && Math.abs(e.edge - e.edgeR) > 0.01) segs.push([aL.x + (sw + markFor(tb, aL.q).w) / 2, p.gx + p.gw]);
-            var key = segs.map(function (g) { return Math.round((g[1] - g[0]) * 64); }).join(',');
-            if (!seen[key]) { seen[key] = 1; segs.forEach(function (g) { gd(g[0], g[1]); }); }
+            if (a.length > 1) { if (K.gapBy === 'oc') want(gaps, a[0].x + sw / 2, a[1].x + sw / 2, 'g'); else want(gaps, a[0].x + sw, a[1].x, 'g'); }
+            want(edges, p.gx, a[0].x + inset(a[0]), 'e');
+            if (e && Math.abs(e.edge - e.edgeR) > 0.01) want(edges, aL.x + sw - inset(aL), p.gx + p.gw, 'e');
             if (nx && nx.seam) {
-              var b = inP(pi + 1), sk; if (!b.length || (a.length > 1 && Math.abs((b[0].x - aL.x) - (a[1].x - a[0].x)) <= 0.01)) return;
-              sk = 's' + Math.round((b[0].x - aL.x - sw) * 64); if (!seen[sk]) { seen[sk] = 1; gd(aL.x + sw, b[0].x); }
+              var b = inP(pi + 1);
+              if (b.length && !(a.length > 1 && Math.abs((b[0].x - aL.x) - (a[1].x - a[0].x)) <= 0.01)) want(K.gapBy === 'oc' ? edges : gaps, aL.x + sw, b[0].x, 'g');
             }
           });
+          spacingDims(ctx, gaps.concat(edges), x0, s, floor - hs[tb] * s + 16);
         }
       }
       txt(ctx, run.name + ' · ' + fmtFt(run.len) + (run.len > shown ? ' (first 20\'-0" shown)' : ''), x0 + w / 2, floor - h - 10, { size: 11.5, w: 500 });
+    }
+    // Spacing dimensions under a band, most important first, as [from, to, inches] along the run.
+    // Each takes the first of two label rows where its label clears the others; one that fits on neither is left off.
+    // Small drawings (a Shop drawing sheet) run out of room first, so the gap between marks always gets its label.
+    function spacingDims(ctx, list, x0, s, y) {
+      var rows = [[], []];
+      ctx.font = '400 9.5px "JetBrains Mono", ui-monospace, monospace';
+      list.forEach(function (g) {
+        var x1 = x0 + g[0] * s, x2 = x0 + g[1] * s, lab = fmtIn(g[2]), lw = ctx.measureText(lab).width, lc = Math.max((x1 + x2) / 2, x1 + lw / 2 - 2), a = Math.min(x1, lc - lw / 2 - 2), b = Math.max(x2, lc + lw / 2 + 2);
+        for (var r = 0; r < rows.length; r++) {
+          if (rows[r].some(function (o) { return a < o[1] + 3 && b > o[0] - 3; })) continue;
+          rows[r].push([a, b]); smallDim(ctx, x1, x2, y + r * 14, lab, -1e9); return;
+        }
+      });
     }
     // A short dimension with its label underneath, for gaps between marks.
     // Skips it (returns null) when its label would run into the one before, which ends at minX; otherwise returns where this label ends.
@@ -3612,6 +3628,16 @@ details[open] > summary .sum { display: none; }
       var v = get(path), shown = kind === 'len' ? fmtFt(v) : kind === 'in' ? fmtIn(v) : kind === 'sin' ? fmtS(v) : v;
       return '<label class="field">' + label + '<input type="text" data-k="' + path + '" data-kind="' + kind + '" value="' + esc(shown) + '"' + (extra || '') + '></label>';
     }
+    // The marker gap field edits the run selected in the left panel; the note under it names the run and offers to use it on all runs.
+    function gapField() {
+      var K = L.markers, si = K.runs[K.sel] ? K.sel : 0, anyFrame = K.runs.some(function (r) { return runBays(r); });
+      return '<label class="field">' + (K.gapMode === 'min' && anyFrame ? 'Min ' : '') + (K.gapBy === 'oc' ? 'O.C.' : K.gapMode === 'min' && anyFrame ? 'gap' : 'Gap') + (K.runs.length > 1 ? ', this run' : '') + '<input type="text" data-k="markers.runs.' + si + '.gap" data-kind="in" value="' + esc(fmtIn(runGap(K.runs[si]))) + '"></label>';
+    }
+    function gapNote() {
+      var K = L.markers, r = K.runs[K.sel] || K.runs[0]; if (!r || K.runs.length < 2) return '';
+      if (sharedGap() != null) return '<p class="hint" style="margin:0">Gap for ' + esc(r.name || 'this run') + '. Each run keeps its own; pick a run on the left to change its gap.</p>';
+      return '<p class="hint keep" style="margin:0">Gap for ' + esc(r.name || 'this run') + '; other runs differ. <button type="button" class="linkish" data-lact="gapall">Use ' + esc(fmtIn(runGap(r))) + ' on all runs</button></p>';
+    }
     function selectF(label, path, opts) {
       var v = String(get(path));
       return '<label class="field">' + label + '<select data-k="' + path + '" data-kind="sel">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (String(o[0]) === v ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label>';
@@ -3881,18 +3907,18 @@ details[open] > summary .sum { display: none; }
           if (anyFrame) spc += selectF('Spacing on panes', 'markers.gapMode', [['run', 'Exact gap straight across the run'], ['exact', 'Exact gap in each pane, extra at the edges'], ['min', 'Minimum gap, fill each pane']]);
         }
         if (anyBar) spc += field(K.pattern === 'solid' ? 'Band height' : seqHas('tick') && !seqHas('square') && !seqHas('dark') ? 'Tick height' : seqHas('tick') ? 'Square and tick height' : 'Square height', 'markers.barH', 'in');
-        if (K.pattern !== 'solid') spc += '<div class="row2">' + (anySize ? field(K.pattern === 'dots' && !K.perBand ? 'Dot size' : isArt() ? 'Graphic width' : K.perBand ? 'Mark width' : 'Square size', 'markers.size', 'in') : field('Tick width', 'markers.tickW', 'in')) + field((K.gapMode === 'min' && anyFrame ? 'Min ' : '') + (K.gapBy === 'oc' ? 'O.C.' : 'gap'), 'markers.gap', 'in') + '</div>' + (anySize && seqHas('tick') ? field('Tick width', 'markers.tickW', 'in') : '') + (isArt() ? '<p class="hint" style="margin:0">Each graphic keeps its own shape; its height follows the width. The band height is where each graphic’s bottom edge sits.</p>' : '');
+        if (K.pattern !== 'solid') spc += '<div class="row2">' + (anySize ? field(K.pattern === 'dots' && !K.perBand ? 'Dot size' : isArt() ? 'Graphic width' : K.perBand ? 'Mark width' : 'Square size', 'markers.size', 'in') : field('Tick width', 'markers.tickW', 'in')) + gapField() + '</div>' + gapNote() + (anySize && seqHas('tick') ? field('Tick width', 'markers.tickW', 'in') : '') + (isArt() ? '<p class="hint" style="margin:0">Each graphic keeps its own shape; its height follows the width. The band height is where each graphic’s bottom edge sits.</p>' : '');
         var plain = K.runs.some(function (r) { return !runBays(r); });
         spc += '<div class="row2">' + field('End clearance', 'markers.margin', 'in') + (plain ? field('Glass height (preview)', 'markers.glassH', 'in') : '') + '</div>' + (plain && !anyFrame ? colorF('Glass tint', 'markers.glass') : '');
-        var res = lsec('m_res', 'Results', '<dl class="kv"><dt>Glass</dt><dd>' + num(mt.runLen / 12) + ' ft</dd><dt>Bands</dt><dd>' + mt.nb + '</dd><dt>Marker length</dt><dd>' + num(mt.lf) + ' LF</dd>' + (K.pattern !== 'solid' ? '<dt>Pieces</dt><dd>' + num(mt.pieces, 0) + (mt.dark ? ' (' + num(mt.dark, 0) + ' dark)' : '') + '</dd>' : '') + '<dt>Across the roll</dt><dd>' + mt.lanes + ' ' + (K.pattern === 'solid' ? 'strips' : 'pieces') + '</dd><dt>Media used</dt><dd>' + num(Math.ceil(mt.rollFt * 10) / 10) + ' ft of ' + L.roll + '"</dd></dl><p class="hint" style="margin:0">Media used assumes pieces nest across the roll with the gutter above. Add a site-survey allowance before ordering.</p>', num(Math.ceil(mt.lf), 0) + ' LF');
+        var res = lsec('m_res', 'Results', '<dl class="kv"><dt>Glass</dt><dd>' + num(mt.runLen / 12) + ' ft</dd><dt>Bands</dt><dd>' + mt.nb + '</dd><dt>Marker length</dt><dd>' + num(mt.lf) + ' LF</dd>' + (K.pattern !== 'solid' ? '<dt>Pieces</dt><dd>' + num(mt.pieces, 0) + (mt.dark ? ' (' + num(mt.dark, 0) + ' dark)' : '') + '</dd>' : '') + (K.pattern === 'solid' ? '<dt>Across the roll</dt><dd>' + mt.lanes + ' strips</dd>' : '<dt>Rows</dt><dd>' + num(mt.rows || 0, 0) + ' of up to ' + mt.lanes + ' marks</dd>') + '<dt>Media used</dt><dd>' + num(Math.ceil(mt.rollFt * 10) / 10) + ' ft of ' + mRoll() + '"</dd></dl><p class="hint" style="margin:0">' + (K.pattern === 'solid' ? 'Media used assumes strips nest across the roll with the gutter between them.' : 'Marks are cut in rows across the roll, ' + (sharedGap() != null ? esc(fmtIn(sharedGap())) + ' apart' : 'each run at its own gap') + ' like on the glass, with the gutter between rows.') + ' Add a site-survey allowance before ordering.</p>', num(Math.ceil(mt.lf), 0) + ' LF');
         var nr = nest(cutPieces());
         var exp = lsec('m_exp', 'Export', '<div class="row"><button type="button" class="btn strong" data-lact="copy">Copy run list</button><button type="button" class="btn" data-lact="csv" data-dl>CSV</button></div>' +
           (K.pattern === 'solid' ? field('Longest strip', 'markers.maxStrip', 'in') : '') +
           '<div class="row" data-dl><button type="button" class="btn strong" data-lact="cutpdf"' + (nr.placed.length ? '' : ' disabled') + '>' + (isArt() ? 'Print and cut (PDF)' : 'Cut file (PDF)') + '</button><button type="button" class="btn" data-lact="cutsvg"' + (nr.placed.length ? '' : ' disabled') + '>' + (isArt() ? 'Print and cut (SVG)' : 'Cut file (SVG)') + '</button></div>' +
-          '<p class="hint keep" style="margin:0">' + num(nr.placed.length, 0) + ' pieces nested ' + nr.lanes + ' across a ' + L.roll + '" roll, ' + num(nr.len / 12) + ' ft long' + (nr.pages > 1 ? ' over ' + nr.pages + ' pages of up to 10 ft' : '') + '.</p><p class="hint" style="margin:0">Cut lines are on a spot color named CutContour (magenta in the SVG).</p>' + (L.note ? '<p class="ok">' + esc(L.note) + '</p>' : '') + '<textarea id="lay-copy" hidden readonly class="copybox"></textarea>');
+          '<p class="hint keep" style="margin:0">' + num(nr.placed.length, 0) + (K.pattern === 'solid' ? ' pieces nested ' + nr.lanes + ' across a ' : ' marks in ' + nr.rows + ' row' + (nr.rows === 1 ? '' : 's') + ' of up to ' + nr.lanes + ', ' + (sharedGap() != null ? esc(fmtIn(sharedGap())) + ' apart' : 'each run at its own gap') + ', on a ') + mRoll() + '" roll, ' + num(nr.len / 12) + ' ft long' + (nr.pages > 1 ? ' over ' + nr.pages + ' pages of up to 10 ft' : '') + '.</p><p class="hint" style="margin:0">Cut lines are on a spot color named CutContour (magenta in the SVG).</p>' + (L.note ? '<p class="ok">' + esc(L.note) + '</p>' : '') + '<textarea id="lay-copy" hidden readonly class="copybox"></textarea>');
         P = { title: 'Distraction markers', sub: K.runs.length + ' run' + (K.runs.length === 1 ? '' : 's') + ' · ' + (mt.nb ? mt.nb + ' band' + (mt.nb === 1 ? '' : 's') + ' at ' + bands().map(fmtIn).join(', ') : 'no bands'),
           tabs: [['bands', 'Bands', scope('Bands for every run') + bnd], ['spacing', 'Spacing', spc], anyFrame ? ['frame', 'Frame', scope('Frame for every run with panes') + frameSec('markers', null, 'frame')] : null, anyFrame ? ['doors', 'Doors', scope('Doors for every run with panes') + frameSec('markers', null, 'doors')] : null],
-          job: [dimsSec('markers'), lsec('m_cut', 'Cutting', rollSel(true) + field('Gutter', 'markers.spacing', 'in'), L.roll + '" roll · ' + fmtIn(K.spacing) + ' gutter')], totals: res + quoteSec(), out: exp + shopSec() };
+          job: [dimsSec('markers'), lsec('m_cut', 'Cutting', selectF('Roll width', 'markers.roll', ROLLS.map(function (r) { return [r, r + '" roll' + (r === 48 ? ' (Dusted Crystal)' : '')]; })) + field(K.pattern === 'solid' ? 'Gutter' : 'Gutter between rows', 'markers.spacing', 'in'), mRoll() + '" roll · ' + fmtIn(K.spacing) + ' gutter')], totals: res + quoteSec(), out: exp + shopSec() };
       }
       var keepTop = rightEl.scrollTop;
       rightEl.innerHTML = panel(P);
@@ -4027,19 +4053,22 @@ details[open] > summary .sum { display: none; }
         // Light pieces first, then dark ones, so each color nests together on the roll.
         var dark = [];
         K.runs.forEach(function (r) {
-          var ms = runMarks(r);
+          var ms = runMarks(r), gap = clearGap(r);
           for (var b = 0; b < nb; b++) ms.forEach(function (m) {
             var mk = markFor(b, m.q); if (!mk.shape && !mk.g) return;
-            (mk.dark ? dark : pcs).push({ w: mk.w, h: mk.h, shape: mk.shape === 'dot' ? 'circle' : 'rect', g: mk.g ? mk.gi : undefined, dark: mk.dark });
+            (mk.dark ? dark : pcs).push({ w: mk.w, h: mk.h, shape: mk.shape === 'dot' ? 'circle' : 'rect', g: mk.g ? mk.gi : undefined, dark: mk.dark, gap: gap });
           });
         });
         pcs = pcs.concat(dark);
       }
       return pcs;
     }
+    // The roll markers are cut from: their own setting, since cut vinyl (Dusted Crystal is 48") isn't the print roll.
+    function mRoll() { return +L.markers.roll || 48; }
     function nest(pcs) {
-      var R = L.roll, sp = L.markers.spacing, placed = [];
+      var R = mRoll(), sp = L.markers.spacing, placed = [];
       if (!pcs.length) return { placed: placed, len: 0, pages: 0, lanes: 0, page: CUT_PAGE };
+      if (L.markers.pattern !== 'solid') return nestRows(pcs, R, sp);
       var pw = pcs.reduce(function (m, p) { return Math.max(m, p.w); }, 0), lanes = Math.max(1, Math.floor((R - 2 * EDGE + sp) / (pw + sp))), laneY = [];
       for (var i = 0; i < lanes; i++) laneY.push(0);
       pcs.forEach(function (pc) {
@@ -4052,8 +4081,25 @@ details[open] > summary .sum { display: none; }
       var len = placed.reduce(function (m, q) { return Math.max(m, q.y + q.h); }, 0);
       return { placed: placed, len: len, pages: Math.max(1, Math.ceil(len / CUT_PAGE - 1e-9)), lanes: lanes, page: CUT_PAGE };
     }
+    // Marks cut the way they go on the glass: rows across the roll with the marker gap between marks, and the gutter between rows.
+    // Each row is a strip to tape and apply, spaced at its run's gap. Dark marks, and runs with a different gap, start a row of their own;
+    // a row that would cross a page break starts the next page.
+    function nestRows(pcs, R, sp) {
+      var placed = [], x = EDGE, y = 0, rowH = 0, per = 0, n = 0, dark = null, gap = null;
+      pcs.forEach(function (pc) {
+        var pg = pc.gap != null ? pc.gap : clearGap();
+        if (n && (x + pc.w > R - EDGE + 1e-9 || pc.dark !== dark || Math.abs(pg - gap) > 1e-6)) { y += rowH + sp; x = EDGE; rowH = 0; per = Math.max(per, n); n = 0; }
+        var pageStart = Math.floor(y / CUT_PAGE) * CUT_PAGE;
+        if (y + pc.h > pageStart + CUT_PAGE) { y = pageStart + CUT_PAGE; }
+        placed.push({ x: x, y: y, w: pc.w, h: pc.h, shape: pc.shape, g: pc.g });
+        x += pc.w + pg; rowH = Math.max(rowH, pc.h); n++; dark = pc.dark; gap = pg;
+      });
+      per = Math.max(per, n);
+      var len = placed.reduce(function (m, q) { return Math.max(m, q.y + q.h); }, 0);
+      return { placed: placed, len: len, pages: Math.max(1, Math.ceil(len / CUT_PAGE - 1e-9)), lanes: per, rows: placed.filter(function (q, i) { return i === 0 || q.y !== placed[i - 1].y; }).length, page: CUT_PAGE };
+    }
     function cutPdf(nr) {
-      var R = L.roll, PT = 72, objs = [], kids = [];
+      var R = mRoll(), PT = 72, objs = [], kids = [];
       function add(o) { objs.push(o); return objs.length; }
       add('<< /Type /Catalog /Pages 2 0 R >>'); add('');
       add('<< /FunctionType 2 /Domain [0 1] /C0 [0 0 0 0] /C1 [0 1 0 0] /N 1 >>');
@@ -4080,14 +4126,14 @@ details[open] > summary .sum { display: none; }
       return new Blob([out], { type: 'application/pdf' });
     }
     function cutSvg(nr) {
-      var R = L.roll, H = nr.len + 2 * EDGE, f = function (n) { return n.toFixed(3); };
+      var R = mRoll(), H = nr.len + 2 * EDGE, f = function (n) { return n.toFixed(3); };
       var body = nr.placed.map(function (q) { return q.shape === 'circle' ? '<circle cx="' + f(q.x + q.w / 2) + '" cy="' + f(q.y + EDGE + q.h / 2) + '" r="' + f(q.w / 2) + '"/>' : '<rect x="' + f(q.x) + '" y="' + f(q.y + EDGE) + '" width="' + f(q.w) + '" height="' + f(q.h) + '"/>'; }).join('\n');
       return new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="' + R + 'in" height="' + f(H) + 'in" viewBox="0 0 ' + R + ' ' + f(H) + '">\n<g id="CutContour" fill="none" stroke="#EC008C" stroke-width="0.01">\n' + body + '\n</g>\n</svg>\n'], { type: 'image/svg+xml' });
     }
-    function cutName(ext) { var K = L.markers; return 'Distraction markers ' + (K.pattern === 'solid' ? fmtIn(K.barH) + ' strips' : K.pattern === 'ticks' ? fmtIn(K.tickW) + ' vertical ticks' : fmtIn(K.size) + ' ' + (K.pattern === 'graphic' ? 'graphics, print and cut' : K.pattern)) + ' on ' + L.roll + 'in roll.' + ext; }
+    function cutName(ext) { var K = L.markers; return 'Distraction markers ' + (K.pattern === 'solid' ? fmtIn(K.barH) + ' strips' : K.pattern === 'ticks' ? fmtIn(K.tickW) + ' vertical ticks' : fmtIn(K.size) + ' ' + (K.pattern === 'graphic' ? 'graphics, print and cut' : K.pattern)) + ' on ' + mRoll() + 'in roll.' + ext; }
     // Print and cut: the graphics at true size, each with a CutContour rectangle around it.
     function artCutSvg(nr) {
-      var R = L.roll, H = nr.len + 2 * EDGE, f = function (n) { return n.toFixed(3); }, G = L.markers.graphics;
+      var R = mRoll(), H = nr.len + 2 * EDGE, f = function (n) { return n.toFixed(3); }, G = L.markers.graphics;
       var art = nr.placed.filter(function (q) { return q.g != null; }).map(function (q) { return '<image href="' + G[q.g].url + '" x="' + f(q.x) + '" y="' + f(q.y + EDGE) + '" width="' + f(q.w) + '" height="' + f(q.h) + '" preserveAspectRatio="none"/>'; }).join('\n');
       var cut = nr.placed.map(function (q) { return q.shape === 'circle' ? '<circle cx="' + f(q.x + q.w / 2) + '" cy="' + f(q.y + EDGE + q.h / 2) + '" r="' + f(q.w / 2) + '"/>' : '<rect x="' + f(q.x) + '" y="' + f(q.y + EDGE) + '" width="' + f(q.w) + '" height="' + f(q.h) + '"/>'; }).join('\n');
       return new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="' + R + 'in" height="' + f(H) + 'in" viewBox="0 0 ' + R + ' ' + f(H) + '">\n<g id="Graphics">\n' + art + '\n</g>\n<g id="CutContour" fill="none" stroke="#EC008C" stroke-width="0.01">\n' + cut + '\n</g>\n</svg>\n'], { type: 'image/svg+xml' });
@@ -4102,7 +4148,7 @@ details[open] > summary .sum { display: none; }
         var fn = ctx.register(ctx.obj({ FunctionType: 2, Domain: [0, 1], C0: [0, 0, 0, 0], C1: [0, 1, 0, 0], N: 1 }));
         var cs = ctx.register(ctx.obj([N('Separation'), N('CutContour'), N('DeviceCMYK'), fn]));
         for (var p = 0; p < nr.pages; p++) {
-          var y0 = p * nr.page, hIn = Math.min(nr.page, nr.len - y0) + 2 * EDGE, W = L.roll * PT, H = hIn * PT, pg = doc.addPage([W, H]);
+          var y0 = p * nr.page, hIn = Math.min(nr.page, nr.len - y0) + 2 * EDGE, W = mRoll() * PT, H = hIn * PT, pg = doc.addPage([W, H]);
           var mine = nr.placed.filter(function (q) { return q.y >= y0 - 1e-6 && q.y < y0 + nr.page - 1e-6; });
           mine.forEach(function (q) { if (q.g != null) pg.drawImage(imgs[q.g], { x: q.x * PT, y: H - (q.y - y0 + EDGE) * PT - q.h * PT, width: q.w * PT, height: q.h * PT }); });
           var res = pg.node.Resources(), csd = res.lookup(N('ColorSpace'));
@@ -4402,10 +4448,13 @@ details[open] > summary .sum { display: none; }
       if (el.dataset.filmmarks) { L.film.marks = el.checked; all(); return; }
       var k = el.dataset.k; if (!k) return;
       var kind = el.dataset.kind, v;
-      if (kind === 'len' || kind === 'in') { v = parseIn(el.value); if (!(v >= 0) || (kind === 'len' && !(v > 0))) { el.value = kind === 'len' ? fmtFt(get(k)) : fmtIn(get(k)); return; } }
+      var runGapK = /^markers\.runs\.(\d+)\.gap$/.exec(k);
+      if (kind === 'len' || kind === 'in') { v = parseIn(el.value); if (!(v >= 0) || (kind === 'len' && !(v > 0))) { el.value = kind === 'len' ? fmtFt(get(k)) : fmtIn(runGapK ? runGap(L.markers.runs[+runGapK[1]]) : get(k)); return; } }
+      // Changing one run's gap leaves the others where they were; new runs start from the gap last typed.
+      if (runGapK) { L.markers.runs.forEach(function (r) { if (r.gap == null) r.gap = L.markers.gap; }); L.markers.gap = v; }
       else if (kind === 'sin') { var neg = /^\s*-/.test(el.value); v = parseIn(String(el.value).replace(/^\s*-\s*/, '')); if (!isFinite(v)) { el.value = fmtS(get(k)); return; } if (neg) v = -v; }
       else if (kind === 'money') { v = parseFloat(String(el.value).replace(/[$,\s]/g, '')); if (!(v >= 0)) { el.value = Number(get(k)).toFixed(2); return; } }
-      else if (kind === 'sel') { v = el.value; if (k === 'roll' || k === 'mural.angle' || k === 'mural.dpi' || k === 'markers.useIdx') v = Number(v); if (k === 'mural.balance' || k === 'film.balance' || k === 'markers.perBand' || k === 'markers.artEdge' || /\.swing$/.test(k)) v = v === 'true'; }
+      else if (kind === 'sel') { v = el.value; if (k === 'roll' || k === 'markers.roll' || k === 'mural.angle' || k === 'mural.dpi' || k === 'markers.useIdx') v = Number(v); if (k === 'mural.balance' || k === 'film.balance' || k === 'markers.perBand' || k === 'markers.artEdge' || /\.swing$/.test(k)) v = v === 'true'; }
       else v = el.value;
       if (k === 'mural.overlap' && v >= printW()) v = printW() - 1;
       if (k === 'margin' && v > L.roll - 6) v = L.roll - 6;
@@ -4463,6 +4512,7 @@ details[open] > summary .sum { display: none; }
       else if (a === 'tilespdf' && !L.busy) tilesPdf();
       else if (a === 'filmpdf' && !L.busy) filmPdf();
       else if (a === 'resetseams') { L.mural.custom = null; all(); }
+      else if (a === 'gapall') { var KG = L.markers, g = runGap(KG.runs[KG.sel] || KG.runs[0]); KG.runs.forEach(function (r) { r.gap = g; }); KG.gap = g; all(); }
       else if (a === 'imgcenter' && L.mural.img) { var rc = imgRect('custom'); L.mural.ix = r8((L.mural.w - rc.w) / 2); L.mural.iy = r8((L.mural.h - rc.h) / 2); all(); }
       else if ((a === 'imgfill' || a === 'imgfit') && L.mural.img) { toCustom(a === 'imgfill' ? 'cover' : 'contain'); all(); }
       else if (a === 'lookall' || a === 'frameall') {
