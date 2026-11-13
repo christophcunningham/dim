@@ -181,6 +181,7 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
 /* Tools in two rows, row details, quote */
 .tools.grid5 { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
 .tools.grid8 { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); }
+.tools.grid9 { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); }
 .tools.grid4 { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .tools.grid4 .tool.txt { padding: 0 4px; }
 .chip.art { width: 18px; height: 18px; background-color: #fff; background-image: var(--art), repeating-conic-gradient(#b9b9b9 0 25%, #f4f4f4 0 50%); background-size: contain, 6px 6px; background-position: center, 0 0; background-repeat: no-repeat, repeat; }
@@ -1624,7 +1625,7 @@ details[open] > summary .sum { display: none; }
   var MTOOL_NAME = { pan: ['Pan', 'H'], edit: ['Edit', 'V'], scale: ['Scale', 'S'], resize: ['Resize', 'Z'], length: ['Length', 'L'], run: ['Run', 'R'], curve: ['Curve', 'K'], dim: ['Dimension', 'D'], area: ['Area', 'A'], rect: ['Rectangle', 'B'], circle: ['Circle', 'O'], count: ['Count', 'C'], angle: ['Angle', 'G'], note: ['Note', 'T'] };
   var DRAW_TOOLS = /^(length|run|curve|dim|area|rect|circle|count|angle|note)$/;
   function renderTools() {
-    toolsEl.classList.toggle('grid5', mode === 'measure'); toolsEl.classList.remove('grid4'); if (mode !== 'shop') toolsEl.classList.remove('grid8');
+    toolsEl.classList.toggle('grid5', mode === 'measure'); toolsEl.classList.remove('grid4'); if (mode !== 'shop') toolsEl.classList.remove('grid8', 'grid9');
     if (mode === 'measure') toolsEl.innerHTML = MTOOLS.map(function (t) { return toolBtn(t[0], t[1], t[2], M.tool === t[1]); }).join('');
   }
   toolsEl.addEventListener('click', function (e) {
@@ -3181,10 +3182,28 @@ details[open] > summary .sum { display: none; }
       var s = best.s; if (!(s > 0)) return; lastScale = s;
       var cellW = c.cw / best.cols, cellH = c.ch / best.rows;
       list.forEach(function (run, i) {
-        var col = i % best.cols, row = Math.floor(i / best.cols), h = H * s;
-        drawRun(ctx, run, col * cellW + 90 + (cellW - 170 - maxShown * s) / 2, row * cellH + 30 + h + (cellH - 110 - h) / 2, s);
+        var col = i % best.cols, row = Math.floor(i / best.cols), h = H * s, rx = col * cellW + 90 + (cellW - 170 - maxShown * s) / 2, rf = row * cellH + 30 + h + (cellH - 110 - h) / 2;
+        drawRun(ctx, run, rx, rf, s);
+        if (offTarget && offTarget.geo) markerSnaps(offTarget.geo, run, K.runs.indexOf(run), rx, rf, s);
       });
       canvas.setAttribute('aria-label', 'Distraction marker elevation for ' + list.map(function (r) { return r.name; }).join(', '));
+    }
+    // For Shop drawing dimensions: where a run sits (x0 and floor in points, s points per inch), and the edges a dimension can snap to,
+    // as segments [x1, y1, x2, y2] in inches along the run (x from its left end, y up from the floor): glass and frame edges, mark edges and centers, the floor.
+    function markerSnaps(geo, run, ri, x0, floor, s) {
+      var K = L.markers, fr = runFrame(run), shown = shownLen(run), hs = bands(), sw = slotW(), sg = [], ms = runMarks(run);
+      var seg = function (x1, y1, x2, y2) { if (Math.min(x1, x2) <= shown + 1e-6) sg.push([x1, y1, x2, y2]); };
+      seg(0, 0, shown, 0); seg(0, 0, 0, runTop(run)); if (shown >= run.len) seg(run.len, 0, run.len, runTop(run));
+      if (fr) fr.panes.forEach(function (p) { seg(p.x, 0, p.x, fr.top); seg(p.x + p.w, 0, p.x + p.w, fr.top); if (p.gw > 0) { seg(p.gx, p.gy0, p.gx, p.gy1); seg(p.gx + p.gw, p.gy0, p.gx + p.gw, p.gy1); } });
+      else { seg(0, K.glassH, shown, K.glassH); }
+      if (K.pattern === 'solid') hs.forEach(function (bh) { runSpans(run).forEach(function (sp) { seg(sp[0], bh, sp[0], bh + K.barH); seg(sp[1], bh, sp[1], bh + K.barH); seg(sp[0], bh, sp[1], bh); seg(sp[0], bh + K.barH, sp[1], bh + K.barH); }); });
+      else hs.forEach(function (bh, bi) {
+        ms.forEach(function (m) {
+          var mk = markFor(bi, m.q), a = m.x + (sw - mk.w) / 2, b = a + mk.w, cx = m.x + sw / 2;
+          seg(a, bh, a, bh + mk.h); seg(b, bh, b, bh + mk.h); seg(a, bh, b, bh); seg(a, bh + mk.h, b, bh + mk.h); seg(cx, bh + mk.h / 2, cx, bh + mk.h / 2);
+        });
+      });
+      geo.runs.push({ ri: ri, x0: x0, floor: floor, s: s, segs: sg });
     }
     // Runs with panes show whole; plain runs show their first 20 ft.
     function shownLen(r) { return runBays(r) ? r.len : Math.min(r.len, 240); }
@@ -3275,7 +3294,7 @@ details[open] > summary .sum { display: none; }
           dimLine(ctx, mx0, my0 - 8, mx0 + mk0.w * s, my0 - 8, fmtIn(mk0.w), null, INK2); dimLine(ctx, mx0 - 8, floor - bh0 * s, mx0 - 8, my0, fmtIn(mk0.h), null, INK2); }
       }
       // Spacing on a plain run: the gap between marks, then end clearance to the first mark.
-      if (!fr && dimOn('markers', 'spacing') && hs.length && K.pattern !== 'solid' && ms.length) {
+      if (!fr && spacingOn() && hs.length && K.pattern !== 'solid' && ms.length) {
         var tbp = hs.length - 1, a0 = ms[0], pl = [], g0 = function (xa, xb) { if (xb - xa >= 0.05 && xa <= shown) pl.push([xa, Math.min(xb, shown), xb - xa]); };
         if (ms[1]) { if (K.gapBy === 'oc') g0(a0.x + sw / 2, ms[1].x + sw / 2); else g0(a0.x + sw, ms[1].x); }
         g0(0, a0.x + (sw - markFor(tbp, a0.q).w) / 2);
@@ -3288,7 +3307,7 @@ details[open] > summary .sum { display: none; }
         fr.panes.forEach(function (p) { var lab = fmtIn(p.w); dimLine(ctx, x0 + p.x * s, floor + 22, x0 + (p.x + p.w) * s, floor + 22, ctx.measureText(lab).width + 6 < p.w * s ? lab : '', 'below'); });
         dimLine(ctx, x0, floor + 52, x0 + w, floor + 52, fmtFt(run.len), 'below');
         var gb = K.curb + K.fSill; if (gb > 0 && fr.panes.some(function (p) { return !p.door; })) dimLine(ctx, x0 + w + 22, floor, x0 + w + 22, Y(gb), fmtIn(gb), 'right');
-        if (hs.length && K.pattern !== 'solid' && dimOn('markers', 'spacing')) {
+        if (hs.length && K.pattern !== 'solid' && spacingOn()) {
           // Spacing in the panes: the gap between marks first, since that's the number the shop cuts to; then glass edge to the first mark,
           // the right edge when it differs, and across a seam when that differs from the gap. Each number shows once.
           var tb = hs.length - 1, gaps = [], edges = [], seen = {}, inP = function (pi) { return ms.filter(function (m) { return m.pane === pi; }); };
@@ -3362,6 +3381,7 @@ details[open] > summary .sum { display: none; }
         top: '<path d="M1.5 16.5h15M14.5 16.5V6M13.3 6h2.4"' + T + '/><rect x="3.5" y="6" width="3" height="3"/><rect x="8.5" y="6" width="3" height="3"/>',
         spacing: '<rect x="1.5" y="6" width="3" height="3"/><rect x="7.5" y="6" width="3" height="3"/><rect x="13.5" y="6" width="3" height="3"/><path d="M4.5 12.5h3M4.5 11.5v2M7.5 11.5v2M10.5 12.5h3M10.5 11.5v2M13.5 11.5v2"' + T + '/>',
         size: '<rect x="4" y="6" width="7" height="7" rx=".5"/><path d="M4 3.5h7M4 2.5v2M11 2.5v2M14 6v7M13 6h2M13 13h2"' + T + '/>' } };
+    function spacingOn() { return dimOn('markers', 'spacing') && !(offTarget && offTarget.noSpacing); }
     function dimOn(job, k) { var D = L[job].dims || {}; return D[k] != null ? !!D[k] : !!(DIM_ON[job] || {})[k]; }
     function dimsSec(job, extra) {
       var list = DIMS[job], on = list.filter(function (d) { return dimOn(job, d[0]); });
@@ -3601,9 +3621,10 @@ details[open] > summary .sum { display: none; }
     // Draw one job into someone else's canvas (Shop drawing), w × h in points at r pixels per point. Returns real inches per point.
     function renderTo(cv, w, h, r, job, opts) {
       var keep = { canvas: canvas, job: L.job, geo: geo };
-      offTarget = { canvas: cv, w: w, h: h, r: r, runs: opts && opts.runs }; canvas = cv; L.job = job; noSel = true;
+      var g = { runs: [] };
+      offTarget = { canvas: cv, w: w, h: h, r: r, runs: opts && opts.runs, noSpacing: !!(opts && opts.noSpacing), geo: g }; canvas = cv; L.job = job; noSel = true;
       try { draw(); } finally { canvas = keep.canvas; L.job = keep.job; geo = keep.geo; offTarget = null; noSel = false; }
-      return { realInPerPt: lastScale > 0 ? 1 / lastScale : NaN };
+      return { realInPerPt: lastScale > 0 ? 1 / lastScale : NaN, runs: g.runs };
     }
 
     // ---- Panels ----
@@ -3694,7 +3715,7 @@ details[open] > summary .sum { display: none; }
     }
     function tools() {
       var J = [['graphic', 'Graphic', 'Graphics on glass or a wall'], ['mural', 'Mural', 'Wall mural tiling'], ['film', 'Film', 'Privacy film'], ['markers', 'Markers', 'Distraction markers']];
-      toolsEl.classList.remove('grid5', 'grid8'); toolsEl.classList.add('grid4');
+      toolsEl.classList.remove('grid5', 'grid8', 'grid9'); toolsEl.classList.add('grid4');
       toolsEl.innerHTML = J.map(function (j) { return '<button type="button" class="tool txt' + (L.job === j[0] ? ' on' : '') + '" data-job="' + j[0] + '" title="' + j[2] + '" aria-pressed="' + (L.job === j[0]) + '">' + j[1] + '</button>'; }).join('');
     }
     function left() {
@@ -4663,7 +4684,7 @@ details[open] > summary .sum { display: none; }
     function setGraphicArt(list) { L.graphic.graphics = Array.isArray(list) ? list.filter(function (g) { return g && g.url && g.id != null; }) : []; }
     return { filmRows: function () { filmSync(); return L.film.panes.map(function (r) { return r.name + ' · ' + (filmFrame(r) ? fmtFt(r.len) : fmtIn(r.w) + ' × ' + fmtIn(r.h)); }); },
       markerRuns: function () { syncLens(); return L.markers.runs.map(function (r) { return r.name + ' · ' + fmtFt(r.len); }); },
-      enter: all, draw: draw, renderTo: renderTo, tools: tools, markerArt: function () { return L.markers.graphics || []; }, setMarkerArt: setMarkerArt, graphicArt: function () { return L.graphic.graphics || []; }, setGraphicArt: setGraphicArt,
+      enter: all, draw: draw, renderTo: renderTo, fmtIn: function (x) { return fmtIn(x); }, tools: tools, markerArt: function () { return L.markers.graphics || []; }, setMarkerArt: setMarkerArt, graphicArt: function () { return L.graphic.graphics || []; }, setGraphicArt: setGraphicArt,
       graphicRuns: function () { syncLens(L.graphic); return L.graphic.runs.map(function (r) { return r.name + ' · ' + fmtFt(elevLen(r)); }); }, left: left, right: right, status: status, getState: getState, setState: setState,
       imageBlob: function () { return L.mural.imgBlob || null; }, imageName: function () { return L.mural.imgName || ''; } };
   })();
@@ -4673,12 +4694,13 @@ details[open] > summary .sum { display: none; }
   var Shop = (function () {
     var PAPERS = { letter: [11, 8.5, 'Letter, 8.5 × 11'], tabloid: [17, 11, 'Tabloid, 11 × 17'], archc: [24, 18, 'Arch C, 18 × 24'], archd: [36, 24, 'Arch D, 24 × 36'] };
     var SOURCES = { graphic: 'Graphic mockup', mural: 'Mural layout', film: 'Privacy film layout', markers: 'Distraction marker layout' };
-    var KIND = { text: 'Text', rect: 'Rectangle', ellipse: 'Ellipse', line: 'Line', arrow: 'Arrow', figure: 'Person', pic: 'Image' };
-    var TOOLS = [['select', 'select', 'Select and move (V)'], ['hand', 'hand', 'Slide the drawing in its frame (H)'], ['text', 'text', 'Text box (T)'], ['rect', 'box', 'Rectangle (R)'], ['ellipse', 'ellipse', 'Ellipse (E)'], ['line', 'length', 'Line (L)'], ['arrow', 'arrow', 'Arrow (A)'], ['figure', 'person', 'Person for scale: click where their feet go (P)']];
-    var KEYS = { v: 'select', h: 'hand', t: 'text', r: 'rect', e: 'ellipse', l: 'line', a: 'arrow', p: 'figure' };
+    var KIND = { text: 'Text', rect: 'Rectangle', ellipse: 'Ellipse', line: 'Line', arrow: 'Arrow', figure: 'Person', pic: 'Image', dim: 'Dimension' };
+    var TOOLS = [['select', 'select', 'Select and move (V)'], ['hand', 'hand', 'Slide the drawing in its frame (H)'], ['text', 'text', 'Text box (T)'], ['rect', 'box', 'Rectangle (R)'], ['ellipse', 'ellipse', 'Ellipse (E)'], ['line', 'length', 'Line (L)'], ['arrow', 'arrow', 'Arrow (A)'], ['dim', 'dim', 'Dimension (D): click two points, then where the line goes'], ['figure', 'person', 'Person for scale: click where their feet go (P)']];
+    var KEYS = { v: 'select', h: 'hand', t: 'text', r: 'rect', e: 'ellipse', l: 'line', a: 'arrow', d: 'dim', p: 'figure' };
     var TOOL_INFO = { select: ['Select', 'V', 'Click to select, Shift+click to select more, drag to move, drag a corner to resize. Arrows nudge, Delete removes.'], hand: ['Hand', 'H', 'Drag to slide drawing in its frame.'],
       text: ['Text', 'T', 'Drag a box on sheet, or click for a default size, then type in panel.'], rect: ['Rectangle', 'R', 'Drag on sheet, or click for a default size.'], ellipse: ['Ellipse', 'E', 'Drag on sheet, or click for a default size.'],
-      line: ['Line', 'L', 'Drag from start to end. Shift keeps it straight.'], arrow: ['Arrow', 'A', 'Drag from tail to head. Shift keeps it straight.'], figure: ['Person', 'P', 'Click where their feet go, then drag to place.'] };
+      line: ['Line', 'L', 'Drag from start to end. Shift keeps it straight.'], arrow: ['Arrow', 'A', 'Drag from tail to head. Shift keeps it straight.'], figure: ['Person', 'P', 'Click where their feet go, then drag to place.'],
+      dim: ['Dimension', 'D', 'Click two points, then click where the dimension line goes. Ends snap to glass edges and marks (hold Alt to place freely). Esc cancels.'] };
     var SICON = {
       left: '<path d="M3 4.5h12M3 8h8M3 11.5h12M3 15h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
       center: '<path d="M3 4.5h12M5 8h8M3 11.5h12M5 15h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
@@ -4772,7 +4794,7 @@ details[open] > summary .sum { display: none; }
       var g = geom(), P = [], B = g.border, k = '#000000', gray = '#666666';
       if (!forPdf) P.push({ k: 'rect', x: 0, y: 0, w: g.W, h: g.H, fill: '#ffffff', paper: true });
       P.push({ k: 'image', src: 'view', x: g.frame.x, y: g.frame.y, w: g.frame.w, h: g.frame.h });
-      S.notes.forEach(function (n) { notePrims(n, P); });
+      S.notes.forEach(function (n) { notePrims(n, P, forPdf); });
       if (S.tbStyle === 'none') { P.push({ k: 'rect', x: B.x, y: B.y, w: B.w, h: B.h, stroke: k, sw: 1.5 }); return { P: P, g: g }; }
       if (S.tbStyle === 'mini') {
         P.push({ k: 'rect', x: B.x, y: g.tbY, w: B.w, h: B.y + B.h - g.tbY, fill: '#ffffff' });
@@ -4854,13 +4876,101 @@ details[open] > summary .sum { display: none; }
     }
     function box(n) { return { x: Math.min(n.x, n.x + n.w), y: Math.min(n.y, n.y + n.h), w: Math.abs(n.w), h: Math.abs(n.h) }; }
     function realPerPt() { var si = scaleInfo(); return si && isFinite(si.realInPerPt) ? si.realInPerPt : NaN; }
+
+    // ---- Dimensions you draw: two measured points and a line placed where you want it ----
+    // Each end keeps where it sits on the drawing (a), so dimensions follow the drawing when it slides, rescales or the paper changes:
+    // on a marker run that's inches along the run and up from the floor; on a Measure drawing, page units; otherwise points in the frame.
+    // An end that snapped to a glass edge or mark remembers it (snap); if the layout changes and nothing is there anymore, the dimension turns red.
+    // The line sits off from the first point by off (sheet points); lt slides the label along the line.
+    var dimDraft = null, dimHover = null, dimMouse = null;
+    function dimOrigin() { var F = geom().frame; return { x: F.x + S.pan.x, y: F.y + S.pan.y }; }
+    function runGeo(ri) { var i = view.info; return i && i.runs ? i.runs.find(function (R) { return R.ri === ri; }) : null; }
+    function anchorOf(pt) {
+      var F = geom().frame, o = dimOrigin(), info = view.info;
+      if (S.src === 'measure') { var r = region(); return r ? { src: 'measure', pg: true, x: r.x + (pt.x - F.x) / r.z, y: r.y + (pt.y - F.y) / r.z } : null; }
+      if (S.src === 'markers' && info && info.runs && info.runs.length) {
+        var best = null;
+        info.runs.forEach(function (R) {
+          var xs = [], ys = []; R.segs.forEach(function (g) { xs.push(g[0], g[2]); ys.push(g[1], g[3]); });
+          var bx0 = o.x + R.x0 + Math.min.apply(null, xs) * R.s, bx1 = o.x + R.x0 + Math.max.apply(null, xs) * R.s, by0 = o.y + R.floor - Math.max.apply(null, ys) * R.s, by1 = o.y + R.floor;
+          var d = Math.hypot(Math.max(bx0 - pt.x, 0, pt.x - bx1), Math.max(by0 - pt.y, 0, pt.y - by1));
+          if (!best || d < best.d) best = { d: d, R: R };
+        });
+        var R = best.R; return { src: 'markers', ri: R.ri, x: (pt.x - o.x - R.x0) / R.s, y: (R.floor - (pt.y - o.y)) / R.s };
+      }
+      return { src: S.src, fx: pt.x - o.x, fy: pt.y - o.y };
+    }
+    function placeOf(a) {
+      if (!a || a.src !== S.src) return null;
+      var F = geom().frame, o = dimOrigin();
+      if (a.pg) { var r = region(); return r ? { x: F.x + (a.x - r.x) * r.z, y: F.y + (a.y - r.y) * r.z } : null; }
+      if (a.ri != null) { var R = runGeo(a.ri); return R ? { x: o.x + R.x0 + a.x * R.s, y: o.y + R.floor - a.y * R.s } : null; }
+      return { x: o.x + a.fx, y: o.y + a.fy };
+    }
+    function syncDim(n) { [n.p1, n.p2].forEach(function (p) { var q = placeOf(p.a); if (q) { p.x = q.x; p.y = q.y; } }); }
+    // The nearest glass edge, frame edge, mark edge or mark center within a few screen pixels, in sheet points.
+    function snapAt(pt) {
+      var info = view.info; if (S.src !== 'markers' || !info || !info.runs) return null;
+      var o = dimOrigin(), tol = 8 / pxPerPt(), best = null;
+      info.runs.forEach(function (R) {
+        R.segs.forEach(function (g) {
+          var ax = o.x + R.x0 + g[0] * R.s, ay = o.y + R.floor - g[1] * R.s, bx = o.x + R.x0 + g[2] * R.s, by = o.y + R.floor - g[3] * R.s;
+          var dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy, t = L2 ? Math.max(0, Math.min(1, ((pt.x - ax) * dx + (pt.y - ay) * dy) / L2)) : 0;
+          [[ax, ay, 0.6], [bx, by, 0.6], [ax + t * dx, ay + t * dy, 1]].forEach(function (c) {
+            var sc = Math.hypot(pt.x - c[0], pt.y - c[1]) * c[2];
+            if (sc < tol && (!best || sc < best.sc)) best = { sc: sc, x: c[0], y: c[1] };
+          });
+        });
+      });
+      return best ? { x: best.x, y: best.y } : null;
+    }
+    function dimPt(q, snapped) { return { x: q.x, y: q.y, a: anchorOf(q), snap: !!snapped }; }
+    // The measured length in inches: from the drawing itself when both ends sit on the same run, otherwise from the sheet scale.
+    function dimValue(n) {
+      var a1 = n.p1.a, a2 = n.p2.a, h = n.o === 'h';
+      if (a1 && a2 && a1.src === S.src && a2.src === S.src && a1.ri != null && a1.ri === a2.ri) return Math.abs(h ? a2.x - a1.x : a2.y - a1.y);
+      var r = realPerPt(); return isFinite(r) ? Math.abs(h ? n.p2.x - n.p1.x : n.p2.y - n.p1.y) * r : NaN;
+    }
+    function dimLabel(n) { var v = dimValue(n); return isFinite(v) ? Lay.fmtIn(v) : '?'; }
+    // An end that snapped to the layout but no longer lands on anything there (within 1/32").
+    function dimStale(n) {
+      return [n.p1, n.p2].some(function (p) {
+        var a = p.a; if (!p.snap || !a || a.src !== S.src || a.ri == null) return false;
+        var R = runGeo(a.ri); if (!R) return false;
+        return !R.segs.some(function (g) { var dx = g[2] - g[0], dy = g[3] - g[1], L2 = dx * dx + dy * dy, t = L2 ? Math.max(0, Math.min(1, ((a.x - g[0]) * dx + (a.y - g[1]) * dy) / L2)) : 0; return Math.hypot(a.x - (g[0] + t * dx), a.y - (g[1] + t * dy)) < 1 / 32; });
+      });
+    }
+    // Where the line and label go: a and b are the line's ends, e1 and e2 the extension lines.
+    function dimGeo(n) {
+      var h = n.o === 'h', p1 = n.p1, p2 = n.p2, a, b;
+      if (h) { var ly = p1.y + n.off; a = { x: p1.x, y: ly }; b = { x: p2.x, y: ly }; } else { var lx = p1.x + n.off; a = { x: lx, y: p1.y }; b = { x: lx, y: p2.y }; }
+      var lab = dimLabel(n), w = tw(lab, n.size, false), mid = h ? (a.x + b.x) / 2 + (n.lt || 0) : (a.y + b.y) / 2 + (n.lt || 0);
+      var lb = h ? { x: mid - w / 2, y: a.y - 3 - n.size * 0.8, w: w, h: n.size } : { x: a.x + 4, y: mid - n.size * 0.45, w: w, h: n.size };
+      return { a: a, b: b, h: h, lab: lab, lb: lb };
+    }
+    function dimPrims(n, P, color) {
+      var g = dimGeo(n), c = color || n.stroke || '#1c1c1c', sw = n.sw || 0.6, t = 2.6;
+      var ext = function (p, q) {   // from a little off the measured point to a little past the line
+        var dx = q.x - p.x, dy = q.y - p.y, L = Math.hypot(dx, dy); if (L < 3) return;
+        var ux = dx / L, uy = dy / L; P.push({ k: 'line', x1: p.x + ux * 2, y1: p.y + uy * 2, x2: q.x + ux * 2.5, y2: q.y + uy * 2.5, stroke: c, sw: sw * 0.8 });
+      };
+      ext(n.p1, g.a); ext(n.p2, g.b);
+      var ux = g.h ? Math.sign(g.b.x - g.a.x) || 1 : 0, uy = g.h ? 0 : Math.sign(g.b.y - g.a.y) || 1;
+      P.push({ k: 'line', x1: g.a.x - ux * 2.5, y1: g.a.y - uy * 2.5, x2: g.b.x + ux * 2.5, y2: g.b.y + uy * 2.5, stroke: c, sw: sw });
+      [g.a, g.b].forEach(function (q) { P.push({ k: 'line', x1: q.x - t, y1: q.y + t, x2: q.x + t, y2: q.y - t, stroke: c, sw: sw * 1.6 }); });
+      P.push({ k: 'text', x: g.lb.x, y: g.lb.y + n.size * 0.8, size: n.size, color: c, text: g.lab, font: 'sans' });
+    }
+    function newDim(d, at) {
+      return { id: S.nextId++, k: 'dim', o: d.o, p1: d.p1, p2: d.p2, off: d.o === 'h' ? at.y - d.p1.y : at.x - d.p1.x, lt: 0, size: S.style.dimSize || 9, stroke: '#1c1c1c', sw: 0.6 };
+    }
     // People stay true to the drawing's scale: their real height sets their size, feet kept in place.
     function fitFig(n) {
       var r = realPerPt(), F = FIGS[n.who] || FIGS.man, h = isFinite(r) ? n.hIn / r : (Math.abs(n.h) || 144), w = h * F.w / 1000, b = box(n);
       var cx = b.x + b.w / 2, feet = b.y + b.h; n.w = w; n.h = h; n.x = cx - w / 2; n.y = feet - h;
     }
     function fitFigs() { S.notes.forEach(function (n) { if (n.k === 'figure' && !(drag && drag.handle && drag.id === n.id)) fitFig(n); }); }
-    function notePrims(n, P) {
+    function notePrims(n, P, forPdf) {
+      if (n.k === 'dim') { syncDim(n); dimPrims(n, P, !forPdf && dimStale(n) ? '#d0342c' : null); return; }
       if (n.k === 'pic') {
         var pb = box(n);
         if (pics[n.pic]) P.push({ k: 'image', src: 'pic', pic: n.pic, x: pb.x, y: pb.y, w: pb.w, h: pb.h });
@@ -4903,7 +5013,7 @@ details[open] > summary .sum { display: none; }
       if (S.src !== 'measure') {
         // A Layout drawing fills the frame; the hand tool slides it (pan is in sheet points here), so it is drawn on its own canvas and placed.
         var slid = S.pan.x || S.pan.y, lc = cv; if (slid) { lc = document.createElement('canvas'); lc.width = cw; lc.height = ch; }
-        renderView.info = Lay.renderTo(lc, F.w, F.h, ppp, S.src, S.src === 'markers' ? { runs: shopRuns() } : S.src === 'graphic' ? { runs: shopElevs() } : S.src === 'film' ? { runs: shopFilm() } : null);
+        renderView.info = Lay.renderTo(lc, F.w, F.h, ppp, S.src, S.src === 'markers' ? { runs: shopRuns(), noSpacing: S.layDims === false } : S.src === 'graphic' ? { runs: shopElevs() } : S.src === 'film' ? { runs: shopFilm() } : null);
         if (slid) ctx.drawImage(lc, Math.round(S.pan.x * ppp), Math.round(S.pan.y * ppp));
         return Promise.resolve({ canvas: cv, info: renderView.info });
       }
@@ -4929,7 +5039,7 @@ details[open] > summary .sum { display: none; }
     function sharpness(want, cap) { var F = geom().frame; return Math.min(want, Math.sqrt(cap / (F.w * F.h))); }
     function viewKey() {
       var F = geom().frame, r = region();
-      return JSON.stringify([S.src, S.grid, S.mrunsOff, S.grunsOff, S.frowsOff, S.src === 'measure' ? 0 : [Math.round(S.pan.x), Math.round(S.pan.y)], F, r && [r.x, r.y, r.w, r.h].map(function (v) { return Math.round(v * 10); }), S.src === 'measure' ? [M.src, M.name, M.page, M.items.filter(function (it) { return it.page === M.page; }), M.scales[M.page]] : [Lay.getState(), Lay.imageName(), UNITS, Lay.markerArt().map(function (g) { return g.name + g.w; }), Lay.graphicArt().map(function (g) { return g.id + g.name + g.w; })]]);
+      return JSON.stringify([S.src, S.grid, S.layDims, S.mrunsOff, S.grunsOff, S.frowsOff, S.src === 'measure' ? 0 : [Math.round(S.pan.x), Math.round(S.pan.y)], F, r && [r.x, r.y, r.w, r.h].map(function (v) { return Math.round(v * 10); }), S.src === 'measure' ? [M.src, M.name, M.page, M.items.filter(function (it) { return it.page === M.page; }), M.scales[M.page]] : [Lay.getState(), Lay.imageName(), UNITS, Lay.markerArt().map(function (g) { return g.name + g.w; }), Lay.graphicArt().map(function (g) { return g.id + g.name + g.w; })]]);
     }
     function ensureView() {
       var key = viewKey(); if (key === view.key) return;
@@ -4971,6 +5081,7 @@ details[open] > summary .sum { display: none; }
       return '';
     }
     function handlesOf(n) {
+      if (n.k === 'dim') return [{ x: n.p1.x, y: n.p1.y, h: 'p1' }, { x: n.p2.x, y: n.p2.y, h: 'p2' }];
       if (n.k === 'line' || n.k === 'arrow') return [{ x: n.x1, y: n.y1, h: 'p1' }, { x: n.x2, y: n.y2, h: 'p2' }];
       var b = box(n); return [{ x: b.x, y: b.y, h: 'nw' }, { x: b.x + b.w, y: b.y, h: 'ne' }, { x: b.x + b.w, y: b.y + b.h, h: 'se' }, { x: b.x, y: b.y + b.h, h: 'sw' }];
     }
@@ -4978,7 +5089,8 @@ details[open] > summary .sum { display: none; }
     // Shift+click selects several items. sel is the key item (its handles and panel show); multi holds the others.
     function selList() { if (sel == null) return []; multi = multi.filter(function (id) { return id !== sel && noteById(id); }); return [sel].concat(multi).map(noteById).filter(Boolean); }
     function isSel(id) { return sel != null && (id === sel || multi.indexOf(id) >= 0); }
-    function moveNote(n, o, dx, dy) { if (n.k === 'line' || n.k === 'arrow') { n.x1 = o.x1 + dx; n.y1 = o.y1 + dy; n.x2 = o.x2 + dx; n.y2 = o.y2 + dy; } else { n.x = o.x + dx; n.y = o.y + dy; } }
+    // Moving a dimension moves its line, not the points it measures.
+    function moveNote(n, o, dx, dy) { if (n.k === 'dim') { n.off = o.off + (n.o === 'h' ? dy : dx); return; } if (n.k === 'line' || n.k === 'arrow') { n.x1 = o.x1 + dx; n.y1 = o.y1 + dy; n.x2 = o.x2 + dx; n.y2 = o.y2 + dy; } else { n.x = o.x + dx; n.y = o.y + dy; } }
     function paint() {
       if (mode !== 'shop' || !svg) return;
       ensureView(); fitSvg(); fitFigs();
@@ -4991,14 +5103,29 @@ details[open] > summary .sum { display: none; }
         if (on) { var lab = inStr(gd.p / 72), fs = 11 * k, lw = (lab.length * 6.4 + 8) * k, lx = v ? Math.min(gd.p + 4 * k, g.W - lw) : 4 * k, ly = v ? 4 * k : Math.max(gd.p - 20 * k, 0);
           o += '<rect x="' + lx + '" y="' + ly + '" width="' + lw + '" height="' + 16 * k + '" fill="#00a5c8" pointer-events="none"/><text x="' + (lx + 4 * k) + '" y="' + (ly + 12 * k) + '" font-family="Helvetica, Arial, sans-serif" font-size="' + fs + '" fill="#ffffff" pointer-events="none">' + esc(lab) + '</text>'; }
       });
-      selList().forEach(function (m) { if (m.id === sel) return; if (m.k === 'line' || m.k === 'arrow') o += '<line x1="' + m.x1 + '" y1="' + m.y1 + '" x2="' + m.x2 + '" y2="' + m.y2 + '" stroke="#3e7bfa" stroke-opacity=".5" stroke-width="' + 5 * k + '" pointer-events="none"/>'; else { var mb = box(m); o += '<rect x="' + mb.x + '" y="' + mb.y + '" width="' + mb.w + '" height="' + mb.h + '" fill="none" stroke="#3e7bfa" stroke-width="' + k + '" stroke-dasharray="' + 4 * k + ' ' + 3 * k + '" pointer-events="none"/>'; } });
+      selList().forEach(function (m) { if (m.id === sel) return; if (m.k === 'dim') { var mg = dimGeo(m); o += '<line x1="' + mg.a.x + '" y1="' + mg.a.y + '" x2="' + mg.b.x + '" y2="' + mg.b.y + '" stroke="#3e7bfa" stroke-opacity=".5" stroke-width="' + 5 * k + '" pointer-events="none"/>'; } else if (m.k === 'line' || m.k === 'arrow') o += '<line x1="' + m.x1 + '" y1="' + m.y1 + '" x2="' + m.x2 + '" y2="' + m.y2 + '" stroke="#3e7bfa" stroke-opacity=".5" stroke-width="' + 5 * k + '" pointer-events="none"/>'; else { var mb = box(m); o += '<rect x="' + mb.x + '" y="' + mb.y + '" width="' + mb.w + '" height="' + mb.h + '" fill="none" stroke="#3e7bfa" stroke-width="' + k + '" stroke-dasharray="' + 4 * k + ' ' + 3 * k + '" pointer-events="none"/>'; } });
       var n = sel != null && noteById(sel);
       if (n) {
-        if (n.k !== 'line' && n.k !== 'arrow') { var b = box(n); o += '<rect x="' + b.x + '" y="' + b.y + '" width="' + b.w + '" height="' + b.h + '" fill="none" stroke="#3e7bfa" stroke-width="' + k + '"/>'; }
+        if (n.k === 'dim') { var sg = dimGeo(n); o += '<line x1="' + sg.a.x + '" y1="' + sg.a.y + '" x2="' + sg.b.x + '" y2="' + sg.b.y + '" stroke="#3e7bfa" stroke-opacity=".45" stroke-width="' + 5 * k + '" pointer-events="none"/><rect x="' + (sg.lb.x - 2) + '" y="' + (sg.lb.y - 2) + '" width="' + (sg.lb.w + 4) + '" height="' + (sg.lb.h + 4) + '" fill="none" stroke="#3e7bfa" stroke-width="' + k + '" stroke-dasharray="' + 3 * k + ' ' + 2 * k + '" pointer-events="none"/>'; }
+        else if (n.k !== 'line' && n.k !== 'arrow') { var b = box(n); o += '<rect x="' + b.x + '" y="' + b.y + '" width="' + b.w + '" height="' + b.h + '" fill="none" stroke="#3e7bfa" stroke-width="' + k + '"/>'; }
         handlesOf(n).forEach(function (hd) { o += '<rect x="' + (hd.x - 4 * k) + '" y="' + (hd.y - 4 * k) + '" width="' + 8 * k + '" height="' + 8 * k + '" fill="#ffffff" stroke="#3e7bfa" stroke-width="' + 1.5 * k + '"/>'; });
       }
+      if (tool === 'dim') o += dimPreview(k);
       svg.innerHTML = o;
       svg.style.cursor = tool === 'hand' ? (drag && drag.pan ? 'grabbing' : 'grab') : tool === 'select' ? 'default' : 'crosshair';
+    }
+    // What the Dimension tool shows while you place one: the snap point under the pointer, then the dimension following the pointer.
+    function dimPreview(k) {
+      var o = '', P = [], c = '#3e7bfa', q = dimHover || dimMouse;
+      if (dimDraft && dimDraft.p2 && dimMouse) dimPrims(newDim(dimDraft, dimMouse), P, c);
+      else if (dimDraft && q) {
+        var d0 = dimDraft.p1, tmp = { o: Math.abs(q.x - d0.x) >= Math.abs(q.y - d0.y) ? 'h' : 'v', p1: d0, p2: { x: q.x, y: q.y, a: dimHover ? anchorOf(q) : null } };
+        o += '<line x1="' + d0.x + '" y1="' + d0.y + '" x2="' + q.x + '" y2="' + q.y + '" stroke="' + c + '" stroke-width="' + k + '" stroke-dasharray="' + 3 * k + ' ' + 2 * k + '" pointer-events="none"/>';
+        P.push({ k: 'text', x: q.x + 8 * k, y: q.y - 6 * k, size: 11 * k, color: c, text: dimLabel(tmp), font: 'sans' });
+      }
+      o += P.map(primSvg).join('').replace(/<(line|text)/g, '<$1 pointer-events="none"');
+      if (dimHover) o += '<rect x="' + (dimHover.x - 3.5 * k) + '" y="' + (dimHover.y - 3.5 * k) + '" width="' + 7 * k + '" height="' + 7 * k + '" fill="none" stroke="#00a5c8" stroke-width="' + 1.5 * k + '" pointer-events="none"/>';
+      return o;
     }
     function guideById(id) { return (S.guides || []).find(function (gd) { return gd.id === id; }); }
     function hitGuide(p) { if (!guidesOn) return null; var tol = 5 / pxPerPt(); return (S.guides || []).slice().reverse().find(function (gd) { return Math.abs((gd.o === 'v' ? p.x : p.y) - gd.p) < tol; }) || null; }
@@ -5010,7 +5137,7 @@ details[open] > summary .sum { display: none; }
     }
     // Moving something near a guide pulls its edge or center (a line's ends) onto it. Alt turns this off.
     function snapToGuides(n) {
-      if (!guidesOn || !(S.guides || []).length) return;
+      if (!guidesOn || !(S.guides || []).length || n.k === 'dim') return;
       var tol = 6 / pxPerPt(), ln = n.k === 'line' || n.k === 'arrow', b = ln ? null : box(n);
       var xs = ln ? [n.x1, n.x2] : [b.x, b.x + b.w / 2, b.x + b.w], ys = ln ? [n.y1, n.y2] : [b.y, b.y + b.h / 2, b.y + b.h];
       var near = function (vals, o) { var best = null; S.guides.forEach(function (gd) { if (gd.o !== o) return; vals.forEach(function (v) { var d = gd.p - v; if (Math.abs(d) < tol && (best == null || Math.abs(d) < Math.abs(best))) best = d; }); }); return best || 0; };
@@ -5018,12 +5145,16 @@ details[open] > summary .sum { display: none; }
       if (ln) { n.x1 += dx; n.x2 += dx; n.y1 += dy; n.y2 += dy; } else { n.x += dx; n.y += dy; }
     }
     function toSheet(e) { var r = svg.getBoundingClientRect(), g = geom(); return { x: (e.clientX - r.left) / r.width * g.W, y: (e.clientY - r.top) / r.height * g.H }; }
-    function hitHandle(p) { var n = sel != null && noteById(sel), tol = 7 / pxPerPt(); if (!n) return null; var h = handlesOf(n).find(function (hd) { return Math.abs(hd.x - p.x) < tol && Math.abs(hd.y - p.y) < tol; }); return h ? h.h : null; }
+    function hitHandle(p) { var n = sel != null && noteById(sel), tol = 7 / pxPerPt(); if (!n) return null;
+      if (n.k === 'dim') { var hb = dimGeo(n).lb; if (p.x > hb.x - 2 && p.x < hb.x + hb.w + 2 && p.y > hb.y - 2 && p.y < hb.y + hb.h + 2) return 'lab'; } var h = handlesOf(n).find(function (hd) { return Math.abs(hd.x - p.x) < tol && Math.abs(hd.y - p.y) < tol; }); return h ? h.h : null; }
     function hitNote(p) {
       var tol = 5 / pxPerPt();
       for (var i = S.notes.length - 1; i >= 0; i--) {
         var n = S.notes[i];
-        if (n.k === 'line' || n.k === 'arrow') {
+        if (n.k === 'dim') {
+          var dg = dimGeo(n), ddx = dg.b.x - dg.a.x, ddy = dg.b.y - dg.a.y, D2 = ddx * ddx + ddy * ddy, dt = D2 ? Math.max(0, Math.min(1, ((p.x - dg.a.x) * ddx + (p.y - dg.a.y) * ddy) / D2)) : 0;
+          if (Math.hypot(p.x - (dg.a.x + dt * ddx), p.y - (dg.a.y + dt * ddy)) < tol || (p.x > dg.lb.x - tol && p.x < dg.lb.x + dg.lb.w + tol && p.y > dg.lb.y - tol && p.y < dg.lb.y + dg.lb.h + tol)) return n;
+        } else if (n.k === 'line' || n.k === 'arrow') {
           var dx = n.x2 - n.x1, dy = n.y2 - n.y1, L2 = dx * dx + dy * dy, t = L2 ? Math.max(0, Math.min(1, ((p.x - n.x1) * dx + (p.y - n.y1) * dy) / L2)) : 0;
           if (Math.hypot(p.x - (n.x1 + t * dx), p.y - (n.y1 + t * dy)) < Math.max(tol, n.sw)) return n;
         } else { var b = box(n); if (p.x > b.x - tol && p.x < b.x + b.w + tol && p.y > b.y - tol && p.y < b.y + b.h + tol) return n; }
@@ -5061,6 +5192,15 @@ details[open] > summary .sum { display: none; }
           else if (gh) drag = { guide: gh.id, p: p };
           paint(); left(); return;
         }
+        if (tool === 'dim') {
+          var ds = e.altKey ? null : snapAt(p), dq = ds || p;
+          if (!dimDraft) { dimDraft = { p1: dimPt(dq, ds) }; paint(); return; }
+          if (!dimDraft.p2) {
+            if (Math.hypot(dq.x - dimDraft.p1.x, dq.y - dimDraft.p1.y) * pxPerPt() < 3) return;
+            dimDraft.p2 = dimPt(dq, ds); dimDraft.o = Math.abs(dq.x - dimDraft.p1.x) >= Math.abs(dq.y - dimDraft.p1.y) ? 'h' : 'v'; paint(); return;
+          }
+          var dn = newDim(dimDraft, p); S.notes.push(dn); sel = dn.id; multi = []; dimDraft = null; paint(); left(); History.record(); return;
+        }
         if (tool === 'figure') {   // drop a person with their feet where you clicked; drag to place them
           var fg = newNote('figure', p, p); S.notes.push(fg); sel = fg.id; multi = []; drag = { move: true, id: fg.id, orig: JSON.parse(JSON.stringify(fg)), p: p };
           tool = 'select'; tools(); paint(); left(); History.record(); return;
@@ -5068,6 +5208,7 @@ details[open] > summary .sum { display: none; }
         var nn = newNote(tool, p, p); S.notes.push(nn); sel = nn.id; multi = []; drag = { create: true, id: nn.id, p: p }; paint();
       });
       svg.addEventListener('pointermove', function (e) {
+        if (tool === 'dim' && !drag) { var hp = toSheet(e); dimMouse = hp; dimHover = e.altKey ? null : snapAt(hp); paint(); return; }
         if (!drag) return;
         var p = toSheet(e), dx = p.x - drag.p.x, dy = p.y - drag.p.y, n = drag.id != null && noteById(drag.id);
         drag.moved = drag.moved || Math.hypot(dx, dy) * pxPerPt() > 2;
@@ -5084,6 +5225,9 @@ details[open] > summary .sum { display: none; }
             if (!e.altKey) { var bx = n.x, by = n.y, bx1 = n.x1, by1 = n.y1; snapToGuides(n); dx += (n.x != null ? n.x - bx : n.x1 - bx1) || 0; dy += (n.y != null ? n.y - by : n.y1 - by1) || 0; }
             drag.group.forEach(function (gm) { moveNote(gm.n, gm.orig, dx, dy); });
           } else if (!e.altKey) snapToGuides(n);
+        } else if (drag.handle && n.k === 'dim') {
+          if (drag.handle === 'lab') n.lt = (drag.orig.lt || 0) + (n.o === 'h' ? dx : dy);
+          else { var hp2 = { x: drag.orig[drag.handle].x + dx, y: drag.orig[drag.handle].y + dy }, hs2 = e.altKey ? null : snapAt(hp2); n[drag.handle] = dimPt(hs2 || hp2, hs2); }
         } else if (drag.handle) {
           var o2 = drag.orig, h = drag.handle;
           if (h === 'p1') { var q1 = straight(o2.x2, o2.y2, o2.x1 + dx, o2.y1 + dy); n.x1 = q1.x; n.y1 = q1.y; }
@@ -5130,7 +5274,7 @@ details[open] > summary .sum { display: none; }
 
     // ---- Panels ----
     function tools() {
-      toolsEl.classList.remove('grid5', 'grid4'); toolsEl.classList.add('grid8');
+      toolsEl.classList.remove('grid5', 'grid4', 'grid8'); toolsEl.classList.add('grid9'); if (tool !== 'dim') dimDraft = null;
       toolsEl.innerHTML = TOOLS.map(function (t) { return toolBtn(t[1], t[0], t[2], tool === t[0]); }).join('');
       if (mode !== 'shop') return;
       var tc = leftEl.querySelector('.toolcard'); if (tc) tc.outerHTML = toolCard();
@@ -5163,7 +5307,7 @@ details[open] > summary .sum { display: none; }
       if (!S.notes.length) { leftEl.innerHTML = h; return; }
       h += '<div class="block"><div class="label">On sheet · front to back</div>';
       h += '<div class="list">' + S.notes.slice().reverse().map(function (n) {
-        var on = isSel(n.id), label = n.k === 'pic' ? (pics[n.pic] ? pics[n.pic].name : 'Image') : n.k === 'text' ? (n.text || '').split('\n')[0].slice(0, 40) || 'Text' : n.k === 'figure' ? (FIGS[n.who] || FIGS.man).label + ', ' + archLen(n.hIn) : KIND[n.k];
+        var on = isSel(n.id), label = n.k === 'pic' ? (pics[n.pic] ? pics[n.pic].name : 'Image') : n.k === 'text' ? (n.text || '').split('\n')[0].slice(0, 40) || 'Text' : n.k === 'figure' ? (FIGS[n.who] || FIGS.man).label + ', ' + archLen(n.hIn) : n.k === 'dim' ? (n.o === 'h' ? 'Across ' : 'Up ') + dimLabel(n) + (dimStale(n) ? ' (check)' : '') : KIND[n.k];
         var row = '<div class="item' + (on ? ' sel' : '') + '" data-snote="' + n.id + '"><span class="chip" style="background:' + (n.k === 'pic' && pics[n.pic] ? '#ffffff url(' + pics[n.pic].url + ') center/cover' : n.k === 'text' ? n.color : n.fill || n.stroke || '#ffffff') + '"></span><span>' + esc(label) + '</span><b>' + KIND[n.k] + '</b><button type="button" data-sdel="' + n.id + '" aria-label="Delete">×</button>';
         if (on) row += '<div class="item-more">' + props(n) + '</div>';
         return row + '</div>';
@@ -5172,6 +5316,15 @@ details[open] > summary .sum { display: none; }
     }
     function props(n) {
       var h = '';
+      if (n.k === 'dim') {
+        h += '<p class="hint keep" style="margin:0">' + (n.o === 'h' ? 'Horizontal' : 'Vertical') + ', ' + esc(dimLabel(n)) + '. Drag it to move the line, drag the number to slide it along, drag an end to change what it measures.</p>';
+        if (dimStale(n)) h += '<p class="err" style="margin:0">An end no longer lands on a glass edge or mark; the layout changed. Drag the red end back onto the drawing.</p>';
+        h += '<div class="sty"><span class="sty-l">Measure</span><select data-sp="o" aria-label="Direction"><option value="h"' + (n.o === 'h' ? ' selected' : '') + '>Across</option><option value="v"' + (n.o === 'v' ? ' selected' : '') + '>Up and down</option></select></div>';
+        h += '<div class="sty"><span class="sty-l">Size</span><select data-sp="size" aria-label="Text size">' + opts([6, 7, 8, 9, 10, 12, 14], n.size, function (x) { return x + ' pt'; }) + '</select></div>';
+        h += '<div class="sty"><span class="sty-s">Color</span>' + swatches('stroke', n.stroke) + '</div>';
+        h += '<div class="sty"><span class="sty-l">Width</span><select data-sp="sw" aria-label="Line width">' + opts([0.35, 0.5, 0.6, 0.75, 1], n.sw, function (x) { return x + ' pt'; }) + '</select></div>';
+        return h;
+      }
       if (n.k === 'text') {
         h += '<textarea class="stext" data-sn="text" rows="3" aria-label="Text">' + esc(n.text) + '</textarea>';
         h += '<div class="sty"><span class="sty-l">Font</span><select data-sp="font" aria-label="Font">' + opts(Object.keys(FONTS), FONTS[n.font] ? n.font : 'sans', function (x) { return FONTS[x].label; }) + '</select><span class="seg">' + ib('bold', 'data-stog="bold"', n.bold, 'Bold') + ib('ital', 'data-stog="ital"', n.ital, 'Italic') + '</span></div>';
@@ -5216,7 +5369,8 @@ details[open] > summary .sum { display: none; }
         dv += '<div class="row"><button type="button" class="btn" data-sact="center"' + (S.pan.x || S.pan.y ? '' : ' disabled') + '>Center drawing</button></div><p class="hint" style="margin:0">Layout fills the frame; the hand tool (H) slides it. Change the drawing in Layout.</p>';
         if (S.src === 'graphic') dv += '<div class="label" style="margin-top:4px">Elevations shown</div>' + Lay.graphicRuns().map(function (nm, i) { return '<label class="chk"><input type="checkbox" data-grun="' + i + '"' + ((S.grunsOff || []).indexOf(i) < 0 ? ' checked' : '') + '> ' + esc(nm) + '</label>'; }).join('');
         if (S.src === 'film') dv += '<div class="label" style="margin-top:4px">Film rows shown</div>' + Lay.filmRows().map(function (nm, i) { return '<label class="chk"><input type="checkbox" data-frow="' + i + '"' + ((S.frowsOff || []).indexOf(i) < 0 ? ' checked' : '') + '> ' + esc(nm) + '</label>'; }).join('');
-        if (S.src === 'markers') dv += '<div class="label" style="margin-top:4px">Glass runs shown</div>' + Lay.markerRuns().map(function (nm, i) { return '<label class="chk"><input type="checkbox" data-srun="' + i + '"' + ((S.mrunsOff || []).indexOf(i) < 0 ? ' checked' : '') + '> ' + esc(nm) + '</label>'; }).join('');
+        if (S.src === 'markers') dv += '<div class="label" style="margin-top:4px">Glass runs shown</div>' + Lay.markerRuns().map(function (nm, i) { return '<label class="chk"><input type="checkbox" data-srun="' + i + '"' + ((S.mrunsOff || []).indexOf(i) < 0 ? ' checked' : '') + '> ' + esc(nm) + '</label>'; }).join('') +
+          '<label class="chk" style="margin-top:4px"><input type="checkbox" data-sk="layDims"' + (S.layDims !== false ? ' checked' : '') + '> Spacing dimensions from Layout</label><p class="hint keep" style="margin:0">Turn these off to place your own with the Dimension tool (D).</p>';
       }
       h += sec('sh_view', 'Drawing', dv);
       var ng = (S.guides || []).length;
@@ -5324,7 +5478,10 @@ details[open] > summary .sum { display: none; }
       if (d.sp === 'hIn') { var hv = parseLen(e.target.value); edit(function (n) { if (hv > 0) { n.hIn = hv; fitFig(n); } }); left(); History.record(); return; }
       if (d.sp) {
         var v = e.target.type === 'checkbox' ? e.target.checked : /size|sw/.test(d.sp) ? Number(e.target.value) : e.target.value;
-        edit(function (n) { n[d.sp] = v; S.style[d.sp] = v; }); left(); History.record();
+        edit(function (n) {
+          if (n.k === 'dim') { if (d.sp === 'o' && v !== n.o) { n.o = v; n.off = 14; n.lt = 0; } else n[d.sp] = v; if (d.sp === 'size') S.style.dimSize = v; return; }
+          n[d.sp] = v; S.style[d.sp] = v;
+        }); left(); History.record();
       }
     });
     rightEl.addEventListener('input', function (e) { if (mode === 'shop' && e.target.dataset.stb) { S.tb[e.target.dataset.stb] = e.target.value; paint(); } });
@@ -5366,6 +5523,7 @@ details[open] > summary .sum { display: none; }
       if ((e.key === 'Delete' || e.key === 'Backspace') && !n && selGuide != null && guideById(selGuide)) { S.guides = S.guides.filter(function (x) { return x.id !== selGuide; }); selGuide = null; all(); History.record(); e.preventDefault(); }
       else if ((e.key === 'Delete' || e.key === 'Backspace') && n) { var gone = selList(); S.notes = S.notes.filter(function (x) { return gone.indexOf(x) < 0; }); sel = null; multi = []; all(); History.record(); e.preventDefault(); }
       else if (e.key === 'Escape' && cpOpen) { cpOpen = null; left(); }
+      else if (e.key === 'Escape' && dimDraft) { dimDraft = null; paint(); }
       else if (e.key === 'Escape') { sel = null; selGuide = null; tool = 'select'; tools(); left(); paint(); }
       else if ((e.key === 'PageDown' || e.key === 'PageUp') && sheets.length > 1) { go(cur + (e.key === 'PageDown' ? 1 : -1)); e.preventDefault(); }
       else if (ARROWS[e.key] && n) {
