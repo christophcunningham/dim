@@ -17,7 +17,7 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Lexend+Zetta:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Lexend+Zetta:wght@500&display=swap">
 <style>
 /* DIM themes. The b00-b09 stops are used by role: b00 ink, b01-b02 softer ink, b03 strong buttons, b04 hover edges,
    b05 page, b06 canvas area, b07 panels, b08 hover and fields, b09 the opposite of ink. Light and dark swap the ramp. */
@@ -31,8 +31,8 @@
   --red: oklch(0.59 0.22 27); --orange: oklch(0.70 0.17 50); --yellow: oklch(0.88 0.18 92); --green: oklch(0.80 0.21 146); --laser: oklch(0.84 0.25 145);
   --blue: oklch(0.64 0.119 248); --purple: oklch(0.61 0.15 292); --pink: oklch(0.68 0.15 350); --teal: oklch(0.70 0.11 195);
   --green-deep: oklch(0.48 0.16 146); --red-deep: oklch(0.52 0.21 27);
-  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-  --logo: "Lexend Zetta", "JetBrains Mono", ui-sans-serif, sans-serif;
+  --ui: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --logo: "Lexend Zetta", "Manrope", ui-sans-serif, sans-serif;
   color-scheme: light;
 }
 :root[data-theme="dark"] {
@@ -47,7 +47,7 @@
 }
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
-body { background: var(--b05); color: var(--b00); font-family: var(--mono); font-size: 12.5px; line-height: 1.5; }
+body { background: var(--b05); color: var(--b00); font-family: var(--ui); font-size: 13px; line-height: 1.5; font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }
 button, input, select, summary { font: inherit; color: inherit; }
 button { cursor: pointer; }
 button:disabled { opacity: .45; cursor: default; }
@@ -65,27 +65,33 @@ button:disabled { opacity: .45; cursor: default; }
 }
 .logo { margin: 0; font-family: var(--logo); font-weight: 500; font-size: 17px; letter-spacing: 0; color: var(--bar-ink); line-height: 1; flex: none; }
 .menu { display: flex; gap: 2px; flex-wrap: wrap; }
-.menu button { background: none; border: 1px solid transparent; border-radius: 4px; padding: 3px 9px; color: var(--bar-ink2); }
+.menu button { background: none; border: 1px solid transparent; border-radius: 2px; padding: 3px 9px; color: var(--bar-ink2); }
 .menu button:hover { background: var(--bar-hover); color: var(--bar-ink); }
 .menu button.on { background: var(--yellow); color: var(--on-yellow); font-weight: 700; }
 .menu button small { color: var(--bar-ink2); font-size: 10px; margin-left: 4px; }
 .bar .spacer { flex: 1; }
 .bar .doc { min-width: 0; color: var(--bar-ink2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.pill { flex: none; border: 1px solid var(--bar-ink2); border-radius: 4px; padding: 1px 7px; color: var(--bar-ink2); font-size: 11px; }
-.theme { flex: none; margin: 0 -8px 0 -10px; background: none; border: 1px solid transparent; border-radius: 4px; width: 28px; height: 26px; display: grid; place-items: center; color: var(--bar-ink2); }
+.pill { flex: none; border: 1px solid var(--bar-ink2); border-radius: 2px; padding: 1px 7px; color: var(--bar-ink2); font-size: 11px; }
+.theme { flex: none; margin: 0 -8px 0 -10px; background: none; border: 1px solid transparent; border-radius: 2px; width: 28px; height: 26px; display: grid; place-items: center; color: var(--bar-ink2); }
 .theme:hover { background: var(--bar-hover); color: var(--bar-ink); }
 
 /* Panels */
 .main { display: grid; grid-template-columns: 264px minmax(0, 1fr) 284px; gap: 8px; padding: 8px; min-height: 0;
   padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); padding-bottom: max(8px, env(safe-area-inset-bottom, 0px)); }
-.panel { background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 55%, transparent); border-radius: 10px; min-height: 0; min-width: 0; box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
+.panel { background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 55%, transparent); border-radius: 4px; min-height: 0; min-width: 0; box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
 .left, .right { overflow: auto; }
 .left { display: flex; flex-direction: column; }
 .center { display: grid; grid-template-rows: minmax(0, 1fr) auto; overflow: hidden; }
 
 /* Left: tool tabs, live readout, measurement list */
 .tools { display: flex; gap: 3px; padding: 10px 10px 8px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
-.tool { flex: 1; min-width: 30px; height: 30px; display: grid; place-items: center; background: var(--b07); border: 1px solid var(--line); border-radius: 4px; color: var(--b01); }
+.tool { flex: 1; min-width: 30px; height: 30px; display: grid; place-items: center; background: var(--b07); border: 1px solid var(--line); border-radius: 2px; color: var(--b01); }
+.tools.tsets { display: grid; gap: 10px; }
+.tset-l { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--b02); margin-bottom: 5px; }
+.tset-g { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; }
+.tset .tool { position: relative; height: 32px; }
+.tset .tool .tk { position: absolute; right: 2px; bottom: 0; font-size: 8px; font-weight: 700; line-height: 1.2; color: var(--b02); }
+.tset .tool.on .tk { color: var(--on-yellow); opacity: .7; }
 .tool:hover { background: var(--b08); }
 .tool.on { background: var(--yellow); color: var(--on-yellow); border-color: var(--ink-hard); }
 .block { padding: 10px 12px; border-bottom: 1px solid color-mix(in oklch, var(--b00) 55%, transparent); }
@@ -94,10 +100,10 @@ button:disabled { opacity: .45; cursor: default; }
 .readout.dim { color: var(--b02); }
 .hint { color: var(--b01); font-size: 11.5px; margin: 6px 0 0; }
 .list { display: grid; gap: 4px; margin-top: 8px; }
-.item { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto 18px; gap: 7px; align-items: center; padding: 3px 4px; border-radius: 4px; }
+.item { display: grid; grid-template-columns: 14px minmax(0, 1fr) auto 18px; gap: 7px; align-items: center; padding: 3px 4px; border-radius: 2px; }
 .item:hover, .item:focus-within { background: var(--b08); }
-.chip { width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--line); }
-.item input[type="text"] { background: none; border: 1px solid transparent; border-radius: 3px; padding: 2px 4px; min-width: 0; color: var(--b00); }
+.chip { width: 14px; height: 14px; border-radius: 2px; border: 1px solid var(--line); }
+.item input[type="text"] { background: none; border: 1px solid transparent; border-radius: 2px; padding: 2px 4px; min-width: 0; color: var(--b00); }
 .item input[type="text"]:hover { border-color: var(--b04); }
 .item input[type="text"]:focus { border-color: var(--b00); background: var(--b08); outline: none; }
 .item b { font-weight: 500; white-space: nowrap; }
@@ -108,12 +114,12 @@ button:disabled { opacity: .45; cursor: default; }
 .swatches i { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--line); display: inline-block; }
 
 /* Buttons and fields */
-.btn { background: var(--b07); border: 1px solid var(--line); border-radius: 4px; padding: 4px 9px; color: var(--b00); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.btn { background: var(--b07); border: 1px solid var(--line); border-radius: 2px; padding: 4px 9px; color: var(--b00); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
 .btn:hover:not(:disabled) { background: var(--b08); }
 .btn.strong { background: var(--strong); color: var(--strong-ink); border-color: var(--ink-hard); font-weight: 500; }
 .btn.strong:hover:not(:disabled) { background: var(--strong-hover); }
 .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-select, input[type="text"] { width: 100%; background: var(--b08); border: 1px solid var(--line); color: var(--b00); border-radius: 4px; padding: 4px 6px; }
+select, input[type="text"] { width: 100%; background: var(--b08); border: 1px solid var(--line); color: var(--b00); border-radius: 2px; padding: 4px 6px; }
 label.field { display: grid; gap: 4px; color: var(--b01); font-size: 11.5px; }
 
 /* Right: inspector */
@@ -130,33 +136,57 @@ summary:hover { background: var(--b08); }
 .kv dd { margin: 0; text-align: right; font-weight: 500; }
 .err { color: var(--red-deep); }
 .ok { color: var(--green-deep); }
-kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; }
+kbd { font-family: var(--ui); font-size: 10.5px; background: var(--b08); border: 1px solid var(--line); border-radius: 2px; padding: 0 4px; }
 .keys { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; align-items: center; color: var(--b01); }
+
+/* Floating bars over the canvas: squared groups of buttons */
+.stage.draw { padding: 52px 28px 56px; }
+.stage-wrap { position: relative; min-height: 0; display: grid; grid-template: minmax(0, 1fr) / minmax(0, 1fr); }
+.fbar { position: absolute; z-index: 6; display: flex; align-items: center; gap: 6px; pointer-events: none; max-width: calc(100% - 20px); flex-wrap: wrap; }
+.fbar > * { pointer-events: auto; }
+.fbar.tl { top: 10px; left: 10px; }
+.fbar.br { right: 14px; bottom: 12px; justify-content: flex-end; }
+.fgroup { display: inline-flex; align-items: center; gap: 1px; padding: 2px; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 40%, transparent); border-radius: 3px; box-shadow: 0 1px 3px rgb(0 0 0 / .14); flex: none; position: relative; }
+.fgroup[hidden] { display: none; }
+.fbtn { height: 26px; min-width: 26px; padding: 0 8px; display: inline-flex; align-items: center; justify-content: center; gap: 5px; background: none; border: 0; border-radius: 2px; color: var(--b01); font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+.fbtn.ic { padding: 0; width: 26px; }
+.fbtn:hover:not(:disabled) { background: var(--b08); color: var(--b00); }
+.fbtn.on { background: var(--strong); color: var(--strong-ink); }
+.fbtn em { font-style: normal; font-weight: 600; letter-spacing: .02em; color: inherit; opacity: .75; text-transform: none; }
+.fsep { width: 1px; align-self: stretch; margin: 3px 2px; background: color-mix(in oklch, var(--line) 35%, transparent); }
+.fgroup select { width: auto; height: 24px; padding: 0 4px; border: 0; background: var(--b08); font-size: 11px; font-weight: 600; border-radius: 2px; }
+.fgroup .flab { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--b02); padding: 0 4px 0 6px; }
+.fbar .zoom button { height: 26px; min-width: 26px; padding: 0 7px; border: 0; border-radius: 2px; font-size: 11px; font-weight: 700; }
+.fbar .zoom button:hover { background: var(--b08); border: 0; }
+.fbar .zoom span { min-width: 44px; font-size: 11px; font-weight: 600; }
+.fpop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 7; width: 240px; display: grid; gap: 10px; padding: 12px; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 45%, transparent); border-radius: 3px; box-shadow: 0 8px 24px rgb(0 0 0 / .18); text-transform: none; letter-spacing: 0; }
+.fpop h4 { margin: 0; font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--b02); }
+.fpop .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 
 /* Center: canvas and status bar */
 .stage { position: relative; overflow: auto; display: flex; padding: 28px; background: var(--b06);
   background-image: linear-gradient(color-mix(in oklch, var(--b05) 55%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in oklch, var(--b05) 55%, transparent) 1px, transparent 1px);
-  background-size: 32px 32px; background-attachment: local; border-radius: 9px 9px 0 0; }
+  background-size: 32px 32px; background-attachment: local; border-radius: 3px 3px 0 0; }
 .stage.drop { box-shadow: inset 0 0 0 2px var(--b00); }
 .art { margin: auto; width: min(100%, 820px); flex: none; }
 .main.home { grid-template-columns: minmax(0, 1fr); }
 .main.home > .left, .main.home > .right { display: none; }
 .home-wrap { margin: auto; width: min(100%, 780px); color: var(--b00); }
-.home-hero { background: var(--b08); border: 1px solid var(--line); border-radius: 10px; padding: 24px 26px; }
+.home-hero { background: var(--b08); border: 1px solid var(--line); border-radius: 4px; padding: 24px 26px; }
 .home-hero h2 { margin: 0 0 6px; font-family: var(--logo); font-weight: 500; font-size: 26px; letter-spacing: .04em; }
 .home-hero p { margin: 0 0 12px; color: var(--b01); }
 .home-hero ul { margin: 0 0 16px; padding-left: 18px; color: var(--b01); }
 .home-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
-.home-cards > div { background: var(--b07); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.home-cards > div { background: var(--b07); border: 1px solid var(--line); border-radius: 4px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
 .home-cards h3 { margin: 0; font-size: 13px; font-weight: 700; }
 .home-cards p { margin: 0; color: var(--b01); font-size: 11.5px; }
 @media (max-width: 720px) { .home-cards { grid-template-columns: minmax(0, 1fr); } }
 .logo { cursor: pointer; }
-.readout.editable { cursor: pointer; border-radius: 4px; }
+.readout.editable { cursor: pointer; border-radius: 2px; }
 .readout.editable:hover { background: var(--b08); }
-.readout input { width: 6.2em; font: inherit; font-size: 20px; padding: 0 4px; background: var(--b09); border: 1px solid var(--line); border-radius: 4px; color: var(--b00); }
+.readout input { width: 6.2em; font: inherit; font-size: 20px; padding: 0 4px; background: var(--b09); border: 1px solid var(--line); border-radius: 2px; color: var(--b00); }
 .readout .szx { font-size: 18px; margin: 0 4px; color: var(--b02); }
-.empty { margin: auto; max-width: 460px; background: var(--b08); border: 1px solid var(--line); border-radius: 10px; padding: 22px 24px; color: var(--b00); }
+.empty { margin: auto; max-width: 460px; background: var(--b08); border: 1px solid var(--line); border-radius: 4px; padding: 22px 24px; color: var(--b00); }
 .empty h2 { margin: 0 0 8px; font-size: 16px; font-weight: 500; }
 .empty p { margin: 0 0 10px; color: var(--b01); }
 .empty ul { margin: 0 0 14px; padding-left: 18px; color: var(--b01); }
@@ -165,7 +195,7 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
 .page.pan { cursor: grab; }
 .page.panning { cursor: grabbing; }
 .page canvas, .page svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.status { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 12px; padding: 6px 10px; border-top: 1px solid var(--line); color: var(--b01); font-size: 11.5px; min-width: 0; }
+.status { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 6px 10px; border-top: 1px solid var(--line); color: var(--b01); font-size: 11.5px; min-width: 0; }
 .status .live { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .status .live b { color: var(--b00); font-weight: 700; }
 .status .live kbd { margin: 0 2px; }
@@ -174,7 +204,7 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
 .status .note { color: var(--b02); white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .status .zoom { flex: none; }
 .zoom { display: flex; align-items: center; gap: 2px; flex: none; }
-.zoom button { background: none; border: 1px solid transparent; border-radius: 4px; padding: 1px 7px; color: var(--b00); }
+.zoom button { background: none; border: 1px solid transparent; border-radius: 2px; padding: 1px 7px; color: var(--b00); }
 .zoom button:hover { border-color: var(--b00); }
 .zoom span { min-width: 46px; text-align: center; }
 
@@ -193,20 +223,20 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
 .sty-l { width: 44px; flex: none; }
 .sty-s { width: 44px; flex: none; }
 .sty select { flex: 1 1 0; min-width: 0; }
-.item .sw { width: 14px; height: 14px; border: 1px solid var(--line); border-radius: 3px; padding: 0; flex: none; }
+.item .sw { width: 14px; height: 14px; border: 1px solid var(--line); border-radius: 2px; padding: 0; flex: none; }
 .item .sw.on { outline: 2px solid var(--line); outline-offset: 1px; }
 .item .sw.auto { background: linear-gradient(135deg, var(--green) 0 33%, var(--blue) 33% 66%, var(--purple) 66%); }
 .sty { position: relative; }
 .item .sw.cust { background: conic-gradient(#e5484d, #f5d90a, #30a46c, #3e7bfa, #8e4ec6, #e93d82, #e5484d); position: relative; }
 .item .sw.cust[style*="--cc"] { background: var(--cc); }
 .item .sw.cust::after { content: "+"; position: absolute; inset: 0; display: grid; place-items: center; font: 700 10px/1 system-ui, sans-serif; color: #fff; text-shadow: 0 0 2px rgb(0 0 0 / .8); }
-.cpop { position: absolute; z-index: 20; top: calc(100% + 4px); right: 0; width: 196px; max-width: 100%; box-sizing: border-box; display: grid; gap: 8px; padding: 8px; background: var(--b07); border: 1px solid var(--line); border-radius: 6px; box-shadow: 0 6px 18px rgb(0 0 0 / .18); }
+.cpop { position: absolute; z-index: 20; top: calc(100% + 4px); right: 0; width: 196px; max-width: 100%; box-sizing: border-box; display: grid; gap: 8px; padding: 8px; background: var(--b07); border: 1px solid var(--line); border-radius: 2px; box-shadow: 0 6px 18px rgb(0 0 0 / .18); }
 .cpop .cgrid { display: grid; grid-template-columns: repeat(8, 18px); gap: 4px; }
 .cpop .sw { width: 18px; height: 18px; }
 .cpop .clab { font-size: 10.5px; color: var(--b01); margin-bottom: -4px; }
-.cpop .cwheel { width: 100%; height: 72px; padding: 0; border: 1px solid var(--line); border-radius: 4px; background: none; cursor: pointer; }
-.swpick { width: 22px; height: 17px; padding: 0; border: 1px solid var(--line); border-radius: 3px; background: none; flex: none; cursor: pointer; }
-.item .mini { font-size: 11px; color: var(--b00); background: var(--b07); border: 1px solid var(--b04); border-radius: 3px; padding: 1px 5px; }
+.cpop .cwheel { width: 100%; height: 72px; padding: 0; border: 1px solid var(--line); border-radius: 2px; background: none; cursor: pointer; }
+.swpick { width: 22px; height: 17px; padding: 0; border: 1px solid var(--line); border-radius: 2px; background: none; flex: none; cursor: pointer; }
+.item .mini { font-size: 11px; color: var(--b00); background: var(--b07); border: 1px solid var(--b04); border-radius: 2px; padding: 1px 5px; }
 .item .mini:hover { color: var(--b00); background: var(--b08); }
 .item input.rotin { width: 46px; background: var(--b08); border-color: var(--b04); padding: 1px 4px; font-size: 11px; }
 .item-tag { grid-column: 2 / -1; font-size: 10.5px; color: var(--b01); margin-top: -3px; padding-left: 5px; }
@@ -219,7 +249,7 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
 .qlines em { color: var(--b01); font-style: normal; }
 .qlines .qtot td { font-weight: 700; font-size: 14px; border-top: 1.5px solid var(--line); padding-top: 6px; }
 .hist { display: flex; gap: 2px; flex: none; }
-.hist button { background: none; border: 1px solid transparent; border-radius: 4px; padding: 2px 8px; color: var(--bar-ink2); }
+.hist button { background: none; border: 1px solid transparent; border-radius: 2px; padding: 2px 8px; color: var(--bar-ink2); }
 .hist button:hover:not(:disabled) { background: var(--bar-hover); color: var(--bar-ink); }
 .hist button:disabled { opacity: .35; }
 
@@ -229,17 +259,13 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
 .page.dragging { cursor: grabbing; }
 .item { cursor: pointer; }
 .item.sel { background: var(--b08); box-shadow: inset 0 0 0 1px var(--line); }
-.units { display: inline-flex; border: 2px solid var(--ink-hard); border-radius: 6px; overflow: hidden; flex: none; background: var(--ink-hard); }
-.units button { background: none; border: 0; padding: 3px 13px; color: var(--yellow); font-weight: 700; letter-spacing: .05em; font-size: 12px; }
-.units button:hover:not(.on) { color: #ffffff; }
-.units button.on { background: var(--yellow); color: var(--on-yellow); border-radius: 3px; }
-.units.fmt { border: 1px solid var(--line); background: var(--b07); }
-.units.fmt button { color: var(--b00); }
-.units.fmt button:hover:not(.on) { color: var(--b00); }
-.units.fmt button { padding: 3px 9px; font-weight: 500; letter-spacing: 0; font-size: 11.5px; }
-.units.fmt button + button { border-left-color: var(--line); }
-.units.fmt button:hover:not(.on) { background: var(--b08); }
-.units.fmt button.on { background: var(--strong); color: var(--strong-ink); border-radius: 0; }
+.units { display: inline-flex; flex: none; gap: 1px; }
+.units button { background: none; border: 0; border-radius: 2px; height: 26px; padding: 0 9px; color: var(--b01); font-weight: 700; letter-spacing: .06em; font-size: 10.5px; }
+.units button:hover:not(.on) { background: var(--b08); color: var(--b00); }
+.units button.on { background: var(--strong); color: var(--strong-ink); }
+.units [data-u="mm"] { margin-left: 3px; position: relative; }
+.units [data-u="mm"]::before { content: ""; position: absolute; left: -2px; top: 4px; bottom: 4px; width: 1px; background: color-mix(in oklch, var(--line) 35%, transparent); }
+.units.fmt { border-left: 1px solid color-mix(in oklch, var(--line) 35%, transparent); padding-left: 2px; margin-left: 1px; }
 /* Left panel: the current tool, its shortcut and what to do next */
 .toolcard { padding: 12px 12px 11px; }
 .tool-name { display: flex; align-items: center; gap: 8px; font-size: 17px; font-weight: 700; line-height: 1.2; color: var(--b00); }
@@ -251,7 +277,7 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
 .drops { margin: 6px 0 0; font-size: 15px; font-weight: 700; color: var(--b00); }
 .drops small { display: block; font-size: 11.5px; font-weight: 400; color: var(--b01); }
 /* Icon toggles: align, bold, dashed */
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; flex: none; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 2px; overflow: hidden; flex: none; }
 .ib { width: 26px; height: 22px; display: grid; place-items: center; background: var(--b07); border: 0; padding: 0; color: var(--b00); }
 .ib + .ib { border-left: 1px solid var(--line); }
 .ib:hover { background: var(--b08); }
@@ -261,15 +287,15 @@ kbd { font-family: var(--mono); font-size: 10.5px; background: var(--b08); borde
 /* Layout */
 .lay-canvas { display: block; margin: auto; flex: none; }
 .sheet-tabs { position: absolute; top: 3px; left: 28px; right: 28px; display: flex; gap: 3px; overflow-x: auto; scrollbar-width: none; }
-.sheet-tabs button { flex: none; height: 22px; padding: 0 10px; font-size: 11.5px; white-space: nowrap; color: var(--b00); background: var(--b07); border: 1px solid var(--line); border-radius: 4px; }
+.sheet-tabs button { flex: none; height: 22px; padding: 0 10px; font-size: 11.5px; white-space: nowrap; color: var(--b00); background: var(--b07); border: 1px solid var(--line); border-radius: 2px; }
 .sheet-tabs button:hover { background: var(--b08); }
 .sheet-tabs button.on { background: var(--yellow); color: var(--on-yellow); border-color: transparent; font-weight: 600; }
 .sheet { display: block; margin: auto; flex: none; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25), 0 6px 18px rgba(0,0,0,.18); touch-action: none; user-select: none; }
 .item .sw.none { background: linear-gradient(135deg, #fff 0 45%, var(--red) 45% 55%, #fff 55%); }
-textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; font: inherit; color: var(--b00); resize: vertical; }
+textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1px solid var(--line); border-radius: 2px; padding: 4px 6px; font: inherit; color: var(--b00); resize: vertical; }
 .tool.txt { flex: 1 1 auto; width: auto; min-width: 0; padding: 0 8px; font-size: 12px; font-weight: 500; white-space: nowrap; }
 .item.ro { grid-template-columns: 14px minmax(0, 1fr) auto 0; padding: 4px; }
-.ed { border: 1px solid transparent; border-radius: 6px; padding: 5px; display: grid; gap: 5px; cursor: pointer; }
+.ed { border: 1px solid transparent; border-radius: 2px; padding: 5px; display: grid; gap: 5px; cursor: pointer; }
 .ed:hover { background: var(--b08); }
 .ed.sel { border-color: var(--line); background: var(--b08); }
 .ed-top { display: grid; grid-template-columns: 14px minmax(0, 1fr) 18px; gap: 7px; align-items: center; }
@@ -290,10 +316,10 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
 .ed-out.spacing b { font-weight: 600; color: var(--b00); }
 .ed input:disabled { opacity: .6; }
 .seqpick { display: grid; gap: 5px; margin-top: -2px; }
-.seqprev { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 4px; min-height: 22px; padding: 4px 6px; background: var(--b08); border: 1px solid var(--line); border-radius: 4px; }
+.seqprev { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 4px; min-height: 22px; padding: 4px 6px; background: var(--b08); border: 1px solid var(--line); border-radius: 2px; }
 .seqprev.dim { opacity: .5; }
 .seqbtns { display: flex; flex-wrap: wrap; gap: 4px; }
-.seqb { display: grid; place-items: center; width: 26px; height: 24px; padding: 0; background: var(--b09); border: 1px solid var(--line); border-radius: 4px; cursor: pointer; }
+.seqb { display: grid; place-items: center; width: 26px; height: 24px; padding: 0; background: var(--b09); border: 1px solid var(--line); border-radius: 2px; cursor: pointer; }
 .seqb:hover { border-color: var(--b00); }
 .seqb.txt { font-size: 13px; color: var(--b01); }
 .seqb:disabled { opacity: .4; cursor: default; }
@@ -319,7 +345,7 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
 .lp-tips[aria-pressed="true"] { background: var(--yellow); color: var(--on-yellow); border-color: var(--ink-hard); }
 .lp-body { flex: 1; }
 .lp:not(.tips) .hint:not(.keep) { display: none; }
-.rtabs { display: flex; margin: 10px 12px 0; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
+.rtabs { display: flex; margin: 10px 12px 0; border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
 .rtabs button { flex: 1; min-width: 0; padding: 5px 4px; background: var(--b07); border: 0; border-left: 1px solid var(--line); color: var(--b01); font: inherit; font-size: 12px; cursor: pointer; }
 .rtabs button:first-child { border-left: 0; }
 .rtabs button:hover { background: var(--b08); }
@@ -328,17 +354,17 @@ textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1p
 .lp-group { padding: 12px 12px 4px; font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--b01); }
 .lp-group + details { border-top: 1px solid var(--line); }
 .lp-bar { display: flex; gap: 4px; padding: 8px 12px 0; }
-.lp-bar button { flex: 1; padding: 3px 4px; background: var(--b07); border: 1px solid var(--line); border-radius: 4px; color: var(--b00); font: inherit; font-size: 11.5px; line-height: 1.35; cursor: pointer; }
+.lp-bar button { flex: 1; padding: 3px 4px; background: var(--b07); border: 1px solid var(--line); border-radius: 2px; color: var(--b00); font: inherit; font-size: 11.5px; line-height: 1.35; cursor: pointer; }
 .lp-bar button:hover { background: var(--b08); }
 .lp-bar button[aria-pressed="true"] { background: var(--yellow); color: var(--on-yellow); border-color: var(--ink-hard); font-weight: 700; }
 summary .st { white-space: nowrap; }
 summary .sum { margin-left: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11.5px; font-weight: 400; color: var(--b01); }
 details[open] > summary .sum { display: none; }
 .dimtog { display: flex; flex-wrap: wrap; gap: 4px; }
-.dimb { width: 34px; height: 30px; display: grid; place-items: center; padding: 0; background: var(--b07); border: 1px solid var(--line); border-radius: 4px; color: var(--b01); cursor: pointer; }
+.dimb { width: 34px; height: 30px; display: grid; place-items: center; padding: 0; background: var(--b07); border: 1px solid var(--line); border-radius: 2px; color: var(--b01); cursor: pointer; }
 .dimb:hover { background: var(--b08); }
 .dimb[aria-pressed="true"] { background: var(--yellow); color: var(--on-yellow); border-color: var(--ink-hard); }
-.aseg { display: flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.aseg { display: flex; border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
 .aseg button { flex: 1; min-width: 0; padding: 4px; border: 0; border-left: 1px solid var(--line); background: var(--b07); color: var(--b01); font: inherit; font-size: 11.5px; cursor: pointer; }
 .aseg button:first-child { border-left: 0; }
 .aseg button:hover { background: var(--b08); }
@@ -355,7 +381,7 @@ details[open] > summary .sum { display: none; }
 .pb-del:hover { color: var(--red-deep); }
 .pb-dup { display: grid; place-items: center; background: none; border: 0; padding: 0; color: var(--b02); line-height: 0; }
 .pb-dup:hover { color: var(--b00); }
-.gitem { display: grid; gap: 6px; padding: 8px; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; }
+.gitem { display: grid; gap: 6px; padding: 8px; border: 1px solid var(--line); border-radius: 2px; cursor: pointer; }
 .gitem.sel { border-color: var(--b00); background: var(--b08); }
 .gitem-top { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto 14px; gap: 7px; align-items: center; }
 .gitem-top span:nth-child(2) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -373,15 +399,15 @@ details[open] > summary .sum { display: none; }
 .pb-add { display: flex; gap: 6px; margin-top: 2px; }
 .pb-add .btn { padding: 2px 8px; font-size: 11px; }
 .row2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.field.color input { width: 100%; height: 30px; padding: 2px; background: var(--b08); border: 1px solid var(--line); border-radius: 4px; cursor: pointer; }
-.copybox { width: 100%; min-height: 110px; background: var(--b08); color: var(--b00); border: 1px solid var(--line); border-radius: 4px; font-family: var(--mono); font-size: 11px; }
+.field.color input { width: 100%; height: 30px; padding: 2px; background: var(--b08); border: 1px solid var(--line); border-radius: 2px; cursor: pointer; }
+.copybox { width: 100%; min-height: 110px; background: var(--b08); color: var(--b00); border: 1px solid var(--line); border-radius: 2px; font-family: var(--ui); font-size: 11px; }
 
 /* Preview drawings */
 .p-ln { stroke: var(--b00); fill: none; stroke-width: 1.25; }
 .p-fill { fill: var(--b05); }
 .p-dim { stroke: var(--b02); fill: none; stroke-width: 1; }
-.p-dimt { fill: var(--b01); font-family: var(--mono); font-size: 11px; }
-.p-lbl { fill: var(--b00); font-family: var(--mono); font-size: 12.5px; font-weight: 700; }
+.p-dimt { fill: var(--b01); font-family: var(--ui); font-size: 11px; }
+.p-lbl { fill: var(--b00); font-family: var(--ui); font-size: 12.5px; font-weight: 700; }
 
 @media (max-width: 1080px) {
   .main { grid-template-columns: 240px minmax(0, 1fr); }
@@ -407,7 +433,7 @@ details[open] > summary .sum { display: none; }
     <button type="button" class="theme" id="theme" aria-label="Switch theme"></button>
     <nav class="menu" aria-label="Modes">
       <button type="button" data-mode="home">Home</button>
-      <button type="button" data-mode="measure" class="on">Measure</button>
+      <button type="button" data-mode="measure" class="on">Draw</button>
       <button type="button" data-mode="layout">Layout</button>
       <button type="button" data-mode="shop">Shop drawing</button>
     </nav>
@@ -431,22 +457,27 @@ details[open] > summary .sum { display: none; }
     </aside>
 
     <section class="panel center" aria-label="Drawing">
-      <div class="stage" id="stage"></div>
-      <div class="status">
-        <span class="live" id="status" aria-live="polite"></span>
-        <span class="mid" id="unitbar">
-          <span class="units" id="units" role="group" aria-label="Length units"><button type="button" data-u="in" title="Inches">IN</button><button type="button" data-u="ftin" title="Feet and inches">FT-IN</button></span>
-          <span class="units fmt" id="fmt" role="group" aria-label="Fractions or decimals"><button type="button" data-f="frac" title="Fractions, to 1/16&quot;">1/16</button><button type="button" data-f="dec" title="Decimals, to 0.001&quot;">.001</button></span>
-        </span>
-        <span class="end">
-          <span class="note">Files stay on this device</span>
-          <span class="zoom" id="zoom">
+      <div class="stage-wrap">
+        <div class="stage" id="stage"></div>
+        <!-- Top left: undo, overlays, dimensions, settings. Bottom right: units, number format, scale or grid, zoom. -->
+        <div class="fbar tl" id="fbar-tl" role="toolbar" aria-label="Canvas"></div>
+        <div class="fbar br" id="fbar-br">
+          <span class="fgroup" id="fscale" hidden></span>
+          <span class="fgroup" id="unitbar">
+            <span class="units" id="units" role="group" aria-label="Length units"><button type="button" data-u="in" title="Inches">IN</button><button type="button" data-u="ftin" title="Feet and inches">FT-IN</button><button type="button" class="met" data-u="mm" title="Millimeters">MM</button><button type="button" class="met" data-u="cm" title="Centimeters">CM</button><button type="button" class="met" data-u="m" title="Meters">M</button></span>
+            <span class="units fmt" id="fmt" role="group" aria-label="Fractions or decimals"><button type="button" data-f="frac" title="Fractions, to 1/16&quot;">1/16</button><button type="button" data-f="dec" title="Decimals, to 0.001&quot;">.001</button></span>
+          </span>
+          <span class="fgroup zoom" id="zoom">
             <button type="button" data-z="out" aria-label="Zoom out">−</button>
             <span id="zl">100%</span>
             <button type="button" data-z="in" aria-label="Zoom in">+</button>
             <button type="button" data-z="fit" title="Fit (⌘0)">Fit</button>
           </span>
-        </span>
+        </div>
+      </div>
+      <div class="status">
+        <span class="live" id="status" aria-live="polite"></span>
+        <span class="end"><span class="note">Files stay on this device</span></span>
       </div>
     </section>
 
@@ -482,6 +513,8 @@ details[open] > summary .sum { display: none; }
     count: '<circle cx="5" cy="6" r="2.6" fill="currentColor"/><circle cx="13" cy="6" r="2.6" fill="currentColor"/><circle cx="9" cy="13" r="2.6" fill="currentColor"/>',
     angle: '<path d="M3 15h12M3 15L12 4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 15a5 5 0 0 0-1.6-3.7" fill="none" stroke="currentColor" stroke-width="1.3"/>',
     box: '<rect x="3" y="4.5" width="12" height="9" fill="none" stroke="currentColor" stroke-width="1.5"/>',
+    sline: '<path d="M3.5 14.5L14.5 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>',
+    spoly: '<path d="M3 14L6 5l6 3.5L15 3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><rect x="1.8" y="12.8" width="2.6" height="2.6" fill="currentColor"/><rect x="4.8" y="3.8" width="2.6" height="2.6" fill="currentColor"/><rect x="10.8" y="7.3" width="2.6" height="2.6" fill="currentColor"/><rect x="13.8" y="2.3" width="2.6" height="2.6" fill="currentColor"/>',
     ellipse: '<ellipse cx="9" cy="9" rx="6.5" ry="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/>',
     arrow: '<path d="M3 14L14 3M14 3H8.5M14 3v5.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>',
     person: '<circle cx="9" cy="3.3" r="2.1" fill="currentColor"/><path d="M5.6 6.4h6.8l.9 5.6h-1.7l-.7 4.8H9.6L9 12.4l-.6 4.4H7.1l-.7-4.8H4.7z" fill="currentColor"/>',
@@ -493,6 +526,20 @@ details[open] > summary .sum { display: none; }
   // ---------- Measure ----------
   var COL = { length: 'var(--green)', run: 'var(--blue)', curve: 'var(--teal)', area: 'var(--purple)', count: 'var(--pink)', angle: 'var(--red)', note: 'var(--yellow)', dim: '#f2f2f2', calib: 'var(--orange)', draft: 'var(--yellow)', snap: 'var(--laser)' };
   var TYPE_NAME = { length: 'Length', run: 'Run', curve: 'Curve', area: 'Area', count: 'Count', angle: 'Angle', note: 'Note', dim: 'Dimension' };
+  // Draw shapes (Line, Rectangle, Ellipse, Polyline): plain drawings with a stroke and fill, kept out of totals and exports' lists.
+  var SHAPE_INK = '#1c1c1c', SHAPE_NAME = { line: 'Line', rect: 'Rectangle', ellipse: 'Ellipse', poly: 'Shape' };
+  var FILLS = [['none', 'None'], ['tint', 'Tint'], ['solid', 'Solid'], ['white', 'White']], STROKES = [[1, 'Thin'], [1.5, 'Regular'], [3, 'Bold']];
+  var BOX_TOOLS = /^(rect|srect|sell)$/, DRAG_TOOLS = /^(sline|srect|sell|length|rect|circle|dim)$/;
+  function shapeFill(it) { var f = it.fill || 'none', c = it.color || SHAPE_INK; return f === 'solid' ? { c: c, o: 1 } : f === 'tint' ? { c: c, o: 0.18 } : f === 'white' ? { c: '#ffffff', o: 1 } : { c: 'none', o: 0 }; }
+  function shapeName(k) { M.n['s_' + k] = (M.n['s_' + k] || 0) + 1; return SHAPE_NAME[k] + ' ' + M.n['s_' + k]; }
+  function addShape(k, pts) {
+    var ss = M.shapeStyle, ex = { shape: k, name: shapeName(k), color: ss.color, sw: ss.sw };
+    if (k === 'rect' || k === 'ellipse') { ex.rect = true; ex.fill = ss.fill; if (k === 'ellipse') ex.ellipse = true; }
+    if (k === 'line' || k === 'poly') ex.end = 'none';
+    var it = addItem(k === 'line' ? 'length' : k === 'poly' ? 'run' : 'area', pts, ex);
+    if (k === 'poly' && pts.length > 2 && dist(pts[0], pts[pts.length - 1]) < 1e-6) { it.type = 'area'; it.pts = pts.slice(0, -1); it.fill = ss.fill; }
+    return it;
+  }
   var CATS = [['', 'No category'], ['mural', 'Mural'], ['film', 'Privacy film'], ['markers', 'Distraction markers'], ['signage', 'Signage']];
   function freshN() { return { circle: 0, length: 0, run: 0, curve: 0, area: 0, count: 0, angle: 0, note: 0, rect: 0 }; }
   var PRESETS = [];
@@ -509,7 +556,7 @@ details[open] > summary .sum { display: none; }
     scales: {},
     items: [], draft: [], calib: [], hover: null, snapped: false, n: freshN(), error: '', note: '', last: null,
     snapDrawing: true, snaps: {}, snapKind: '', fileBytes: null, fileType: '', activeCount: null,
-    style: { color: '', end: '' }, round: '', tags: 'full'
+    style: { color: '', end: '' }, round: '', tags: 'full', shapeStyle: { color: '#1c1c1c', fill: 'none', sw: 1.5 }, shapeSizes: false
   };
   try { var tg0 = localStorage.getItem('dim-tags'); if (tg0 === 'size' || tg0 === 'off') M.tags = tg0; } catch (e) {}
   var F = 18, OX = 144, OY = 180;
@@ -535,14 +582,53 @@ details[open] > summary .sum { display: none; }
     return o + '<rect x="0" y="0" width="' + B.w + '" height="' + B.h + '" fill="none" stroke="#bbbbbb" stroke-width="1" vector-effect="non-scaling-stroke"/>';
   }
   function baseSVG(noGrid) { return M.src === 'blank' ? blankSVG(noGrid) : sampleSVG(); }
+  // On screen the blank canvas draws its grid with CSS (see paintGrid), so only the edge goes in the SVG.
+  function blankEdgeSVG() { var B = M.blank; return '<rect x="0" y="0" width="' + B.w + '" height="' + B.h + '" fill="none" stroke="#bbbbbb" stroke-width="1" vector-effect="non-scaling-stroke"/>'; }
+  // Snap grid sizes, in inches. Points land on the grid; the lines on screen thin out as you zoom out.
+  var GRID_IMP = [[0.0625, '1/16"'], [0.125, '1/8"'], [0.25, '1/4"'], [0.5, '1/2"'], [1, '1"'], [2, '2"'], [3, '3"'], [6, '6"'], [12, '1\''], [24, '2\'']];
+  var GRID_MET = [[1, '1 mm'], [2, '2 mm'], [5, '5 mm'], [10, '1 cm'], [20, '2 cm'], [50, '5 cm'], [100, '10 cm'], [250, '25 cm'], [500, '50 cm'], [1000, '1 m']].map(function (g) { return [g[0] / 25.4, g[1]]; });
+  var GRID_ALL = GRID_IMP.concat(GRID_MET);
+  function gridSteps() { return isMetric() ? GRID_MET : GRID_IMP; }
+  function gridLabel(s) { var g = GRID_ALL.find(function (x) { return x[0] === s; }); return g ? g[1] : fmtLen(s); }
+  // Switching between imperial and metric moves the snap grid to the nearest size in the other system.
+  function nearestStep(st) { var best = null; gridSteps().forEach(function (g) { if (!best || Math.abs(Math.log(g[0] / st)) < Math.abs(Math.log(best / st))) best = g[0]; }); return best; }
+  // Length step choices (stored in inches): 1/4" or 1", or 1 mm, 5 mm or 1 cm in metric.
+  function roundOpts() {
+    var opts = isMetric() ? [[String(1 / 25.4), '1 mm'], [String(5 / 25.4), '5 mm'], [String(10 / 25.4), '1 cm']] : [['0.25', '1/4"'], ['1', '1"']];
+    return '<option value=""' + (!M.round ? ' selected' : '') + '>Off: exact</option>' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (M.round === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('');
+  }
+  function blankDefault() { return isMetric() ? { w: 6000 / 25.4, h: 3600 / 25.4, grid: true, step: 10 / 25.4 } : { w: 240, h: 144, grid: true }; }
+  function gridOn() { return M.src === 'blank' && M.blank && M.blank.snap; }
+  // The two line weights shown at this zoom: the finest grid level at least 7px apart, and the next level up.
+  function gridLevels() {
+    var met = GRID_MET.some(function (g) { return g[0] === M.blank.step; }), mm = function (v) { return v / 25.4; };
+    var s = M.blank.step, z = M.zoom, lv = [s].concat((met ? [5, 10, 50, 100, 500, 1000, 5000, 10000].map(mm) : [0.125, 0.25, 0.5, 1, 6, 12, 60, 120, 600, 1200]).filter(function (c) { return c > s && Math.abs(c / s - Math.round(c / s)) < 1e-9; }));
+    var fine = lv.find(function (c) { return c * z >= 7; }); if (!fine) return null;
+    var coarse = (met ? [10, 100, 1000, 10000].map(mm) : [1, 12, 120, 1200]).find(function (c) { return c > fine && Math.abs(c / fine - Math.round(c / fine)) < 1e-9; });
+    return { fine: fine, coarse: coarse };
+  }
+  function paintGrid() {
+    if (!pageEl) return;
+    var st = pageEl.style;
+    if (M.src !== 'blank' || !M.blank.grid) { st.backgroundImage = ''; st.backgroundSize = ''; return; }
+    var g = gridLevels(); if (!g) { st.backgroundImage = ''; return; }
+    var f = g.fine * M.zoom, c = g.coarse ? g.coarse * M.zoom : 0;
+    var line = function (col, dir) { return 'linear-gradient(' + dir + ', ' + col + ' 0 1px, transparent 1px)'; };
+    var imgs = [line('#e9e9e9', 'to right'), line('#e9e9e9', 'to bottom')], sizes = [f + 'px ' + f + 'px', f + 'px ' + f + 'px'];
+    if (c) { imgs.unshift(line('#cfcfcf', 'to right'), line('#cfcfcf', 'to bottom')); sizes.unshift(c + 'px ' + c + 'px', c + 'px ' + c + 'px'); }
+    st.backgroundImage = imgs.join(', '); st.backgroundSize = sizes.join(', ');
+  }
+  // A blank canvas is in inches, so it can zoom far enough in to work in sixteenths; drawings stop at 8x.
+  function maxZoom() { return M.src === 'blank' ? 800 : 8; }
   function setBlank(B) {
-    M.blank = { w: Math.max(12, B.w || 240), h: Math.max(12, B.h || 144), grid: B.grid !== false, snap: B.snap !== false };
+    M.blank = { w: Math.max(1, B.w || 240), h: Math.max(1, B.h || 144), grid: B.grid !== false, snap: B.snap !== false, step: GRID_ALL.some(function (x) { return x[0] === B.step; }) ? B.step : 1 };
+    if (!gridSteps().some(function (x) { return x[0] === M.blank.step; })) M.blank.step = nearestStep(M.blank.step);
     M.w = M.blank.w; M.h = M.blank.h; M.pages = 1;
     M.scales = { 1: { inPerUnit: 1, label: 'Blank canvas, true size', how: 'blank', id: 'blank' } };
   }
   function newBlank() {
     resetDoc('Blank canvas'); M.src = 'blank'; M.pdf = null; M.img = null; M.pageObj = null; M.fileBytes = null; M.fileType = '';
-    setBlank({ w: 240, h: 144, grid: true }); if (mode !== 'measure') setMode('measure');
+    setBlank(blankDefault()); if (mode !== 'measure') setMode('measure');
     buildPage(); fit(); renderAll(); History.reset();
   }
   function sampleSVG() {
@@ -586,8 +672,21 @@ details[open] > summary .sum { display: none; }
 
   // ---- Lengths ----
   var FR = ['', ' 1/16', ' 1/8', ' 3/16', ' 1/4', ' 5/16', ' 3/8', ' 7/16', ' 1/2', ' 9/16', ' 5/8', ' 11/16', ' 3/4', ' 13/16', ' 7/8', ' 15/16'];
-  var UNITS = 'in';
-  try { if (localStorage.getItem('dim-units') === 'ftin') UNITS = 'ftin'; } catch (e) {}
+  // Display units: inches, feet-inches, or metric (mm, cm, m). Everything is stored in inches either way.
+  var UNITS = 'in', UNIT_IN = { mm: 1 / 25.4, cm: 1 / 2.54, m: 1 / 0.0254 }, IMP_UNITS = 'in';
+  try { var u0 = localStorage.getItem('dim-units'); if (u0 === 'ftin' || UNIT_IN[u0]) UNITS = u0; var i0 = localStorage.getItem('dim-units-imp'); if (i0 === 'ftin') IMP_UNITS = 'ftin'; } catch (e) {}
+  if (UNITS === 'ftin') IMP_UNITS = 'ftin';
+  function isMetric() { return !!UNIT_IN[UNITS]; }
+  // Metric lengths: whole mm from 100 mm up (tenths below), cm to a tenth, m to the millimeter.
+  function metricStr(inch) {
+    if (!isFinite(inch)) return '—';
+    var v = inch / UNIT_IN[UNITS], d = UNITS === 'mm' ? (Math.abs(v) >= 100 ? 0 : 1) : UNITS === 'cm' ? 1 : 3;
+    return v.toLocaleString(undefined, { maximumFractionDigits: d }) + ' ' + UNITS;
+  }
+  // A plain number you type is in the units on screen: inches, or mm, cm or m.
+  function plainIn(v) { return isMetric() ? v * UNIT_IN[UNITS] : v; }
+  function unitWord() { return isMetric() ? UNITS : 'inches'; }
+  function egLen() { return { mm: 'e.g. 1200 or 1.2 m', cm: 'e.g. 120 or 1.2 m', m: 'e.g. 1.2 or 1200 mm' }[UNITS] || 'e.g. 96 or 8\'-0&quot;'; }
   // Fractions (to 1/16") or decimals (to 0.001"), set with the toggle next to IN / FT-IN.
   var FMT = 'frac';
   try { if (localStorage.getItem('dim-fmt') === 'dec') FMT = 'dec'; } catch (e) {}
@@ -611,17 +710,19 @@ details[open] > summary .sum { display: none; }
     if (FMT === 'dec') return decIn(inch) + '"';
     var ei = Math.round(inch * 16) / 16, wi = Math.floor(ei + 1e-9), fi = Math.round((ei - wi) * 16);
     if (fi === 16) { wi += 1; fi = 0; }
-    return wi.toLocaleString() + FR[fi] + '"';
+    return (wi === 0 && fi ? FR[fi].trim() : wi.toLocaleString() + FR[fi]) + '"';
   }
-  function fmtLen(inch) { return UNITS === 'in' ? inStr(inch) : ftIn(inch); }
-  function parseLen(str) {
-    var s = String(str).trim().toLowerCase().replace(/[′’]/g, "'").replace(/[″”]|''/g, '"');
+  function fmtLen(inch) { return isMetric() ? metricStr(inch) : UNITS === 'in' ? inStr(inch) : ftIn(inch); }
+  // Feet-inches tools (Layout) use the last imperial choice when Draw is in metric.
+  function fmtImp(inch) { return UNITS === 'in' || (isMetric() && IMP_UNITS === 'in') ? inStr(inch) : ftIn(inch); }
+  function parseLen(str, imp) {
+    var s = String(str).trim().toLowerCase().replace(/(\d),(?=\d{3}(\D|$))/g, '$1').replace(/[′’]/g, "'").replace(/[″”]|''/g, '"');
     var m = s.match(/^([\d.]+)\s*(mm|cm|m)$/);
     if (m) return parseFloat(m[1]) * { mm: 1 / 25.4, cm: 1 / 2.54, m: 39.3701 }[m[2]];
     s = s.replace(/\s*(feet|foot|ft)\b/g, "'").replace(/\s*(inches|inch|in)\b/g, '"');
     var ft = 0, rest = s, i = s.indexOf("'");
     if (i >= 0) { ft = parseFloat(s.slice(0, i)); if (isNaN(ft)) return NaN; rest = s.slice(i + 1); }
-    else if (s.indexOf('"') < 0) { return /^\d+(\.\d+)?$/.test(s) ? parseFloat(s) : NaN; }
+    else if (s.indexOf('"') < 0) { return /^\d+(\.\d+)?$/.test(s) ? (imp ? parseFloat(s) : plainIn(parseFloat(s))) : NaN; }
     rest = rest.replace(/"/g, '').replace(/^\s*-\s*/, '').trim();
     var inch = 0, parts = rest ? rest.split(/[\s-]+/) : [];
     for (var k = 0; k < parts.length; k++) {
@@ -640,13 +741,19 @@ details[open] > summary .sum { display: none; }
   function scaleLabel(s) { return !s ? '' : s.how === 'calib' && isFinite(s.known) ? fmtLen(s.known) + ' known length' : s.label; }
   function lenIn(units, page) { var s = scaleFor(page); return s ? units * s.inPerUnit : NaN; }
   function sqftOf(units2, page) { var s = scaleFor(page); return s ? units2 * s.inPerUnit * s.inPerUnit / 144 : NaN; }
-  function fmtSqft(a) { return isFinite(a) ? a.toLocaleString(undefined, { maximumFractionDigits: 1 }) + ' sq ft' : 'set scale'; }
+  // Total length: linear feet, or meters in metric.
+  function fmtLin(inch) { return isMetric() ? (inch * 0.0254).toLocaleString(undefined, { maximumFractionDigits: 2 }) + ' m' : (inch / 12).toFixed(1) + ' lin ft'; }
+  function fmtSqft(a) {
+    if (!isFinite(a)) return 'set scale';
+    if (isMetric()) { var m2 = a * 0.09290304; return m2.toLocaleString(undefined, { maximumFractionDigits: Math.abs(m2) < 1 ? 3 : 2 }) + ' m²'; }
+    return a.toLocaleString(undefined, { maximumFractionDigits: 1 }) + ' sq ft';
+  }
   function angleAt(pts) {
     var a = pts[0], b = pts[1], c = pts[2]; if (!c) return NaN;
     var d = Math.abs(Math.atan2(a.y - b.y, a.x - b.x) - Math.atan2(c.y - b.y, c.x - b.x)) * 180 / Math.PI;
     return d > 180 ? 360 - d : d;
   }
-  function areaSqft(it) { if (it.circle) { var r = dist(it.pts[0], it.pts[1]); return sqftOf(Math.PI * r * r, it.page); } return sqftOf(polyArea(it.pts), it.page); }
+  function areaSqft(it) { if (it.ellipse) { var eb = bboxOf(it.pts); return sqftOf(Math.PI * eb.w * eb.h / 4, it.page); } if (it.circle) { var r = dist(it.pts[0], it.pts[1]); return sqftOf(Math.PI * r * r, it.page); } return sqftOf(polyArea(it.pts), it.page); }
   // ---- Curves: 3 points make a true circular arc; more points make a smooth curve through every point ----
   function circleThrough(a, b, c) {
     var d = 2 * (a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)); if (Math.abs(d) < 1e-9) return null;
@@ -697,8 +804,11 @@ details[open] > summary .sum { display: none; }
   function curveRadius(pts) { var C = pts.length === 3 ? circleThrough(pts[0], pts[1], pts[2]) : null; return C ? C.r : NaN; }
   // The path a measurement actually follows: the sampled curve for curves, the clicked points for everything else.
   function circlePts(c, r) { var out = []; for (var i = 0; i < 96; i++) { var t = i / 96 * Math.PI * 2; out.push({ x: c.x + r * Math.cos(t), y: c.y + r * Math.sin(t) }); } return out; }
+  // An ellipse fills the box of its four corners (kept as a rectangle so its corners drag like one).
+  function ellipsePts(pts) { var b = bboxOf(pts), out = []; for (var i = 0; i < 96; i++) { var t = i / 96 * Math.PI * 2; out.push({ x: b.x + b.w / 2 * (1 + Math.cos(t)), y: b.y + b.h / 2 * (1 + Math.sin(t)) }); } return out; }
   function geomPts(it) {
     if (it.type === 'curve') return curveDense(it.pts);
+    if (it.ellipse) return ellipsePts(it.pts);
     if (it.circle) return circlePts(it.pts[0], dist(it.pts[0], it.pts[1]));
     if (it.type === 'dim' && it.off) { var g = dimGeom(it, 0, 0); return [g.a, g.b]; }
     return it.pts;
@@ -729,6 +839,7 @@ details[open] > summary .sum { display: none; }
   function itemCol(it) { return it.color || (it.deduct ? 'var(--red)' : COL[it.type]); }
   function itemInk(it) { return it.color && isDark(hexArr(it.color)) ? '#ffffff' : '#2b2b2b'; }
   function applyStyle(it) {
+    if (it.shape) return it;
     if (M.style.color) it.color = M.style.color;
     if (M.style.end && LINE_TYPES.test(it.type)) it.end = M.style.end;
     return it;
@@ -754,8 +865,8 @@ details[open] > summary .sum { display: none; }
   }
   // A size you type (site survey, photo) wins over the measured one. Plain numbers are inches.
   function parseSize(t) {
-    var s2 = String(t).trim();
-    if (/^\d+(\.\d+)?$/.test(s2)) return parseFloat(s2);
+    var s2 = String(t).trim().replace(/(\d),(?=\d{3}(\D|$))/g, '$1');
+    if (/^\d+(\.\d+)?$/.test(s2)) return plainIn(parseFloat(s2));
     if (/^\d+\s+\d+\/\d+$/.test(s2)) { var q = s2.split(/\s+/), fr = q[1].split('/'); return Number(q[0]) + fr[0] / fr[1]; }
     var v = parseLen(s2); return v > 0 ? v : NaN;
   }
@@ -768,6 +879,7 @@ details[open] > summary .sum { display: none; }
   function manualText(it) { return isFinite(it.manualIn) ? fmtLen(it.manualIn) : it.manual; }
   function itemLenIn(it) { return isFinite(it.manualIn) ? it.manualIn : lenIn(pathLen(geomPts(it)), it.page); }
   function itemValue(it) {
+    if (it.shape === 'rect' || it.shape === 'ellipse') { var sb = bboxOf(it.pts), sw2 = lenIn(sb.w, it.page), sh2 = lenIn(sb.h, it.page); return isFinite(sw2) ? fmtLen(sw2) + ' × ' + fmtLen(sh2) : 'set scale'; }
     if (it.manual && /dim|length|run|curve|area/.test(it.type)) return manualText(it);
     if (it.type === 'dim') { var dv = lenIn(pathLen(it.pts), it.page); return isFinite(dv) ? fmtLen(dv) : 'type a size'; }
     if (it.type === 'count') return it.pts.length + ' ea';
@@ -1003,7 +1115,8 @@ details[open] > summary .sum { display: none; }
     pageEl = $('page'); canvasEl = $('pdf-canvas'); baseEl = $('base'); ovEl = $('ov');
     baseEl.setAttribute('viewBox', '0 0 ' + M.w + ' ' + M.h);
     ovEl.setAttribute('viewBox', '0 0 ' + M.w + ' ' + M.h);
-    if (M.src === 'sample' || M.src === 'blank') { canvasEl.hidden = true; baseEl.innerHTML = baseSVG(); }
+    if (M.src === 'blank') { canvasEl.hidden = true; baseEl.innerHTML = blankEdgeSVG(); }
+    else if (M.src === 'sample') { canvasEl.hidden = true; baseEl.innerHTML = baseSVG(); }
     else { baseEl.innerHTML = ''; canvasEl.hidden = false; }
     bindPage(); sizePage();
   }
@@ -1011,7 +1124,9 @@ details[open] > summary .sum { display: none; }
     if (!pageEl) return;
     pageEl.style.width = (M.w * M.zoom) + 'px';
     pageEl.style.height = (M.h * M.zoom) + 'px';
-    $('zl').textContent = Math.round(M.zoom * 100) + '%';
+    // A blank canvas reads as actual size: 100% is one inch per CSS inch (96px).
+    $('zl').textContent = Math.round(M.src === 'blank' ? M.zoom / 96 * 100 : M.zoom * 100) + '%';
+    paintGrid();
     if (M.src === 'pdf' || M.src === 'image') { clearTimeout(rasterTimer); rasterTimer = setTimeout(drawRaster, 120); }
   }
   function drawRaster() {
@@ -1034,10 +1149,10 @@ details[open] > summary .sum { display: none; }
     }
   }
   function fit() {
-    var cs = getComputedStyle(stage), pl = parseFloat(cs.paddingLeft), pt = parseFloat(cs.paddingTop);
-    var aw = stage.clientWidth - 2 * pl, ah = stage.clientHeight - 2 * pt;
+    var cs = getComputedStyle(stage), pl = parseFloat(cs.paddingLeft), pt = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+    var aw = stage.clientWidth - 2 * pl, ah = stage.clientHeight - pt;
     if (aw < 40 || ah < 40) return;
-    M.zoom = Math.max(0.03, Math.min(8, Math.min(aw / M.w, ah / M.h)));
+    M.zoom = Math.max(0.03, Math.min(maxZoom(), Math.min(aw / M.w, ah / M.h)));
     M.autoFit = true; M.fitZoom = M.zoom;
     sizePage(); renderOverlay();
   }
@@ -1046,7 +1161,7 @@ details[open] > summary .sum { display: none; }
     var r = pageEl.getBoundingClientRect();
     if (cx == null) { var sr = stage.getBoundingClientRect(); cx = sr.left + sr.width / 2; cy = sr.top + sr.height / 2; }
     var px = (cx - r.left) / M.zoom, py = (cy - r.top) / M.zoom;
-    M.zoom = Math.max(0.03, Math.min(8, M.zoom * f)); M.autoFit = false;
+    M.zoom = Math.max(0.03, Math.min(maxZoom(), M.zoom * f)); M.autoFit = false;
     sizePage(); renderOverlay();
     var r2 = pageEl.getBoundingClientRect();
     stage.scrollLeft += (r2.left + px * M.zoom) - cx;
@@ -1130,6 +1245,7 @@ details[open] > summary .sum { display: none; }
     var mode = M.tags || 'full', out = [];
     items.forEach(function (it) {
       var isSel = selId === it.id; if (mode === 'off' && !isSel) return;
+      if (it.shape && !M.shapeSizes && !isSel) return;
       var val = itemValue(it), sp, nm = it.name || '';
       if (it.type === 'dim') {
         var dg = dimGeom(it, 0, 0), A = dg.a, B = dg.b, deg = Math.atan2(B.y - A.y, B.x - A.x) * 180 / Math.PI;
@@ -1157,7 +1273,7 @@ details[open] > summary .sum { display: none; }
     function tagSize(text) { return { w: (text.length * 6.7 + 14) * ts * k, h: 20 * ts * k }; }
     function tag(x, y, text, c, ink) {
       var fs = 11 * ts * k, sz = tagSize(text), w = sz.w, h = sz.h;
-      return '<g><rect x="' + (x - w / 2) + '" y="' + (y - h / 2) + '" width="' + w + '" height="' + h + '" rx="' + (4 * ts * k) + '" fill="' + c + '" fill-opacity=".94" stroke="#3a3a3a" stroke-width="1" vector-effect="non-scaling-stroke"/><text x="' + x + '" y="' + (y + fs * 0.36) + '" text-anchor="middle" font-family="JetBrains Mono, ui-monospace, monospace" font-weight="500" font-size="' + fs + '" fill="' + (ink || '#2b2b2b') + '">' + esc(text) + '</text></g>';
+      return '<g><rect x="' + (x - w / 2) + '" y="' + (y - h / 2) + '" width="' + w + '" height="' + h + '" rx="' + (4 * ts * k) + '" fill="' + c + '" fill-opacity=".94" stroke="#3a3a3a" stroke-width="1" vector-effect="non-scaling-stroke"/><text x="' + x + '" y="' + (y + fs * 0.36) + '" text-anchor="middle" font-family="Manrope, system-ui, sans-serif" font-weight="500" font-size="' + fs + '" fill="' + (ink || '#2b2b2b') + '">' + esc(text) + '</text></g>';
     }
     var mine = M.items.filter(function (it) { return it.page === M.page; }), editing = M.tool === 'edit';
     if (M.drag && M.drag.dimpull) mine = mine.concat([{ id: -1, type: 'dim', page: M.page, pts: [M.drag.a, M.drag.b], off: M.drag.off, name: '' }]);
@@ -1184,7 +1300,7 @@ details[open] > summary .sum { display: none; }
         var ink = itemInk(it);
         it.pts.forEach(function (p, i) {
           var on = isSel && sel.pt === i, r = (on ? 9 : 7.5) * k;
-          o += '<circle cx="' + p.x + '" cy="' + p.y + '" r="' + r + '" fill="' + (on ? COL.draft : c) + '" stroke="' + (isSel ? '#ffffff' : '#4a4a4a') + '" stroke-width="' + (isSel ? 2 : 1) + '" vector-effect="non-scaling-stroke"/><text x="' + p.x + '" y="' + (p.y + 3.6 * k) + '" text-anchor="middle" font-family="JetBrains Mono, monospace" font-weight="700" font-size="' + 9.5 * k + '" fill="' + (on ? '#2b2b2b' : ink) + '">' + (i + 1) + '</text>';
+          o += '<circle cx="' + p.x + '" cy="' + p.y + '" r="' + r + '" fill="' + (on ? COL.draft : c) + '" stroke="' + (isSel ? '#ffffff' : '#4a4a4a') + '" stroke-width="' + (isSel ? 2 : 1) + '" vector-effect="non-scaling-stroke"/><text x="' + p.x + '" y="' + (p.y + 3.6 * k) + '" text-anchor="middle" font-family="Manrope, system-ui, sans-serif" font-weight="700" font-size="' + 9.5 * k + '" fill="' + (on ? '#2b2b2b' : ink) + '">' + (i + 1) + '</text>';
         });
         return;
       }
@@ -1203,6 +1319,15 @@ details[open] > summary .sum { display: none; }
           o += '<polygon points="' + svgPts(nl.head) + '" fill="' + c + '" stroke="#2b2b2b" stroke-width="1" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>';
         } else o += '<circle cx="' + it.pts[0].x + '" cy="' + it.pts[0].y + '" r="' + 3.5 * k + '" fill="' + c + '" stroke="#2b2b2b" stroke-width="1" vector-effect="non-scaling-stroke"/>';
         if (isSel || editing) o += '<circle cx="' + it.pts[0].x + '" cy="' + it.pts[0].y + '" r="' + (isSel && sel.pt === 0 ? 6 : 4.5) * k + '" fill="none" stroke="' + (isSel ? '#ffffff' : '#2b2b2b') + '" stroke-width="' + (isSel ? 2 : 1) + '" vector-effect="non-scaling-stroke"/>';
+        return;
+      }
+      if (it.shape) {
+        // Draw shapes: plain stroke and fill, no tag unless asked. Handles show while editing or selected.
+        var closed = it.type === 'area', sc2 = it.color || SHAPE_INK, swd = it.sw || 1.5, sf = shapeFill(it);
+        if (isSel) o += (closed ? '<polygon' : '<polyline') + ' points="' + svgPts(gp) + '" fill="none" stroke="#3e7bfa" stroke-opacity=".35" stroke-width="' + (swd + 6) + '" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>';
+        o += (closed ? '<polygon' : '<polyline') + ' points="' + svgPts(gp) + '" fill="' + (closed ? sf.c : 'none') + '"' + (closed && sf.o < 1 ? ' fill-opacity="' + sf.o + '"' : '') + ' stroke="' + sc2 + '" stroke-width="' + swd + '" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>';
+        if (!closed && es !== 'none' && es !== 'square') o += marksSvg(endMarks(gp, es, 5 * k, it.pts), sc2);
+        if (editing || isSel) it.pts.forEach(function (p, i) { var on = isSel && sel.pt === i, hov = editing && M.hoverPt && M.hoverPt.item === it.id && M.hoverPt.idx === i; o += pt(p, on ? COL.draft : '#ffffff', on || hov, on); });
         return;
       }
       if (isSel) o += (it.type === 'area' ? '<polygon' : '<polyline') + ' points="' + svgPts(gp) + '" fill="none" stroke="#ffffff" stroke-width="6" stroke-opacity=".85" vector-effect="non-scaling-stroke"/>';
@@ -1238,7 +1363,9 @@ details[open] > summary .sum { display: none; }
     }
     if (M.draft.length) {
       var dp = M.draft.slice(); if (M.hover) dp.push(M.hover);
-      if (M.tool === 'rect' && dp.length === 2) dp = [dp[0], { x: dp[1].x, y: dp[0].y }, dp[1], { x: dp[0].x, y: dp[1].y }, dp[0]];
+      if ((M.tool === 'rect' || M.tool === 'srect') && dp.length === 2) dp = [dp[0], { x: dp[1].x, y: dp[0].y }, dp[1], { x: dp[0].x, y: dp[1].y }, dp[0]];
+      if (M.tool === 'sell' && dp.length === 2) { dp = ellipsePts(dp); dp.push(dp[0]); }
+      if (M.tool === 'spoly' && dp.length > 2 && M.hover && dist(M.hover, M.draft[0]) < 1e-6) o += '<polygon points="' + svgPts(M.draft) + '" fill="' + COL.draft + '" fill-opacity=".14" stroke="none"/>';
       if (M.tool === 'curve') dp = curveDense(dp);
       if (M.tool === 'circle' && dp.length === 2) { dp = circlePts(dp[0], dist(dp[0], dp[1])); dp.push(dp[0]); }
       if (M.tool === 'area' && dp.length > 2) o += '<polygon points="' + svgPts(dp) + '" fill="' + COL.area + '" fill-opacity=".14" stroke="none"/><line x1="' + dp[dp.length - 1].x + '" y1="' + dp[dp.length - 1].y + '" x2="' + dp[0].x + '" y2="' + dp[0].y + '" stroke="#4a4a4a" stroke-width="1" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>';
@@ -1269,7 +1396,7 @@ details[open] > summary .sum { display: none; }
   function snapPoints(skip) {
     var pts = [];
     M.items.forEach(function (it) { if (it.page !== M.page) return; it.pts.forEach(function (q, i) { if (!(skip && skip.item === it.id && skip.idx === i)) pts.push(q); }); });
-    if (M.tool === 'area' && M.draft.length > 2) pts.push(M.draft[0]);
+    if ((M.tool === 'area' || M.tool === 'spoly') && M.draft.length > 2) pts.push(M.draft[0]);
     return pts;
   }
   function adjust(p, e, skip, anchor) {
@@ -1277,17 +1404,23 @@ details[open] > summary .sum { display: none; }
     if (!e.altKey) snapPoints(skip).forEach(function (q) { var d = dist(p, q); if (d < bd) { bd = d; best = q; } });
     if (best) return { p: { x: best.x, y: best.y }, snapped: true, kind: 'point' };
     var last = anchor || (M.tool === 'scale' ? (M.calib.length === 1 ? M.calib[0] : null) : (M.draft.length ? M.draft[M.draft.length - 1] : null));
-    if (e.shiftKey && last) return { p: roundLen(Math.abs(p.x - last.x) > Math.abs(p.y - last.y) ? { x: p.x, y: last.y } : { x: last.x, y: p.y }, last, e), snapped: false };
+    if (e.shiftKey && last) {
+      // Shift: rectangles and ellipses stay square, lines stay level or plumb. On the grid, the free size lands on a grid step.
+      var dx = p.x - last.x, dy = p.y - last.y, sq = BOX_TOOLS.test(M.tool) && M.draft.length === 1, gq = !e.altKey && gridOn() ? M.blank.step : 0;
+      var rnd = function (v) { return gq ? Math.round(v / gq) * gq : v; };
+      if (sq) { var dd = rnd(Math.max(Math.abs(dx), Math.abs(dy))); return { p: { x: last.x + (dx < 0 ? -dd : dd), y: last.y + (dy < 0 ? -dd : dd) }, snapped: !!gq, kind: gq ? 'grid' : '' }; }
+      var op = Math.abs(dx) > Math.abs(dy) ? { x: last.x + rnd(dx), y: last.y } : { x: last.x, y: last.y + rnd(dy) };
+      return { p: gq ? op : roundLen(op, last, e), snapped: !!gq, kind: gq ? 'grid' : '' };
+    }
     if (!e.altKey) { var ds = drawingSnap(p, tol); if (ds) return { p: { x: ds.x, y: ds.y }, snapped: true, kind: ds.kind }; }
     if (!e.altKey) { var gs = gridSnap(p, tol); if (gs.on) return { p: roundLen(gs.p, last, e, gs), snapped: true, kind: 'grid' }; }
     return { p: roundLen(p, last, e), snapped: false };
   }
-  function gridStep() { return M.blank && Math.max(M.blank.w, M.blank.h) > 2400 ? 120 : 12; }
-  // Blank canvas: points stick to grid lines they come close to.
-  function gridSnap(p, tol) {
-    if (M.src !== 'blank' || !M.blank.snap) return { p: p, on: false };
-    var st = gridStep(), gx = Math.round(p.x / st) * st, gy = Math.round(p.y / st) * st, sx = Math.abs(gx - p.x) < tol, sy = Math.abs(gy - p.y) < tol;
-    return { p: { x: sx ? gx : p.x, y: sy ? gy : p.y }, on: sx || sy, sx: sx, sy: sy };
+  // Blank canvas with Snap on: every point lands on the snap grid (Alt places freely).
+  function gridSnap(p) {
+    if (!gridOn()) return { p: p, on: false };
+    var st = M.blank.step;
+    return { p: { x: Math.round(p.x / st) * st, y: Math.round(p.y / st) * st }, on: true, sx: true, sy: true };
   }
   // Lengths round to the nearest 1/4" or 1" (Drawing panel setting); rectangles round width and height.
   function roundLen(p, last, e, gs) {
@@ -1320,7 +1453,7 @@ details[open] > summary .sum { display: none; }
       if (it.page !== M.page) return;
       if (it.type === 'count' || it.type === 'note') return;
       if (it.type === 'curve') { curveSpans(it.pts).forEach(function (sp, si) { for (var j = 1; j < sp.length; j++) test(it, sp[j - 1], sp[j], si); }); return; }
-      if (it.circle) { var cg = geomPts(it); for (var ci = 0; ci < cg.length; ci++) test(it, cg[ci], cg[(ci + 1) % cg.length], -1); return; }
+      if (it.circle || it.ellipse) { var cg = geomPts(it); for (var ci = 0; ci < cg.length; ci++) test(it, cg[ci], cg[(ci + 1) % cg.length], -1); return; }
       var hp = it.type === 'dim' ? geomPts(it) : it.pts, n = hp.length, segs = it.type === 'area' ? n : n - 1;
       for (var i = 0; i < segs; i++) test(it, hp[i], hp[(i + 1) % n], i);
     });
@@ -1358,14 +1491,16 @@ details[open] > summary .sum { display: none; }
   function removePoint(itemId, idx) {
     var it = itemById(itemId); if (!it) return;
     var min = { area: 3, angle: 3, curve: 3, count: 1, note: 1, dim: 2 }[it.type] || 2;
+    if (it.ellipse) return;
     if (it.rect) it.rect = false;
+    if (it.shape === 'rect') it.shape = 'poly';
     if (it.pts.length - 1 < min) { M.items = M.items.filter(function (x) { return x !== it; }); M.sel = null; M.note = it.name + ' removed (it needs at least ' + min + ' points).'; }
     else { it.pts.splice(idx, 1); M.sel = { item: it.id, pt: null }; }
     M.hoverPt = null; renderOverlay(); renderPanels();
   }
   function insertPoint(hs) {
-    var it = itemById(hs.item); if (!it || hs.seg < 0 || it.circle || /count|note|angle|dim/.test(it.type)) return;
-    it.rect = false;
+    var it = itemById(hs.item); if (!it || hs.seg < 0 || it.circle || it.ellipse || /count|note|angle|dim/.test(it.type)) return;
+    it.rect = false; if (it.shape) it.shape = 'poly';
     if (it.type === 'length') { it.type = 'run'; M.n.run += 1; if (/^Length \d+$/.test(it.name)) it.name = 'Run ' + M.n.run; }
     it.pts.splice(hs.seg + 1, 0, { x: hs.at.x, y: hs.at.y });
     M.sel = { item: it.id, pt: hs.seg + 1 }; renderOverlay(); renderPanels();
@@ -1399,12 +1534,13 @@ details[open] > summary .sum { display: none; }
     renderOverlay(); renderPanels();
   }
   function finish() {
+    if (M.tool === 'spoly') { var sp = M.draft.slice(); M.draft = []; if (sp.length >= 2) addShape('poly', sp); renderOverlay(); renderPanels(); return; }
     if (M.tool === 'run' || M.tool === 'area' || M.tool === 'curve') commit(M.tool);
     else if (M.tool === 'count' && M.activeCount) { M.activeCount = null; renderOverlay(); renderPanels(); }
   }
   function addItem(type, pts, extra) {
     var key = extra && extra.rect ? 'area' : extra && extra.circle ? 'circle' : type;
-    M.n[key] = (M.n[key] || 0) + 1;
+    if (!(extra && extra.shape)) M.n[key] = (M.n[key] || 0) + 1;
     var it = { id: nextId++, type: type, page: M.page, pts: pts, name: (extra && extra.circle ? 'Circle' : TYPE_NAME[type]) + ' ' + M.n[key] };
     if (extra) Object.keys(extra).forEach(function (k) { it[k] = extra[k]; });
     applyStyle(it);
@@ -1419,6 +1555,17 @@ details[open] > summary .sum { display: none; }
       return;
     }
     if (M.tool === 'length') { M.draft.push(p); if (M.draft.length === 2) commit('length'); else renderOverlay(); return; }
+    if (M.tool === 'sline' || M.tool === 'srect' || M.tool === 'sell') {
+      M.draft.push(p); if (M.draft.length < 2) { renderOverlay(); return; }
+      var s0 = M.draft[0], s1 = M.draft[1], k3 = M.tool === 'sline' ? 'line' : M.tool === 'srect' ? 'rect' : 'ellipse'; M.draft = [];
+      var big = k3 === 'line' ? dist(s0, s1) * M.zoom > 3 : Math.abs(s0.x - s1.x) * M.zoom > 3 && Math.abs(s0.y - s1.y) * M.zoom > 3;
+      if (big) { var sh = addShape(k3, k3 === 'line' ? [s0, s1] : [{ x: s0.x, y: s0.y }, { x: s1.x, y: s0.y }, { x: s1.x, y: s1.y }, { x: s0.x, y: s1.y }]); M.sel = { item: sh.id, pt: null }; }
+      renderOverlay(); renderPanels(); return;
+    }
+    if (M.tool === 'spoly') {
+      if (M.draft.length >= 3 && dist(p, M.draft[0]) < 9 / M.zoom) { var cl = addShape('poly', M.draft.concat([M.draft[0]])); M.draft = []; M.sel = { item: cl.id, pt: null }; renderOverlay(); renderPanels(); return; }
+      M.draft.push(p); renderOverlay(); return;
+    }
     if (M.tool === 'angle') { M.draft.push(p); if (M.draft.length === 3) commit('angle'); else renderOverlay(); return; }
     if (M.tool === 'dim') {
       M.draft.push(p);
@@ -1522,6 +1669,10 @@ details[open] > summary .sum { display: none; }
         M.drag = { dimpull: true, a: de.a, b: de.b, off: 0, side: offFrom(de.a, de.b, fp) < 0 ? -1 : 1, moved: false };
         pageEl.setPointerCapture(e.pointerId); renderOverlay(); return;
       }
+      if (DRAG_TOOLS.test(M.tool) && !M.draft.length && e.button === 0) {
+        handleClick(adjust(toPage(e), e).p);
+        M.create = { x: e.clientX, y: e.clientY }; pageEl.setPointerCapture(e.pointerId); return;
+      }
       down = { x: e.clientX, y: e.clientY };
     });
     pageEl.addEventListener('pointermove', function (e) {
@@ -1558,6 +1709,11 @@ details[open] > summary .sum { display: none; }
     pageEl.addEventListener('pointerleave', function () { if (!pan && !M.drag) { M.hover = null; M.hoverPt = null; M.hoverSeg = null; renderOverlay(); } });
     pageEl.addEventListener('pointerup', function (e) {
       if (pan) { pan = null; pageEl.classList.remove('panning'); return; }
+      if (M.create) {
+        var cr = M.create; M.create = null;
+        if (Math.hypot(e.clientX - cr.x, e.clientY - cr.y) > 4 && M.draft.length) handleClick(adjust(toPage(e), e).p);
+        return;
+      }
       if (M.drag && M.drag.dimpull) {
         var dpl = M.drag; M.drag = null; M.dimEdge = null;
         var dm2 = addItem('dim', [dpl.a, dpl.b], { off: dpl.moved ? dpl.off : dpl.side * 24 / M.zoom }); M.sel = { item: dm2.id, pt: null };
@@ -1599,7 +1755,7 @@ details[open] > summary .sum { display: none; }
     if (b.dataset.z === 'in') zoomAt(1.25); else if (b.dataset.z === 'out') zoomAt(0.8); else fit();
   });
   function typing(e) { return /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName); }
-  var HOTKEYS = { o: 'circle', h: 'pan', s: 'scale', z: 'resize', l: 'length', r: 'run', k: 'curve', a: 'area', v: 'edit', b: 'rect', c: 'count', g: 'angle', t: 'note', d: 'dim' };
+  var HOTKEYS = { '\\': 'sline', m: 'srect', e: 'sell', p: 'spoly', o: 'circle', h: 'pan', s: 'scale', z: 'resize', l: 'length', r: 'run', k: 'curve', a: 'area', v: 'edit', b: 'rect', c: 'count', g: 'angle', t: 'note', d: 'dim' };
   var ARROWS = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
   document.addEventListener('keydown', function (e) {
     if (mode !== 'measure' || typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
@@ -1620,13 +1776,17 @@ details[open] > summary .sum { display: none; }
   });
 
   // ---- Panels ----
-  var MTOOLS = [['hand', 'pan', 'Pan (H, or hold Space)'], ['select', 'edit', 'Edit (V): drag points, lines or curves'], ['scale', 'scale', 'Scale (S): printed scale or known length'], ['resize', 'resize', 'Resize (Z): drag a corner or type a size'], ['length', 'length', 'Length (L)'], ['run', 'run', 'Run (R): several segments'], ['trace', 'curve', 'Curve (K): 3 points make an arc'], ['dim', 'dim', 'Dimension (D): pull from an edge'],
-    ['area', 'area', 'Area (A)'], ['rect', 'rect', 'Rectangle (B): two corners'], ['circle', 'circle', 'Circle (O): center, then edge'], ['count', 'count', 'Count (C)'], ['angle', 'angle', 'Angle (G): corner in middle'], ['note', 'note', 'Note (T)']];
-  var MTOOL_NAME = { pan: ['Pan', 'H'], edit: ['Edit', 'V'], scale: ['Scale', 'S'], resize: ['Resize', 'Z'], length: ['Length', 'L'], run: ['Run', 'R'], curve: ['Curve', 'K'], dim: ['Dimension', 'D'], area: ['Area', 'A'], rect: ['Rectangle', 'B'], circle: ['Circle', 'O'], count: ['Count', 'C'], angle: ['Angle', 'G'], note: ['Note', 'T'] };
-  var DRAW_TOOLS = /^(length|run|curve|dim|area|rect|circle|count|angle|note)$/;
+  // Draw tools make plain shapes (click and drag); Measure tools make measurements. Each list: [icon, tool, title, key].
+  var DTOOLS = [['select', 'edit', 'Select and edit (V): drag points, lines or shapes', 'V'], ['hand', 'pan', 'Pan (H, or hold Space)', 'H'], ['sline', 'sline', 'Line (\\): click and drag', '\\'], ['box', 'srect', 'Rectangle (M): click and drag, Shift for a square', 'M'],
+    ['ellipse', 'sell', 'Ellipse (E): click and drag, Shift for a circle', 'E'], ['spoly', 'spoly', 'Polyline (P): click each point, Enter to finish, click the first point to close', 'P'], ['note', 'note', 'Note (T)', 'T']];
+  var KTOOLS = [['scale', 'scale', 'Scale (S): printed scale or known length', 'S'], ['resize', 'resize', 'Resize (Z): drag a corner or type a size', 'Z'], ['length', 'length', 'Length (L): click and drag', 'L'], ['run', 'run', 'Run (R): several segments', 'R'], ['trace', 'curve', 'Curve (K): 3 points make an arc', 'K'], ['dim', 'dim', 'Dimension (D): pull from an edge, or drag', 'D'],
+    ['area', 'area', 'Area (A)', 'A'], ['rect', 'rect', 'Rectangle area (B): click and drag', 'B'], ['circle', 'circle', 'Circle (O): drag from the center', 'O'], ['count', 'count', 'Count (C)', 'C'], ['angle', 'angle', 'Angle (G): corner in middle', 'G']];
+  var MTOOL_NAME = { sline: ['Line', '\\'], srect: ['Rectangle', 'M'], sell: ['Ellipse', 'E'], spoly: ['Polyline', 'P'], pan: ['Pan', 'H'], edit: ['Select', 'V'], scale: ['Scale', 'S'], resize: ['Resize', 'Z'], length: ['Length', 'L'], run: ['Run', 'R'], curve: ['Curve', 'K'], dim: ['Dimension', 'D'], area: ['Area', 'A'], rect: ['Rectangle area', 'B'], circle: ['Circle', 'O'], count: ['Count', 'C'], angle: ['Angle', 'G'], note: ['Note', 'T'] };
+  var DRAW_TOOLS = /^(length|run|curve|dim|area|rect|circle|count|angle|note|sline|srect|sell|spoly)$/;
   function renderTools() {
-    toolsEl.classList.toggle('grid5', mode === 'measure'); toolsEl.classList.remove('grid4'); if (mode !== 'shop') toolsEl.classList.remove('grid8', 'grid9');
-    if (mode === 'measure') toolsEl.innerHTML = MTOOLS.map(function (t) { return toolBtn(t[0], t[1], t[2], M.tool === t[1]); }).join('');
+    toolsEl.classList.toggle('tsets', mode === 'measure'); toolsEl.classList.remove('grid5', 'grid4'); if (mode !== 'shop') toolsEl.classList.remove('grid8', 'grid9');
+    var set = function (title, list) { return '<div class="tset"><div class="tset-l">' + title + '</div><div class="tset-g">' + list.map(function (t) { return toolBtn(t[0], t[1], t[2], M.tool === t[1]).replace('</button>', '<span class="tk" aria-hidden="true">' + t[3] + '</span></button>'); }).join('') + '</div></div>'; };
+    if (mode === 'measure') toolsEl.innerHTML = set('Draw', DTOOLS) + set('Measure', KTOOLS);
   }
   toolsEl.addEventListener('click', function (e) {
     if (mode !== 'measure') return;
@@ -1634,7 +1794,7 @@ details[open] > summary .sum { display: none; }
     setTool(b.dataset.tool);
   });
   function setTool(t) {
-    M.tool = t; M.draft = []; M.hoverPt = null; M.hoverSeg = null; M.activeCount = null;
+    M.tool = t; M.draft = []; M.create = null; M.hoverPt = null; M.hoverSeg = null; M.activeCount = null;
     if (t !== 'scale') M.calib = [];
     M.calibErr = '';
     if (pageEl) { pageEl.classList.toggle('edit', t === 'edit'); pageEl.classList.remove('over'); }
@@ -1705,6 +1865,8 @@ details[open] > summary .sum { display: none; }
     var withHover = function (arr) { return M.hover ? arr.concat([M.hover]) : arr; };
     if (M.draft.length) {
       if (M.tool === 'area') return { label: 'Measuring · Area', text: M.draft.length > 1 ? fmtSqft(sqftOf(polyArea(withHover(M.draft)), M.page)) : '—', live: true };
+      if (M.tool === 'srect' || M.tool === 'sell') { var sd = withHover(M.draft); return { label: 'Drawing · ' + MTOOL_NAME[M.tool][0], text: sd.length > 1 ? fmtLen(lenIn(Math.abs(sd[1].x - sd[0].x), M.page)) + ' × ' + fmtLen(lenIn(Math.abs(sd[1].y - sd[0].y), M.page)) : '—', live: true }; }
+      if (M.tool === 'sline' || M.tool === 'spoly') { var sl = lenIn(pathLen(withHover(M.draft)), M.page); return { label: 'Drawing · ' + MTOOL_NAME[M.tool][0], text: isFinite(sl) ? fmtLen(sl) : '—', live: true }; }
       if (M.tool === 'rect') { var d = withHover(M.draft); return { label: 'Measuring · Rectangle', text: d.length > 1 ? fmtLen(lenIn(Math.abs(d[1].x - d[0].x), M.page)) + ' × ' + fmtLen(lenIn(Math.abs(d[1].y - d[0].y), M.page)) : '—', live: true }; }
       if (M.tool === 'circle') { var cd = withHover(M.draft); return { label: 'Measuring · Circle', text: cd.length > 1 ? 'Ø ' + fmtLen(lenIn(2 * dist(cd[0], cd[1]), M.page)) : '—', live: true }; }
       if (M.tool === 'angle') { var ap = withHover(M.draft); return { label: 'Measuring · Angle', text: ap.length > 2 ? angleAt(ap).toFixed(1) + '°' : '—', live: true }; }
@@ -1753,7 +1915,7 @@ details[open] > summary .sum { display: none; }
     if (M.src === 'none') return '';
     if (M.src === 'blank') return '<div class="block"><p class="hint" style="margin:0">Blank canvas is drawn at true size: every measurement is its real length.</p></div>';
     var s = scaleNow(), h = '<div class="block" style="display:grid;gap:8px"><label class="field" for="scale-sel">Printed scale<select id="scale-sel">' + scaleOptions(s) + '</select></label>';
-    if (M.calib.length === 2) h += '<label class="field" for="known">Known length<input type="text" id="known" value="" placeholder="e.g. 144 or 36 1/2" inputmode="decimal" autocomplete="off"></label><div class="row"><button type="button" class="btn strong" data-act="apply">Apply scale</button><button type="button" class="btn" data-act="recal">Redo</button></div><p class="hint" style="margin:0">Plain numbers are inches: 144, 36 1/2, 150.25. 12\'-0" and 3.2 m work too.</p>';
+    if (M.calib.length === 2) h += '<label class="field" for="known">Known length<input type="text" id="known" value="" placeholder="' + (isMetric() ? egLen() : 'e.g. 144 or 36 1/2') + '" inputmode="decimal" autocomplete="off"></label><div class="row"><button type="button" class="btn strong" data-act="apply">Apply scale</button><button type="button" class="btn" data-act="recal">Redo</button></div><p class="hint" style="margin:0">Plain numbers are inches: 144, 36 1/2, 150.25. 12\'-0" and 3.2 m work too.</p>';
     if (M.calibErr) h += '<p class="err" style="margin:0">' + esc(M.calibErr) + '</p>';
     if (s && s.how === 'calib' && s.pts) h += '<p class="hint" style="margin:0">Orange line on drawing marks the known length.</p>';
     h += '<p class="hint" style="margin:0">' + (M.src === 'image' ? 'Images have no true size: calibrate from a length you know.' : s ? 'Check it: measure a dimension printed on the sheet.' : 'Printed scale works when the PDF is at full size.') + '</p>';
@@ -1763,7 +1925,7 @@ details[open] > summary .sum { display: none; }
     if (mode !== 'measure') return;
     M.sizeEdit = null;
     var mine = M.items.filter(function (it) { return it.page === M.page; });
-    var tn = MTOOL_NAME[M.tool] || ['Measure', ''];
+    var tn = MTOOL_NAME[M.tool] || ['Draw', ''];
     var h = '<div class="block toolcard"><div class="tool-name">' + tn[0] + (tn[1] ? ' <kbd>' + tn[1] + '</kbd>' : '') + '</div><p class="tip" id="tip"></p></div>';
     h += '<div class="block" id="readout-block"><div class="label" id="readout-label"></div><div class="readout" id="readout"></div></div>';
     if (M.tool === 'scale') h += scalePanel();
@@ -1773,18 +1935,19 @@ details[open] > summary .sum { display: none; }
       if (!rsel) h += '<p class="hint">Select a measurement first.</p>';
       else if (!rb) h += '<p class="hint">Notes and angles can’t be resized.</p>';
       else if (!scaleFor(rsel.page)) h += '<p class="hint">Set scale first (S).</p>';
-      else h += '<label class="field">' + rb.label + ' (now ' + fmtLen(lenIn(rb.units, rsel.page)) + ')<input type="text" id="resize-in" inputmode="decimal" placeholder="e.g. 96 or 8\'-0&quot;"></label><div class="row" style="margin-top:6px"><button type="button" class="btn strong" data-rsz="' + rsel.id + '">Resize</button></div><p class="hint">Scales evenly around its center. Plain numbers are inches.</p>';
+      else h += '<label class="field">' + rb.label + ' (now ' + fmtLen(lenIn(rb.units, rsel.page)) + ')<input type="text" id="resize-in" inputmode="decimal" placeholder="' + egLen() + '"></label><div class="row" style="margin-top:6px"><button type="button" class="btn strong" data-rsz="' + rsel.id + '">Resize</button></div><p class="hint">Scales evenly around its center. Plain numbers are ' + unitWord() + '.</p>';
       if (rsel && rb) h += '<label class="field" style="margin-top:8px">Scale by ratio<select id="resize-ratio">' + RATIOS.map(function (r) { return '<option value="' + r + '">' + r + (r.split(':')[0] === '1' ? ' (smaller)' : ' (larger)') + '</option>'; }).join('') + '</select></label><div class="row" style="margin-top:6px"><button type="button" class="btn" data-rszr="' + rsel.id + '">Scale</button></div>';
       h += '</div>';
     }
     if (M.note) h += '<div class="block"><p class="hint" style="color:var(--b00);margin:0">' + esc(M.note) + '</p></div>';
     if (!mine.length) { leftEl.innerHTML = h; updateLive(); updateStatus(); return; }
-    h += '<div class="block"><div class="label">Measurements' + (M.pages > 1 ? ' · page ' + M.page : '') + '</div>';
+    h += '<div class="block"><div class="label">' + (mine.some(function (x) { return x.shape; }) ? 'On the canvas' : 'Measurements') + (M.pages > 1 ? ' · page ' + M.page : '') + '</div>';
     h += '<div class="list">' + mine.map(function (it) {
       var on = M.sel && M.sel.item === it.id, chip = itemCol(it);
-      var row = '<div class="item' + (on ? ' sel' : '') + '" data-item="' + it.id + '"><span class="chip' + (it.type === 'count' ? ' round' : '') + '" style="background:' + chip + '" title="' + TYPE_NAME[it.type] + '"></span><input type="text" value="' + esc(it.name) + '" data-name="' + it.id + '" aria-label="' + (it.type === 'note' ? 'Note text' : 'Name of ' + esc(it.name)) + '"><b>' + itemValue(it) + '</b><button type="button" data-del="' + it.id + '" aria-label="Delete ' + esc(it.name) + '">×</button>';
-      if (on) {
-        var ph = it.type === 'note' || it.type === 'angle' ? '' : it.type === 'dim' ? 'Size, e.g. 48 or 8\'-2 1/2&quot;' : it.type === 'area' ? 'Label instead, e.g. 48&quot; × 96&quot;' : it.type === 'count' ? '' : 'Typed size (instead of measured)';
+      var row = '<div class="item' + (on ? ' sel' : '') + '" data-item="' + it.id + '"><span class="chip' + (it.type === 'count' ? ' round' : '') + '" style="background:' + chip + '" title="' + (it.shape ? SHAPE_NAME[it.shape] : TYPE_NAME[it.type]) + '"></span><input type="text" value="' + esc(it.name) + '" data-name="' + it.id + '" aria-label="' + (it.type === 'note' ? 'Note text' : 'Name of ' + esc(it.name)) + '"><b>' + itemValue(it) + '</b><button type="button" data-del="' + it.id + '" aria-label="Delete ' + esc(it.name) + '">×</button>';
+      if (on && it.shape) row += '<div class="item-more">' + styleControls(it) + '</div>';
+      else if (on) {
+        var ph = it.type === 'note' || it.type === 'angle' ? '' : it.type === 'dim' ? (isMetric() ? 'Size, ' + egLen() : 'Size, e.g. 48 or 8\'-2 1/2&quot;') : it.type === 'area' ? (isMetric() ? 'Label instead, e.g. 1200 × 2400' : 'Label instead, e.g. 48&quot; × 96&quot;') : it.type === 'count' ? '' : 'Typed size (instead of measured)';
         row += '<div class="item-more">' + (ph ? '<input type="text" class="valin" data-val="' + it.id + '" value="' + esc(it.manual || '') + '" placeholder="' + ph + '" aria-label="Typed size">' : '');
         if (it.type !== 'note' && it.type !== 'angle') row += '<select data-cat="' + it.id + '" aria-label="Category">' + CATS.map(function (c2) { return '<option value="' + c2[0] + '"' + ((it.cat || '') === c2[0] ? ' selected' : '') + '>' + c2[1] + '</option>'; }).join('') + '</select>';
         if (it.type === 'area') row += '<label class="chk"><input type="checkbox" data-deduct="' + it.id + '"' + (it.deduct ? ' checked' : '') + '> Deduct</label>';
@@ -1797,6 +1960,15 @@ details[open] > summary .sum { display: none; }
     updateLive(); updateStatus();
   }
   function styleControls(it) {
+    if (it.shape) {
+      var sc3 = it.color || SHAPE_INK, closed = it.type === 'area';
+      var sh = '<div class="sty">' + PALETTE.map(function (c) { return '<button type="button" class="sw' + (sc3 === c ? ' on' : '') + '" data-color="' + c + '" style="background:' + c + '" aria-label="Color ' + c + '"></button>'; }).join('') +
+        '<input type="color" class="swpick" data-colorpick="' + it.id + '" value="' + sc3 + '" title="Any color" aria-label="Pick any color"></div>';
+      sh += '<label class="sty"><span class="sty-l">Stroke</span><select data-sw="' + it.id + '">' + STROKES.map(function (o) { return '<option value="' + o[0] + '"' + ((it.sw || 1.5) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>';
+      if (closed) sh += '<label class="sty"><span class="sty-l">Fill</span><select data-fill="' + it.id + '">' + FILLS.map(function (o) { return '<option value="' + o[0] + '"' + ((it.fill || 'none') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>';
+      else sh += '<label class="sty"><span class="sty-l">Ends</span><select data-end="' + it.id + '">' + ENDS.map(function (o) { return '<option value="' + o[0] + '"' + (endStyle(it) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>';
+      return sh;
+    }
     var h = '<div class="sty"><button type="button" class="sw auto' + (!it.color ? ' on' : '') + '" data-color="" title="Default color" aria-label="Default color"></button>' +
       PALETTE.map(function (c) { return '<button type="button" class="sw' + (it.color === c ? ' on' : '') + '" data-color="' + c + '" style="background:' + c + '" aria-label="Color ' + c + '"></button>'; }).join('') +
       '<input type="color" class="swpick" data-colorpick="' + it.id + '" value="' + (it.color || '#3e7bfa') + '" title="Any color" aria-label="Pick any color"></div>';
@@ -1808,6 +1980,7 @@ details[open] > summary .sum { display: none; }
     return h;
   }
   function setItemColor(it, c) {
+    if (it.shape) { it.color = c || SHAPE_INK; M.shapeStyle.color = it.color; renderOverlay(); renderPanels(); return; }
     if (c) it.color = c; else delete it.color;
     M.style.color = c || '';
     renderOverlay(); renderPanels();
@@ -1816,6 +1989,7 @@ details[open] > summary .sum { display: none; }
   function totalsFor(items) {
     var t = { lin: 0, area: 0, deduct: 0, counts: [], angles: 0, notes: 0 };
     items.forEach(function (it) {
+      if (it.shape) return;
       if (it.type === 'length' || it.type === 'run' || it.type === 'curve') t.lin += itemLenIn(it) || 0;
       else if (it.type === 'area') { var a = areaSqft(it) || 0; if (it.deduct) t.deduct += a; else t.area += a; }
       else if (it.type === 'count') t.counts.push(it);
@@ -1829,7 +2003,7 @@ details[open] > summary .sum { display: none; }
     var s = scaleNow(), h = '';
     // Drawing. A blank canvas leads with its size.
     var d = '';
-    if (M.src === 'blank') d += '<div class="row2"><label class="field">Canvas width<input type="text" id="blank-w" value="' + esc(fmtLen(M.blank.w)) + '"></label><label class="field">Canvas height<input type="text" id="blank-h" value="' + esc(fmtLen(M.blank.h)) + '"></label></div><label class="chk"><input type="checkbox" id="blank-grid"' + (M.blank.grid ? ' checked' : '') + '> 1 ft grid</label><label class="chk"><input type="checkbox" id="blank-snap"' + (M.blank.snap ? ' checked' : '') + '> Snap grid</label>';
+    if (M.src === 'blank') d += '<div class="row2"><label class="field">Canvas width<input type="text" id="blank-w" value="' + esc(fmtLen(M.blank.w)) + '"></label><label class="field">Canvas height<input type="text" id="blank-h" value="' + esc(fmtLen(M.blank.h)) + '"></label></div><label class="chk"><input type="checkbox" id="blank-grid"' + (M.blank.grid ? ' checked' : '') + '> Show grid</label><label class="chk"><input type="checkbox" id="blank-snap"' + (M.blank.snap ? ' checked' : '') + '> Snap to grid (' + gridLabel(M.blank.step) + ')</label>';
     d += M.src === 'none' ? '<p class="hint" style="margin:0">No drawing open.</p>' : M.src === 'blank' ? '' : '<p>' + esc(M.name) + '</p><p class="hint" style="margin:0">' + sizeText() + (M.pages > 1 ? ' · page ' + M.page + ' of ' + M.pages : '') + '</p>';
     d += '<div class="row"><label class="btn strong" for="file">Open file</label><input type="file" id="file" accept="application/pdf,image/*,.dim,.json" hidden>';
     if (M.src !== 'blank') d += '<button type="button" class="btn" data-act="blank">Blank canvas</button>';
@@ -1839,7 +2013,7 @@ details[open] > summary .sum { display: none; }
     if (M.pages > 1) d += '<div class="row"><button type="button" class="btn" data-act="prev"' + (M.page === 1 ? ' disabled' : '') + '>‹ Prev page</button><button type="button" class="btn" data-act="next"' + (M.page === M.pages ? ' disabled' : '') + '>Next page ›</button></div>';
     var ix = M.snaps[M.page], snapInfo = M.src === 'image' ? 'Images have no lines to snap to.' : !ix ? '' : ix.pending ? 'Reading drawing lines…' : ix.failed ? 'Could not read lines from this PDF.' : (M.src === 'sample' ? 'Snaps to wall ends and along walls.' : num0(ix.count || 0) + ' lines found.');
     if (M.src !== 'none' && M.src !== 'blank') d += '<label class="chk"><input type="checkbox" id="snap-drawing"' + (M.snapDrawing ? ' checked' : '') + (M.src === 'image' ? ' disabled' : '') + '> Snap drawing lines</label><p class="hint" style="margin:0">' + snapInfo + ' Hold Alt to place a point without snapping.</p>';
-    if (M.src !== 'none') d += '<label class="field">Length step<select id="round-sel"><option value=""' + (!M.round ? ' selected' : '') + '>Off: exact</option><option value="0.25"' + (M.round === '0.25' ? ' selected' : '') + '>1/4"</option><option value="1"' + (M.round === '1' ? ' selected' : '') + '>1"</option></select></label><p class="hint" style="margin:0">Points you click land on whole steps, so a line reads 96 1/4" instead of 96 3/16". Alt ignores it.</p>';
+    if (M.src !== 'none') d += '<label class="field">Length step<select id="round-sel">' + roundOpts() + '</select></label><p class="hint" style="margin:0">Points you click land on whole steps, so a line reads ' + (isMetric() ? '2,440 mm instead of 2,438.7 mm' : '96 1/4" instead of 96 3/16"') + '. Alt ignores it.</p>';
     d += '<label class="field">Tags on drawing<select id="tags-sel"><option value="full"' + ((M.tags || 'full') === 'full' ? ' selected' : '') + '>Name and size</option><option value="size"' + (M.tags === 'size' ? ' selected' : '') + '>Size only</option><option value="off"' + (M.tags === 'off' ? ' selected' : '') + '>Selected only</option></select></label><p class="hint" style="margin:0">Crowded tags step aside with a leader line, drop their name, or shrink to a dot. Select one to bring it back.</p>';
     if (M.error) d += '<p class="err">' + esc(M.error) + '</p>';
     h += sec('drawing', 'Drawing', d);
@@ -1849,12 +2023,12 @@ details[open] > summary .sum { display: none; }
     h += sec('project', 'Project', pr);
     // Totals
     var mine = M.items.filter(function (it) { return it.page === M.page; }), t = totalsFor(mine);
-    var tt = '<dl class="kv"><dt>Length + runs</dt><dd>' + (t.lin ? (t.lin / 12).toFixed(1) + ' lin ft' : '—') + '</dd><dt>Area</dt><dd>' + (t.area ? fmtSqft(t.area) : '—') + '</dd>';
+    var tt = '<dl class="kv"><dt>Length + runs</dt><dd>' + (t.lin ? fmtLin(t.lin) : '—') + '</dd><dt>Area</dt><dd>' + (t.area ? fmtSqft(t.area) : '—') + '</dd>';
     if (t.deduct) tt += '<dt>Deductions</dt><dd>−' + fmtSqft(t.deduct) + '</dd><dt>Net area</dt><dd>' + fmtSqft(t.area - t.deduct) + '</dd>';
     t.counts.forEach(function (c4) { tt += '<dt>' + esc(c4.name) + '</dt><dd>' + c4.pts.length + ' ea</dd>'; });
     tt += '</dl>';
     var cats = {}; mine.forEach(function (it) { if (it.cat) (cats[it.cat] = cats[it.cat] || []).push(it); });
-    Object.keys(cats).forEach(function (k) { var ct = totalsFor(cats[k]), nm = CATS.find(function (c5) { return c5[0] === k; })[1]; tt += '<p class="hint" style="margin:0">' + esc(nm) + ': ' + [ct.lin ? (ct.lin / 12).toFixed(1) + ' lin ft' : '', ct.area - ct.deduct ? fmtSqft(ct.area - ct.deduct) : ''].filter(Boolean).join(', ') + '</p>'; });
+    Object.keys(cats).forEach(function (k) { var ct = totalsFor(cats[k]), nm = CATS.find(function (c5) { return c5[0] === k; })[1]; tt += '<p class="hint" style="margin:0">' + esc(nm) + ': ' + [ct.lin ? fmtLin(ct.lin) : '', ct.area - ct.deduct ? fmtSqft(ct.area - ct.deduct) : ''].filter(Boolean).join(', ') + '</p>'; });
     h += sec('totals', 'Totals', s ? tt : '<p class="hint" style="margin:0">Set scale (S) to see totals.</p>');
     // Export
     var ex = M.items.length ? '<div class="row"><button type="button" class="btn strong" data-act="copy">Copy list</button><button type="button" class="btn" data-act="csv" data-dl>CSV</button><button type="button" class="btn" data-act="pdf" data-dl' + (Markup.busy ? ' disabled' : '') + '>Marked-up PDF</button><button type="button" class="btn" data-act="jpg" data-dl' + (Markup.busy ? ' disabled' : '') + '>Marked-up image</button></div><p class="hint" style="margin:0">Both draw measurements on drawing or photo, ready to email or text. PDF adds a list page.</p>' : '<p class="hint" style="margin:0">Measure something first.</p>';
@@ -1871,21 +2045,22 @@ details[open] > summary .sum { display: none; }
     return sec('about', 'About', '<p>DIM measures drawings and photos, lays out murals, privacy film and distraction markers, and makes shop drawings.</p><p class="hint" style="margin:0">Files open on this device and are never uploaded. PDFs are drawn with Mozilla pdf.js and written with pdf-lib.</p>');
   }
   function renderPanels() {
-    renderLeft(); renderRight();
+    renderLeft(); renderRight(); renderFloat();
     if (M.note) { clearTimeout(renderPanels.t); renderPanels.t = setTimeout(function () { M.note = ''; if (mode === 'measure') renderLeft(); }, 3000); }
     History.record();
   }
   rightEl.addEventListener('toggle', function (e) { var d = e.target; if (d.dataset && d.dataset.sec) openSecs[d.dataset.sec] = d.open; }, true);
 
   function exportRows() {
-    return M.items.map(function (it) {
+    return M.items.filter(function (it) { return !it.shape; }).map(function (it) {
       var unitVal = NaN, unit = '', s = scaleFor(it.page);
-      if (it.type === 'area') { unitVal = areaSqft(it) * (it.deduct ? -1 : 1); unit = 'sq ft'; }
-      else if (it.type === 'length' || it.type === 'run' || it.type === 'curve' || it.type === 'dim') { unitVal = itemLenIn(it) / 12; unit = 'ft'; }
+      var inch = NaN;
+      if (it.type === 'area') { unitVal = areaSqft(it) * (it.deduct ? -1 : 1); unit = 'sq ft'; if (isMetric()) { unitVal *= 0.09290304; unit = 'm²'; } }
+      else if (it.type === 'length' || it.type === 'run' || it.type === 'curve' || it.type === 'dim') { inch = itemLenIn(it); unitVal = isMetric() ? inch * 0.0254 : inch / 12; unit = isMetric() ? 'm' : 'ft'; }
       else if (it.type === 'count') { unitVal = it.pts.length; unit = 'ea'; }
       else if (it.type === 'angle') { unitVal = angleAt(it.pts); unit = 'deg'; }
       var cat = it.cat ? CATS.find(function (c) { return c[0] === it.cat; })[1] : '';
-      return { name: it.name, type: TYPE_NAME[it.type] + (it.rect ? ' (rectangle)' : '') + (it.circle ? ' (circle)' : '') + (it.deduct ? ' (deduct)' : '') + (it.manual ? ' (typed)' : ''), cat: cat, page: it.page, text: itemValue(it), value: isFinite(unitVal) ? unitVal.toFixed(2) : '', unit: unit, inches: unit === 'ft' && isFinite(unitVal) ? (unitVal * 12).toFixed(2) : '', scale: scaleLabel(s) };
+      return { name: it.name, type: TYPE_NAME[it.type] + (it.rect ? ' (rectangle)' : '') + (it.circle ? ' (circle)' : '') + (it.deduct ? ' (deduct)' : '') + (it.manual ? ' (typed)' : ''), cat: cat, page: it.page, text: itemValue(it), value: isFinite(unitVal) ? unitVal.toFixed(2) : '', unit: unit, inches: isFinite(inch) ? inch.toFixed(2) : '', scale: scaleLabel(s) };
     });
   }
   function copyList() {
@@ -1914,7 +2089,7 @@ details[open] > summary .sum { display: none; }
       var nb = Object.assign({}, M.blank), bv;
       if (e.target.id === 'blank-grid') nb.grid = e.target.checked;
       else if (e.target.id === 'blank-snap') nb.snap = e.target.checked;
-      else { bv = parseSize(e.target.value); if (bv >= 12) nb[e.target.id === 'blank-w' ? 'w' : 'h'] = bv; }
+      else { bv = parseSize(e.target.value); if (bv >= 1) nb[e.target.id === 'blank-w' ? 'w' : 'h'] = bv; }
       setBlank(nb); buildPage(); fit(); renderAll(); return;
     }
   });
@@ -1944,7 +2119,9 @@ details[open] > summary .sum { display: none; }
     if (d.cat) { var it = itemById(Number(d.cat)); if (it) { it.cat = e.target.value; renderPanels(); } }
     if (d.deduct) { var it2 = itemById(Number(d.deduct)); if (it2) { it2.deduct = e.target.checked; renderOverlay(); renderPanels(); } }
     if (d.colorpick) { var it3 = itemById(Number(d.colorpick)); if (it3) setItemColor(it3, e.target.value); }
-    if (d.end) { var it4 = itemById(Number(d.end)); if (it4) { it4.end = e.target.value; if (it4.type !== 'area') M.style.end = it4.end; renderOverlay(); renderPanels(); } }
+    if (d.end) { var it4 = itemById(Number(d.end)); if (it4) { it4.end = e.target.value; if (it4.type !== 'area' && !it4.shape) M.style.end = it4.end; renderOverlay(); renderPanels(); } }
+    if (d.fill) { var it6 = itemById(Number(d.fill)); if (it6) { it6.fill = e.target.value; M.shapeStyle.fill = it6.fill; renderOverlay(); renderPanels(); } }
+    if (d.sw) { var it7 = itemById(Number(d.sw)); if (it7) { it7.sw = Number(e.target.value); M.shapeStyle.sw = it7.sw; renderOverlay(); renderPanels(); } }
     if (d.rotv) { var it5 = itemById(Number(d.rotv)); if (it5) { it5.rot = normRot(e.target.value); renderOverlay(); renderPanels(); } }
   });
   function applyResize(id) {
@@ -1974,7 +2151,7 @@ details[open] > summary .sum { display: none; }
   function applyCalib() {
     var kn = $('known'), inches = parseSize(kn ? kn.value : '');
     var d = M.calib.length === 2 ? dist(M.calib[0], M.calib[1]) : 0;
-    if (!(inches > 0) || !(d > 0)) { M.calibErr = 'Type the length in inches, like 144 or 36 1/2.'; renderPanels(); var kn2 = $('known'); if (kn2) kn2.focus(); return; }
+    if (!(inches > 0) || !(d > 0)) { M.calibErr = isMetric() ? 'Type the length in ' + UNITS + ', like ' + egLen().replace('e.g. ', '') + '.' : 'Type the length in inches, like 144 or 36 1/2.'; renderPanels(); var kn2 = $('known'); if (kn2) kn2.focus(); return; }
     M.calibErr = '';
     M.scales[M.page] = { inPerUnit: inches / d, label: fmtLen(inches) + ' known length', how: 'calib', id: 'calib', known: inches, pts: [{ x: M.calib[0].x, y: M.calib[0].y }, { x: M.calib[1].x, y: M.calib[1].y }] };
     M.calib = []; M.note = 'Scale set. Press L to measure.';
@@ -2008,11 +2185,14 @@ details[open] > summary .sum { display: none; }
     var withHover = function (arr) { return M.hover ? arr.concat([M.hover]) : arr; };
     var len = function (pts) { var v = lenIn(pathLen(pts), M.page); return isFinite(v) ? fmtLen(v) : 'set scale'; };
     var snapTxt = M.snapped && M.snapKind ? '<span class="sub">Snapped: ' + ({ point: 'point', end: 'line end', line: 'line', grid: 'grid' }[M.snapKind]) + '</span>' : /^(length|run|curve|area|rect|circle|angle|dim)$/.test(M.tool) && !M.draft.length ? '<span class="sub"><kbd>Shift</kbd> straight · <kbd>Alt</kbd> no snap · right-click undoes a point</span>' : '';
-    var tn = MTOOL_NAME[M.tool] || ['Measure', ''], tipEl = $('tip');
+    var tn = MTOOL_NAME[M.tool] || ['Draw', ''], tipEl = $('tip');
     statusEl.innerHTML = '<b>' + tn[0] + '</b>' + (tn[1] ? ' <kbd>' + tn[1] + '</kbd>' : '') + (M.src === 'none' ? '' : ' · ' + (s ? esc(scaleLabel(s)) : 'no scale set'));
     if (M.src === 'none') { if (tipEl) tipEl.innerHTML = 'Open a drawing to start: <b>Open file</b> on right, or drop a file on canvas.'; return; }
     if (M.tool === 'scale') live = M.calib.length === 1 ? '<b>Click the other end.</b>' : M.calib.length === 2 ? '<b>Type the real length below</b>, then Apply.' : 'Pick the printed scale below, or <b>click both ends of a known length</b> (a door, a dimensioned wall).';
-    else if (M.tool === 'length') live = M.draft.length ? 'Length <b>' + len(withHover(M.draft)) + '</b> · click the other end' : 'Click two points on drawing.';
+    else if (M.tool === 'sline') live = M.draft.length ? 'Line <b>' + len(withHover(M.draft)) + '</b> · release, or click the other end' : 'Click and drag to draw a line. Shift keeps it level or plumb.';
+    else if (M.tool === 'srect' || M.tool === 'sell') live = M.draft.length ? 'Release, or click the opposite corner · Shift makes it ' + (M.tool === 'srect' ? 'a square' : 'a circle') : 'Click and drag to draw ' + (M.tool === 'srect' ? 'a rectangle' : 'an ellipse') + '. Shift keeps it ' + (M.tool === 'srect' ? 'square' : 'round') + '.';
+    else if (M.tool === 'spoly') live = M.draft.length ? 'Shape <b>' + len(withHover(M.draft)) + '</b> · Enter or double-click to finish, click the first point to close' : 'Click each point of the shape';
+    else if (M.tool === 'length') live = M.draft.length ? 'Length <b>' + len(withHover(M.draft)) + '</b> · click the other end' : 'Click and drag, or click both ends.';
     else if (M.tool === 'run') live = M.draft.length ? 'Run <b>' + len(withHover(M.draft)) + '</b> · Enter to finish' : 'Click points along the run';
     else if (M.tool === 'curve') live = M.draft.length ? 'Curve <b>' + len(curveDense(withHover(M.draft))) + '</b> · ' + (M.draft.length < 3 ? 'keep clicking along the curve' : 'Enter or double-click to finish') : 'Click points along the curve: start, middle, end makes an arc';
     else if (M.tool === 'area') live = M.draft.length ? 'Area <b>' + (M.draft.length > 1 ? fmtSqft(sqftOf(polyArea(withHover(M.draft)), M.page)) : '—') + '</b> · click the first point to close' : 'Click the corners of the area';
@@ -2029,6 +2209,66 @@ details[open] > summary .sum { display: none; }
     if (tipEl) tipEl.innerHTML = live + snapTxt + need;
   }
   function renderAll() { renderTools(); renderPanels(); drawOverlay(); updateStatus(); }
+
+  // ---- Floating bars (Draw) ----
+  var FICON = {
+    undo: '<path d="M6.5 4L3 7.5 6.5 11M3.5 7.5H11a4 4 0 0 1 0 8H8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>',
+    redo: '<path d="M11.5 4L15 7.5 11.5 11M14.5 7.5H7a4 4 0 0 0 0 8h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>',
+    gear: '<circle cx="9" cy="9" r="2.4" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M9 1.8v2.1M9 14.1v2.1M1.8 9h2.1M14.1 9h2.1M3.9 3.9l1.5 1.5M12.6 12.6l1.5 1.5M3.9 14.1l1.5-1.5M12.6 5.4l1.5-1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'
+  };
+  var TAG_MODES = [['full', 'Name + size'], ['size', 'Size only'], ['off', 'Selected only']];
+  var fpopOpen = false;
+  function ficon(k) { return '<svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true">' + FICON[k] + '</svg>'; }
+  function fbtn(act, label, on, title, extra) { return '<button type="button" class="fbtn' + (on ? ' on' : '') + '" data-fa="' + act + '"' + (on != null ? ' aria-pressed="' + !!on + '"' : '') + ' title="' + title + '"' + (extra || '') + '>' + label + '</button>'; }
+  function renderFloat() {
+    var tl = $('fbar-tl'), sc = $('fscale');
+    if (mode !== 'measure') { tl.hidden = true; sc.hidden = true; return; }
+    tl.hidden = false;
+    var blank = M.src === 'blank', c = History.can(), h = '';
+    h += '<span class="fgroup"><button type="button" class="fbtn ic" id="f-undo" data-fa="undo" title="Undo (⌘Z)" aria-label="Undo"' + (c.u ? '' : ' disabled') + '>' + ficon('undo') + '</button><button type="button" class="fbtn ic" id="f-redo" data-fa="redo" title="Redo (⌘⇧Z)" aria-label="Redo"' + (c.r ? '' : ' disabled') + '>' + ficon('redo') + '</button></span>';
+    h += '<span class="fgroup">';
+    if (blank) h += fbtn('grid', 'Grid', M.blank.grid, 'Show the grid') + fbtn('snap', 'Snap', M.blank.snap, 'Snap points to the grid (hold Alt to place freely)');
+    else h += fbtn('snapd', 'Snap', M.snapDrawing && M.src === 'pdf', M.src === 'pdf' ? 'Snap to the drawing’s lines (hold Alt to place freely)' : 'Only PDFs have lines to snap to', M.src === 'pdf' ? '' : ' disabled');
+    h += '</span>';
+    var tm = TAG_MODES.find(function (t) { return t[0] === (M.tags || 'full'); }) || TAG_MODES[0];
+    h += '<span class="fgroup">' + fbtn('tags', 'Dims <em>' + tm[1] + '</em>', M.tags !== 'off', 'Measurement tags: ' + tm[1] + ' (click to change)') + fbtn('ssize', 'Shape sizes', M.shapeSizes, 'Show the size of each Draw shape') + '</span>';
+    h += '<span class="fgroup"><button type="button" class="fbtn ic' + (fpopOpen ? ' on' : '') + '" data-fa="settings" title="Settings" aria-label="Settings" aria-expanded="' + fpopOpen + '">' + ficon('gear') + '</button>' + (fpopOpen ? settingsPop() : '') + '</span>';
+    tl.innerHTML = h;
+    // Bottom right: the snap grid on a blank canvas, the drawing's scale otherwise.
+    sc.hidden = M.src === 'none';
+    if (blank) sc.innerHTML = '<span class="flab">Grid</span><select id="f-gstep" aria-label="Snap grid size">' + gridSteps().map(function (g) { return '<option value="' + g[0] + '"' + (g[0] === M.blank.step ? ' selected' : '') + '>' + g[1] + '</option>'; }).join('') + '</select>';
+    else { var s0 = scaleNow(); sc.innerHTML = '<button type="button" class="fbtn" data-fa="scale" title="Set the scale (S)">Scale <em>' + esc(s0 ? scaleLabel(s0) : 'not set') + '</em></button>'; }
+  }
+  function settingsPop() {
+    var h = '<div class="fpop" role="dialog" aria-label="Settings">';
+    if (M.src === 'blank') h += '<h4>Canvas</h4><div class="row2"><label class="field">Width<input type="text" id="f-cw" value="' + esc(fmtLen(M.blank.w)) + '"></label><label class="field">Height<input type="text" id="f-ch" value="' + esc(fmtLen(M.blank.h)) + '"></label></div>';
+    else h += '<h4>Measuring</h4><label class="field">Length step<select id="f-round">' + roundOpts() + '</select></label>';
+    h += '<h4>Tags</h4><label class="field">Measurement tags<select id="f-tags">' + TAG_MODES.map(function (t) { return '<option value="' + t[0] + '"' + ((M.tags || 'full') === t[0] ? ' selected' : '') + '>' + t[1] + '</option>'; }).join('') + '</select></label>';
+    return h + '<p class="hint" style="margin:0">More settings will move here.</p></div>';
+  }
+  function setBlankOpt(k, v) { var nb = Object.assign({}, M.blank); nb[k] = v; setBlank(nb); }
+  $('fbar-tl').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-fa]'); if (!b || mode !== 'measure') return;
+    var a = b.dataset.fa;
+    if (a === 'undo') History.undo();
+    else if (a === 'redo') History.redo();
+    else if (a === 'grid') { setBlankOpt('grid', !M.blank.grid); paintGrid(); renderRight(); }
+    else if (a === 'snap') { setBlankOpt('snap', !M.blank.snap); renderRight(); }
+    else if (a === 'snapd') { M.snapDrawing = !M.snapDrawing; renderRight(); }
+    else if (a === 'tags') { var i = TAG_MODES.findIndex(function (t) { return t[0] === (M.tags || 'full'); }); M.tags = TAG_MODES[(i + 1) % TAG_MODES.length][0]; try { localStorage.setItem('dim-tags', M.tags); } catch (err) {} renderOverlay(); renderRight(); }
+    else if (a === 'ssize') { M.shapeSizes = !M.shapeSizes; renderOverlay(); }
+    else if (a === 'settings') { fpopOpen = !fpopOpen; }
+    renderFloat();
+  });
+  $('fbar-tl').addEventListener('change', function (e) {
+    var id = e.target.id;
+    if (id === 'f-cw' || id === 'f-ch') { var v = parseSize(e.target.value); if (v >= 1) { setBlankOpt(id === 'f-cw' ? 'w' : 'h', v); buildPage(); fit(); renderAll(); } return; }
+    if (id === 'f-round') { M.round = e.target.value; renderRight(); }
+    if (id === 'f-tags') { M.tags = e.target.value; try { localStorage.setItem('dim-tags', M.tags); } catch (err) {} renderOverlay(); renderRight(); renderFloat(); }
+  });
+  document.addEventListener('pointerdown', function (e) { if (fpopOpen && !e.target.closest('#fbar-tl')) { fpopOpen = false; renderFloat(); } });
+  $('fbar-br').addEventListener('change', function (e) { if (e.target.id === 'f-gstep') { setBlankOpt('step', Number(e.target.value)); paintGrid(); renderRight(); renderOverlay(); } });
+  $('fbar-br').addEventListener('click', function (e) { var b = e.target.closest('[data-fa="scale"]'); if (b && mode === 'measure') setTool('scale'); });
 
   // ---------- Undo / redo: snapshots of everything you can change ----------
   var History = (function () {
@@ -2052,7 +2292,7 @@ details[open] > summary .sum { display: none; }
     api.can = function () { return { u: stack.length > 1, r: redo.length > 0 }; };
     return api;
   })();
-  function paintUndo() { var c = History.can(); $('undo').disabled = !c.u; $('redo').disabled = !c.r; }
+  function paintUndo() { var c = History.can(); $('undo').disabled = !c.u; $('redo').disabled = !c.r; var fu = $('f-undo'), fr = $('f-redo'); if (fu) fu.disabled = !c.u; if (fr) fr.disabled = !c.r; }
 
   // ---------- Autosave: the current project, kept in this browser (IndexedDB) ----------
   var Autosave = (function () {
@@ -2158,7 +2398,7 @@ details[open] > summary .sum { display: none; }
     function rr(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
     function tag(x, y, text, fill, ang, ink) {
       ctx.save(); ctx.translate(x, y); if (ang) ctx.rotate(ang);
-      ctx.font = '700 ' + (11 * u) + 'px "JetBrains Mono", ui-monospace, monospace';
+      ctx.font = '700 ' + (11 * u) + 'px Manrope, system-ui, sans-serif';
       var w = ctx.measureText(text).width + 12 * u, h = 20 * u;
       rr(-w / 2, -h / 2, w, h, 4 * u); ctx.globalAlpha = 0.94; ctx.fillStyle = fill; ctx.fill(); ctx.globalAlpha = 1; ctx.lineWidth = Math.max(1, u); ctx.strokeStyle = dark; ctx.stroke();
       ctx.fillStyle = ink || '#222222'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, 0, 0.6 * u); ctx.restore();
@@ -2186,6 +2426,15 @@ details[open] > summary .sum { display: none; }
         marks(endMarks([dgc.a, dgc.b], es, s), lc);
         return;
       }
+      if (it.shape) {
+        var shc = it.color || SHAPE_INK, shf = shapeFill(it), shw = (it.sw || 1.5) * 1.2 * u;
+        if (it.type === 'area') {
+          ctx.beginPath(); gp.forEach(function (q, i) { if (i) ctx.lineTo(q.x, q.y); else ctx.moveTo(q.x, q.y); }); ctx.closePath();
+          if (shf.o) { ctx.globalAlpha = shf.o; ctx.fillStyle = shf.c; ctx.fill(); ctx.globalAlpha = 1; }
+          line(gp, shc, shw, true);
+        } else { line(gp, shc, shw); if (es !== 'none' && es !== 'square') marks(endMarks(path, es, s, it.pts), shc); }
+        return;
+      }
       if (it.type === 'area') {
         ctx.beginPath(); gp.forEach(function (q, i) { if (i) ctx.lineTo(q.x, q.y); else ctx.moveTo(q.x, q.y); }); ctx.closePath();
         ctx.globalAlpha = 0.22; ctx.fillStyle = c; ctx.fill(); ctx.globalAlpha = 1;
@@ -2193,10 +2442,10 @@ details[open] > summary .sum { display: none; }
       } else if (/length|run|angle|curve/.test(it.type)) { line(gp, 'rgba(255,255,255,.7)', 6 * u); line(gp, c, 3 * u); }
       if (it.type === 'count') pts.forEach(function (q, i) {
         ctx.beginPath(); ctx.arc(q.x, q.y, 8 * u, 0, Math.PI * 2); ctx.fillStyle = c; ctx.fill(); ctx.lineWidth = Math.max(1, u); ctx.strokeStyle = dark; ctx.stroke();
-        ctx.fillStyle = ink; ctx.font = '700 ' + (9.5 * u) + 'px "JetBrains Mono", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(i + 1), q.x, q.y + 0.5 * u);
+        ctx.fillStyle = ink; ctx.font = '700 ' + (9.5 * u) + 'px Manrope, system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(i + 1), q.x, q.y + 0.5 * u);
       });
       else if (it.type === 'note') {
-        ctx.font = '700 ' + (11 * u) + 'px "JetBrains Mono", ui-monospace, monospace';
+        ctx.font = '700 ' + (11 * u) + 'px Manrope, system-ui, sans-serif';
         var nlc = noteLeader(pts[0], P(noteLab(it, 18 * u / f)), ctx.measureText(it.name || '').width + 12 * u, 20 * u, it.rot, 11 * u);
         if (nlc) {
           if (nlc.long) { line([nlc.a, nlc.b], 'rgba(255,255,255,.9)', 4 * u); line([nlc.a, nlc.b], dark, 1.5 * u); }
@@ -2208,7 +2457,7 @@ details[open] > summary .sum { display: none; }
     // Tags last, spread out so they don't stack (same rules as on screen).
     var reqs = tagReqs(items, 18 * u / f, null);
     reqs.forEach(function (r) { r.x *= f; r.y *= f; if (r.ax != null) { r.ax *= f; r.ay *= f; } if (r.it.type === 'dim') r.fill = '#f2f2f2'; else if (!r.it.color) r.fill = rgbCss(r.it.deduct ? RGB.deduct : RGB[r.it.type]); });
-    ctx.font = '700 ' + (11 * u) + 'px "JetBrains Mono", ui-monospace, monospace';
+    ctx.font = '700 ' + (11 * u) + 'px Manrope, system-ui, sans-serif';
     placeTags(reqs, u, function (r, t) { return { w: ctx.measureText(t).width + 12 * u, h: 20 * u }; });
     reqs.forEach(function (r) {
       var o = r.out; if (!o) return;
@@ -2329,6 +2578,17 @@ details[open] > summary .sum { display: none; }
           marks(endMarks([dgp.a, dgp.b], es, ms), lc);
           return;
         }
+        if (it.shape) {
+          var pc = col(hexArr(it.color || SHAPE_INK)), pf = shapeFill(it), pw = (it.sw || 1.5) * 0.8 * k;
+          if (it.type === 'area') {
+            if (pf.o) pg.drawSvgPath(svgPath(P), { x: 0, y: 0, color: pf.c === '#ffffff' ? white : pc, opacity: pf.o, borderWidth: 0 });
+            for (var si = 0; si < P.length; si++) pg.drawLine({ start: P[si], end: P[(si + 1) % P.length], thickness: pw, color: pc });
+          } else {
+            for (var sj = 1; sj < P.length; sj++) pg.drawLine({ start: P[sj - 1], end: P[sj], thickness: pw, color: pc, lineCap: PL.LineCapStyle ? PL.LineCapStyle.Round : undefined });
+            if (es !== 'none' && es !== 'square') marks(endMarks(path, es, ms, it.pts), pc);
+          }
+          return;
+        }
         if (it.type === 'area') {
           pg.drawSvgPath(svgPath(P), { x: 0, y: 0, color: c, opacity: 0.2, borderWidth: 0 });
           for (var i = 0; i < P.length; i++) pg.drawLine({ start: P[i], end: P[(i + 1) % P.length], thickness: 1.6 * k, color: c, dashArray: it.deduct ? [6 * k, 4 * k] : undefined });
@@ -2383,7 +2643,7 @@ details[open] > summary .sum { display: none; }
         if (start + per >= rows.length) {
           var t = totalsFor(M.items); y -= 10;
           pg.drawLine({ start: { x: 40, y: y + 8 }, end: { x: W - 40, y: y + 8 }, thickness: 0.6, color: mid });
-          var lines = ['Length + runs: ' + (t.lin / 12).toFixed(1) + ' lin ft', 'Area: ' + fmtSqft(t.area) + (t.deduct ? '   Deductions: -' + fmtSqft(t.deduct) + '   Net: ' + fmtSqft(t.area - t.deduct) : '')];
+          var lines = ['Length + runs: ' + fmtLin(t.lin), 'Area: ' + fmtSqft(t.area) + (t.deduct ? '   Deductions: -' + fmtSqft(t.deduct) + '   Net: ' + fmtSqft(t.area - t.deduct) : '')];
           t.counts.forEach(function (c) { lines.push(c.name + ': ' + c.pts.length + ' ea'); });
           lines.forEach(function (l) { y -= 14; pg.drawText(pdfText(l), { x: 40, y: y, size: 10, font: bold, color: dark }); });
         }
@@ -2440,7 +2700,7 @@ details[open] > summary .sum { display: none; }
     // Plain numbers are inches here; 24' or 2'-6" or 3.2 m work too.
     function parseIn(v) { var s = String(v).trim(); if (/^\d+(\.\d+)?$/.test(s)) return parseFloat(s); if (/^\d+\s+\d+\/\d+$/.test(s)) { var p = s.split(/\s+/), f = p[1].split('/'); return Number(p[0]) + f[0] / f[1]; } return parseLen(s.indexOf("'") < 0 && s.indexOf('"') < 0 && !/m$/.test(s) ? s + '"' : s); }
     function fmtIn(x) { if (!isFinite(x)) return '—'; if (FMT === 'dec') return decIn(x) + '"'; var e = Math.round(x * 16) / 16, w = Math.floor(e + 1e-9), fr = Math.round((e - w) * 16); return (w || !fr ? w : '') + (fr ? (w ? ' ' : '') + FR[fr].trim() : '') + '"'; }
-    function fmtFt(inch) { return fmtLen(inch); }
+    function fmtFt(inch) { return fmtImp(inch); }
     function num(n, d) { return Number(n).toLocaleString(undefined, { maximumFractionDigits: d == null ? 1 : d }); }
     function get(path) { return path.split('.').reduce(function (o, k) { return o[k]; }, L); }
     function set(path, v) { var ks = path.split('.'), o = L; for (var i = 0; i < ks.length - 1; i++) o = o[ks[i]]; o[ks[ks.length - 1]] = v; }
@@ -2875,7 +3135,7 @@ details[open] > summary .sum { display: none; }
         g.addColorStop(0, A.g1); g.addColorStop(1, A.g2); ctx.fillStyle = g; ctx.fillRect(X, Yy, w, h); return;
       }
       ctx.fillStyle = '#ffffff'; ctx.fillRect(X, Yy, w, h);
-      if (!A.img) { ctx.fillStyle = '#9a9a9a'; ctx.font = '500 ' + Math.max(12, 14) + 'px "JetBrains Mono", monospace'; ctx.textAlign = 'center'; ctx.fillText('Choose an image in Artwork', X + w / 2, Yy + h / 2); return; }
+      if (!A.img) { ctx.fillStyle = '#9a9a9a'; ctx.font = '500 ' + Math.max(12, 14) + 'px Manrope, system-ui, sans-serif'; ctx.textAlign = 'center'; ctx.fillText('Choose an image in Artwork', X + w / 2, Yy + h / 2); return; }
       var iw = A.img.naturalWidth, ih = A.img.naturalHeight;
       ctx.save(); ctx.beginPath(); ctx.rect(X, Yy, w, h); ctx.clip();
       if (A.fit === 'repeat') {
@@ -2903,7 +3163,7 @@ details[open] > summary .sum { display: none; }
       return { ctx: ctx, cw: cw, ch: ch };
     }
     function txt(ctx, t, x, y, o) {
-      o = o || {}; ctx.font = (o.w || 400) + ' ' + (o.size || 11) + 'px "JetBrains Mono", ui-monospace, monospace';
+      o = o || {}; ctx.font = (o.w || 400) + ' ' + (o.size || 11) + 'px Manrope, system-ui, sans-serif';
       ctx.textAlign = o.align || 'center'; ctx.textBaseline = o.base || 'alphabetic'; ctx.fillStyle = o.color || SINK; ctx.fillText(t, x, y);
     }
     // ---- Dimension labels that adapt to what is under them ----
@@ -2938,7 +3198,7 @@ details[open] > summary .sum { display: none; }
     // o: size, w (weight), align, base, color (a fixed ink). Draws the label, boxed only if it needs to be.
     function dimText(ctx, label, x, y, o) {
       o = o || {}; var size = o.size || 11, align = o.align || 'center', base = o.base || 'alphabetic';
-      ctx.font = (o.w || 400) + ' ' + size + 'px "JetBrains Mono", ui-monospace, monospace';
+      ctx.font = (o.w || 400) + ' ' + size + 'px Manrope, system-ui, sans-serif';
       var lw = ctx.measureText(label).width, lx = align === 'left' ? x : align === 'right' ? x - lw : x - lw / 2, ty = base === 'middle' ? y - size * 0.62 : y - size * 0.86, th = size * 1.15;
       var bg = underBox(ctx, lx - 2, ty - 1, lw + 4, th + 2), inks = o.color ? [o.color] : [SINK, INK2], ink = inks[0], box = false;
       if (bg) {
@@ -2961,7 +3221,7 @@ details[open] > summary .sum { display: none; }
       else dimText(ctx, label, (x1 + x2) / 2, side === 'below' ? y1 + 16 : y1 - 7, { size: 11 });
     }
     function tag(ctx, x, y, t, fill) {
-      ctx.font = '700 11px "JetBrains Mono", monospace'; var w = ctx.measureText(t).width + 12, h = 18;
+      ctx.font = '700 11px Manrope, system-ui, sans-serif'; var w = ctx.measureText(t).width + 12, h = 18;
       ctx.fillStyle = fill; ctx.strokeStyle = INK; ctx.lineWidth = 1;
       ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x - w / 2, y - h / 2, w, h, 4); else ctx.rect(x - w / 2, y - h / 2, w, h); ctx.fill(); ctx.stroke();
       txt(ctx, t, x, y + 4, { w: 700, color: INK2 });
@@ -3098,7 +3358,7 @@ details[open] > summary .sum { display: none; }
             for (var q = 0; q < r.strips - 1; q++) { pos += r.widths[q]; ctx.beginPath(); if (r.dir === 'vertical') { ctx.moveTo(x + pos * s, fy); ctx.lineTo(x + pos * s, fy + fh); } else { ctx.moveTo(x, fy + pos * s); ctx.lineTo(x + w, fy + pos * s); } ctx.stroke(); }
             ctx.setLineDash([]);
             // Strip widths, dimensioned like Mural panels: under the pane for drops, down its left side for rows.
-            ctx.font = '400 11px "JetBrains Mono", ui-monospace, monospace';
+            ctx.font = '400 11px Manrope, system-ui, sans-serif';
             var fits = r.widths.every(function (sw) { return ctx.measureText(fmtIn(sw)).width + 6 < sw * s; }), p0 = 0, fdim = dimOn('film', 'film'), side = gapIn * s > 22 || i === 0;
             // Film size: the strips across one way, and the film's whole size the other way (its height beside drops, its width over rows).
             if (!fdim) { /* switched off under Dimensions */ }
@@ -3112,10 +3372,10 @@ details[open] > summary .sum { display: none; }
             }
           }
           if (pc && dimOn('film', 'fade')) { var FK0 = filmK(p); drawFadeStops(ctx, fadeStops(FK0), gx, gx + gw, function (hh) { return gy + gh - hh * s; }, Math.max(0, pc.base - 1e-6), pc.base + pc.h + 1e-6, gx + gw - 4, 'right', false); }
-          ctx.font = '400 10.5px "JetBrains Mono", ui-monospace, monospace';
+          ctx.font = '400 10.5px Manrope, system-ui, sans-serif';
           var dt = pc ? dropsText(r, p.qty) : 'band misses this glass', nq = pc ? r.strips * (p.qty > 1 ? p.qty : 1) : 0; if (pc && ctx.measureText(dt).width > room + 2) dt = nq + (r.dir === 'vertical' ? ' drop' : ' row') + (nq > 1 ? 's' : '');
           var sz = fmtIn(p.w) + ' × ' + fmtIn(p.h) + ' ×' + p.qty; if (ctx.measureText(sz).width > room + 2) sz = '×' + p.qty;
-          ctx.font = '500 11px "JetBrains Mono", ui-monospace, monospace';
+          ctx.font = '500 11px Manrope, system-ui, sans-serif';
           var nm = p.name; while (nm.length > 2 && ctx.measureText(nm).width > room) nm = nm.slice(0, -2) + '…';
           txt(ctx, nm, x + w / 2, base + 42, { size: 11, w: 500 });
           txt(ctx, sz, x + w / 2, base + 57, { size: 10.5, color: SINK2 });
@@ -3152,11 +3412,11 @@ details[open] > summary .sum { display: none; }
       // A band's bottom edge above the floor and its height, down the right side.
       if (band && rightDim && bandDim) { dimLine(ctx, x0 + w + 22, floor, x0 + w + 22, Y(K.bandB), fmtIn(K.bandB), 'right'); dimLine(ctx, x0 + w + 22, Y(K.bandB), x0 + w + 22, Y(K.bandB + K.bandH), fmtIn(K.bandH), 'right'); }
       ctx.strokeStyle = SINK2; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x0 - (sideDim ? 50 : 6), floor + .5); ctx.lineTo(x0 + w + 6, floor + .5); ctx.stroke();
-      ctx.font = '400 11px "JetBrains Mono", ui-monospace, monospace';
+      ctx.font = '400 11px Manrope, system-ui, sans-serif';
       fr.panes.forEach(function (g) { var lab = fmtIn(g.w); dimLine(ctx, x0 + g.x * s, floor + 22, x0 + (g.x + g.w) * s, floor + 22, ctx.measureText(lab).width + 6 < g.w * s ? lab : '', 'below'); });
       dimLine(ctx, x0, floor + 52, x0 + w, floor + 52, fmtFt(fr.len), 'below');
       if (sideDim) dimLine(ctx, x0 - 28, floor, x0 - 28, Y(fr.top), fmtIn(fr.top));
-      ctx.font = '500 11.5px "JetBrains Mono", ui-monospace, monospace';
+      ctx.font = '500 11.5px Manrope, system-ui, sans-serif';
       var nm = p.name + (p.qty > 1 ? ' ×' + p.qty : ''), full = nm + ' · ' + fmtFt(fr.len); if (ctx.measureText(full).width <= w + 30) nm = full; else while (nm.length > 2 && ctx.measureText(nm).width > w + 30) nm = nm.slice(0, -2) + '…';
       txt(ctx, nm, x0 + w / 2, Y(fr.top) - 10, { size: 11.5, w: 500 });
     }
@@ -3303,7 +3563,7 @@ details[open] > summary .sum { display: none; }
       if (fr) drawDoors(ctx, fr, K, x0, floor, s, true);
       if (fr) {
         // Openings under the floor line, the overall frame below them, where the glass starts on the right, and the spacing in the panes.
-        ctx.font = '400 11px "JetBrains Mono", ui-monospace, monospace';
+        ctx.font = '400 11px Manrope, system-ui, sans-serif';
         fr.panes.forEach(function (p) { var lab = fmtIn(p.w); dimLine(ctx, x0 + p.x * s, floor + 22, x0 + (p.x + p.w) * s, floor + 22, ctx.measureText(lab).width + 6 < p.w * s ? lab : '', 'below'); });
         dimLine(ctx, x0, floor + 52, x0 + w, floor + 52, fmtFt(run.len), 'below');
         var gb = K.curb + K.fSill; if (gb > 0 && fr.panes.some(function (p) { return !p.door; })) dimLine(ctx, x0 + w + 22, floor, x0 + w + 22, Y(gb), fmtIn(gb), 'right');
@@ -3334,7 +3594,7 @@ details[open] > summary .sum { display: none; }
     // Small drawings (a Shop drawing sheet) run out of room first, so the gap between marks always gets its label.
     function spacingDims(ctx, list, x0, s, y) {
       var rows = [[], []];
-      ctx.font = '400 9.5px "JetBrains Mono", ui-monospace, monospace';
+      ctx.font = '400 9.5px Manrope, system-ui, sans-serif';
       list.forEach(function (g) {
         var x1 = x0 + g[0] * s, x2 = x0 + g[1] * s, lab = fmtIn(g[2]), lw = ctx.measureText(lab).width, lc = Math.max((x1 + x2) / 2, x1 + lw / 2 - 2), a = Math.min(x1, lc - lw / 2 - 2), b = Math.max(x2, lc + lw / 2 + 2);
         for (var r = 0; r < rows.length; r++) {
@@ -3346,12 +3606,12 @@ details[open] > summary .sum { display: none; }
     // A short dimension with its label underneath, for gaps between marks.
     // Skips it (returns null) when its label would run into the one before, which ends at minX; otherwise returns where this label ends.
     function smallDim(ctx, x1, x2, y, label, minX) {
-      ctx.font = '400 9.5px "JetBrains Mono", ui-monospace, monospace';
+      ctx.font = '400 9.5px Manrope, system-ui, sans-serif';
       var lw = ctx.measureText(label).width, lc = Math.max((x1 + x2) / 2, x1 + lw / 2 - 2);
       if (lc - lw / 2 - 2 < minX + 3) return null;
       ctx.save(); ctx.strokeStyle = '#b0127a'; ctx.lineWidth = .75; ctx.beginPath();
       ctx.moveTo(x1, y); ctx.lineTo(x2, y); ctx.moveTo(x1, y - 3); ctx.lineTo(x1, y + 3); ctx.moveTo(x2, y - 3); ctx.lineTo(x2, y + 3); ctx.stroke(); ctx.restore();
-      ctx.font = '400 9.5px "JetBrains Mono", ui-monospace, monospace';
+      ctx.font = '400 9.5px Manrope, system-ui, sans-serif';
       var tw2 = ctx.measureText(label).width, cx = Math.max((x1 + x2) / 2, x1 + tw2 / 2 - 2);
       dimText(ctx, label, cx, y + 12.5, { size: 9.5, color: '#b0127a' });
       return cx + tw2 / 2 + 2;
@@ -3441,7 +3701,7 @@ details[open] > summary .sum { display: none; }
       else { ctx.moveTo(x1, y1 - 3.5); ctx.lineTo(x1, y1 + 3.5); ctx.moveTo(x2, y2 - 3.5); ctx.lineTo(x2, y2 + 3.5); }
       ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 3; ctx.stroke();   // a light halo keeps the line readable on brick or block
       ctx.strokeStyle = GDIM; ctx.lineWidth = .9; ctx.stroke();
-      ctx.font = '500 10px "JetBrains Mono", ui-monospace, monospace';
+      ctx.font = '500 10px Manrope, system-ui, sans-serif';
       var lw = ctx.measureText(label).width, cx, cy;
       if (vert) { cy = (y1 + y2) / 2; cx = side === 'left' ? x1 - 6 - lw / 2 : x1 + 6 + lw / 2; }
       else { cx = (x1 + x2) / 2; cy = y1 - 7 - (lw + 6 > Math.abs(x2 - x1) ? 10 : 0); }
@@ -3551,7 +3811,7 @@ details[open] > summary .sum { display: none; }
       });
       if (fr && (r.items || []).length) drawDoors(ctx, fr, G, x0, floor, s, true);
       // Pane openings and the overall length under the floor, where the glass starts, or the wall's height.
-      ctx.font = '400 11px "JetBrains Mono", ui-monospace, monospace';
+      ctx.font = '400 11px Manrope, system-ui, sans-serif';
       if (fr) {
         fr.panes.forEach(function (p) { var lab = fmtIn(p.w); dimLine(ctx, x0 + p.x * s, floor + 22, x0 + (p.x + p.w) * s, floor + 22, ctx.measureText(lab).width + 6 < p.w * s ? lab : '', 'below'); });
         dimLine(ctx, x0, floor + 52, x0 + w, floor + 52, fmtFt(len), 'below');
@@ -3670,12 +3930,12 @@ details[open] > summary .sum { display: none; }
     var rollSel = function (noMargin) { var rw = selectF('Roll width', 'roll', ROLLS.map(function (r) { return [r, r + '" roll']; })); return noMargin ? rw : '<div class="row2">' + rw + field('Printer margin', 'margin', 'in') + '</div><p class="hint keep" style="margin:0">Prints ' + fmtIn(printW()) + ' wide on a ' + L.roll + '" roll. The margin is both edges together.</p>'; };
     // Lengths, runs and rectangles from Measure. With a category, items tagged with it win; untagged ones are used if none are tagged.
     function measuredLengths(cat) {
-      var list = M.items.filter(function (it) { return (it.type === 'length' || it.type === 'run' || it.type === 'curve') && scaleFor(it.page); });
+      var list = M.items.filter(function (it) { return !it.shape && (it.type === 'length' || it.type === 'run' || it.type === 'curve') && scaleFor(it.page); });
       if (cat) { var only = list.filter(function (it) { return it.cat === cat; }); list = only.length ? only : list.filter(function (it) { return !it.cat; }); }
       return list.map(function (it) { return { id: it.id, name: it.name, len: lenIn(pathLen(geomPts(it)), it.page) }; });
     }
     function measuredRects(cat) {
-      var list = M.items.filter(function (it) { return it.type === 'area' && it.rect && !it.deduct && scaleFor(it.page); });
+      var list = M.items.filter(function (it) { return !it.shape && it.type === 'area' && it.rect && !it.deduct && scaleFor(it.page); });
       if (cat) { var only = list.filter(function (it) { return it.cat === cat; }); list = only.length ? only : list.filter(function (it) { return !it.cat; }); }
       return list.map(function (it) { return { id: it.id, name: it.name, w: lenIn(Math.abs(it.pts[1].x - it.pts[0].x), it.page), h: lenIn(Math.abs(it.pts[2].y - it.pts[1].y), it.page) }; });
     }
@@ -3745,7 +4005,7 @@ details[open] > summary .sum { display: none; }
             (on ? paneBuilder(p, filmK(p)) : fr ? '<div class="ed-out">' + esc(p.panes) + '</div>' : '') +
             (on && fr && pcs.length ? '<div class="ed-out spacing">' + pcs.map(function (pc, j) { return '<b>' + esc(pc.part) + '</b> ' + esc(fmtIn(pc.w)) + ' × ' + esc(fmtIn(pc.h)) + ' ×' + pc.qty + ' · ' + esc(dropsText(rs[j], pc.qty)); }).join('<br>') + '</div>' : '') +
             (warn.length ? '<div class="ed-out warn">' + warn.map(esc).join('<br>') + '</div>' : '') + '</div>';
-        }).join('') + '</div><div class="row" style="margin-top:8px"><button type="button" class="btn" data-addrow="1">+ Add pane</button>' + (fromMeasureCount() ? '<button type="button" class="btn" data-frommeasure="1">Add from Measure</button>' : '') + '</div></div>';
+        }).join('') + '</div><div class="row" style="margin-top:8px"><button type="button" class="btn" data-addrow="1">+ Add pane</button>' + (fromMeasureCount() ? '<button type="button" class="btn" data-frommeasure="1">Add from Draw</button>' : '') + '</div></div>';
       } else if (L.job === 'graphic') {
         var G = L.graphic, gc = graphicCount(); syncLens(G);
         h += '<div class="block"><div class="label">Graphic mockup</div><div class="readout">' + gc + ' graphic' + (gc === 1 ? '' : 's') + '</div><p class="hint">On ' + G.runs.length + ' elevation' + (G.runs.length === 1 ? '' : 's') + ', glass or wall. Place logos and graphics, then open as a shop drawing.</p></div>';
@@ -3767,7 +4027,7 @@ details[open] > summary .sum { display: none; }
             '<div class="ed-nums two"><label>Length<input type="text" data-f="len" value="' + esc(fmtFt(r.len)) + '"' + (bays ? ' disabled title="Set by the panes"' : '') + '></label><span class="ed-out">' + (L.markers.pattern === 'solid' ? num(r.len * mt.nb / 12) + ' LF' : ms.length * mt.nb + ' pcs') + '</span></div>' +
             (on ? paneBuilder(r) : fr ? '<div class="ed-out">' + esc(r.panes) + '</div>' : '') +
             (on && fr ? spacingNote(ms) : '') + (warn.length ? '<div class="ed-out warn">' + warn.map(esc).join('<br>') + '</div>' : '') + '</div>';
-        }).join('') + '</div><div class="row" style="margin-top:8px"><button type="button" class="btn" data-addrow="1">+ Add run</button>' + (fromMeasureCount() ? '<button type="button" class="btn" data-frommeasure="1">Add from Measure</button>' : '') + '</div></div>';
+        }).join('') + '</div><div class="row" style="margin-top:8px"><button type="button" class="btn" data-addrow="1">+ Add run</button>' + (fromMeasureCount() ? '<button type="button" class="btn" data-frommeasure="1">Add from Draw</button>' : '') + '</div></div>';
       }
       leftEl.innerHTML = h;
     }
@@ -3799,7 +4059,7 @@ details[open] > summary .sum { display: none; }
       if (L.job === 'mural') {
         var A = L.mural, m = muralPanels(), ml = measuredLengths('mural'), mr = measuredRects('mural');
         var size = '<div class="row2">' + field('Wall width', 'mural.w', 'len') + field('Wall height', 'mural.h', 'len') + '</div>';
-        if (ml.length || mr.length) size += '<label class="field">Use Measure item<select data-measure="mural"><option value="">Choose…</option>' + mr.map(function (x) { return '<option value="r:' + x.w + ':' + x.h + '">' + esc(x.name) + ' · ' + fmtFt(x.w) + ' × ' + fmtFt(x.h) + '</option>'; }).join('') + ml.map(function (x) { return '<option value="w:' + x.len + '">' + esc(x.name) + ' · width ' + fmtFt(x.len) + '</option>'; }).join('') + '</select></label><p class="hint" style="margin:0">A rectangle sets width and height; a length sets width.</p>';
+        if (ml.length || mr.length) size += '<label class="field">Use Draw item<select data-measure="mural"><option value="">Choose…</option>' + mr.map(function (x) { return '<option value="r:' + x.w + ':' + x.h + '">' + esc(x.name) + ' · ' + fmtFt(x.w) + ' × ' + fmtFt(x.h) + '</option>'; }).join('') + ml.map(function (x) { return '<option value="w:' + x.len + '">' + esc(x.name) + ' · width ' + fmtFt(x.len) + '</option>'; }).join('') + '</select></label><p class="hint" style="margin:0">A rectangle sets width and height; a length sets width.</p>';
         var roll = rollSel() + '<div class="row2">' + field('Bleed, each edge', 'mural.bleed', 'in') + field('Panel overlap', 'mural.overlap', 'in') + '</div>' +
           selectF('Panels run', 'mural.orient', [['vertical', 'Vertically (drops)'], ['horizontal', 'Horizontally (rows)']]) +
           selectF('Panel widths', 'mural.balance', [['false', 'Full rolls, last one trimmed'], ['true', 'All panels equal']]) +
@@ -3837,7 +4097,7 @@ details[open] > summary .sum { display: none; }
       } else if (L.job === 'film') {
         var F2 = L.film, t = filmTotals(), sp = F2.panes[F2.sel] || F2.panes[0], pre = sp ? 'film.panes.' + F2.panes.indexOf(sp) + '.s' : '', R = sp ? rowSet(sp) : null, built = !!(sp && runBays(sp)), many = F2.panes.length > 1;
         var fromFloor = built ? ' On a built-out row, heights are from the floor, so the film lines up across doors and sidelites.' : '';
-        var rollB = rollSel() + '<div class="row2">' + field('Bleed, each edge', 'film.allow', 'in') + field('Default glass height', 'film.defH', 'in') + '</div>' + selectF('Strips run', 'film.mode', [['auto', 'Whichever uses less film'], ['vertical', 'Vertically (drops)'], ['horizontal', 'Horizontally (rows)']]) + selectF('Strip widths', 'film.balance', [['true', 'All strips equal'], ['false', 'Full rolls, last one trimmed']]) + '<p class="hint" style="margin:0">Default glass height is used for panes added from Measure lengths.</p>';
+        var rollB = rollSel() + '<div class="row2">' + field('Bleed, each edge', 'film.allow', 'in') + field('Default glass height', 'film.defH', 'in') + '</div>' + selectF('Strips run', 'film.mode', [['auto', 'Whichever uses less film'], ['vertical', 'Vertically (drops)'], ['horizontal', 'Horizontally (rows)']]) + selectF('Strip widths', 'film.balance', [['true', 'All strips equal'], ['false', 'Full rolls, last one trimmed']]) + '<p class="hint" style="margin:0">Default glass height is used for panes added from Draw lengths.</p>';
         var cov = selectF('Film covers', 'film.cover', [['full', 'The whole glass'], ['band', 'A band']]);
         if (F2.cover === 'band') cov += '<div class="row2">' + field('Band height', 'film.bandH', 'in') + field('Bottom edge, AFF', 'film.bandB', 'in') + '</div><p class="hint" style="margin:0">One band runs the length of every row, ' + esc(fmtIn(F2.bandB)) + ' to ' + esc(fmtIn(F2.bandB + F2.bandH)) + ' above the floor, cut for each pane of glass. Its top and bottom edges get no bleed unless they reach the edge of the glass. Plain panes are placed by <b>Sill height</b> under Look.</p>' + (printW() + 1e-9 < F2.bandH ? '<p class="hint keep" style="margin:0">A ' + esc(fmtIn(F2.bandH)) + ' band is taller than the ' + esc(fmtIn(printW())) + ' this roll prints, so rows will seam.</p>' : '');
         var tabs = [];
@@ -4792,7 +5052,7 @@ details[open] > summary .sum { display: none; }
         }
       }
       var z = Math.min(F.w / base.w, F.h / base.h), preset = presetOf(V), warn = '';
-      if (preset) { if (sc) z = sc.inPerUnit / preset.inPerUnit; else warn = 'Set a scale in Measure first; the drawing is fitted to the frame for now.'; }
+      if (preset) { if (sc) z = sc.inPerUnit / preset.inPerUnit; else warn = 'Set a scale in Draw first; the drawing is fitted to the frame for now.'; }
       var w = F.w / z, h = F.h / z, cx = base.x + base.w / 2 + V.pan.x, cy = base.y + base.h / 2 + V.pan.y;
       var real = sc ? sc.inPerUnit / z : NaN;
       return { x: cx - w / 2, y: cy - h / 2, w: w, h: h, z: z, realInPerPt: real, warn: warn,
@@ -5117,7 +5377,7 @@ details[open] > summary .sum { display: none; }
       if (p.k === 'image') {
         var vw = VS(viewById(p.vid) || S);
         if (vw.url) return '<image href="' + vw.url + '" x="' + p.x + '" y="' + p.y + '" width="' + p.w + '" height="' + p.h + '" preserveAspectRatio="none"/>';
-        var pv = viewById(p.vid) || S, msg = vw.err ? 'Could not draw it: ' + vw.err : pv.src === 'measure' && M.src === 'none' ? 'Open a drawing in Measure, or pick a Layout as the source.' : 'Drawing…';
+        var pv = viewById(p.vid) || S, msg = vw.err ? 'Could not draw it: ' + vw.err : pv.src === 'measure' && M.src === 'none' ? 'Open a drawing in Draw, or pick a Layout as the source.' : 'Drawing…';
         return '<text x="' + (p.x + p.w / 2) + '" y="' + (p.y + p.h / 2) + '" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#888888">' + esc(msg) + '</text>';
       }
       return '';
@@ -5181,7 +5441,7 @@ details[open] > summary .sum { display: none; }
         mrunsOff: [], grunsOff: [], frowsOff: [], layDims: true, border: true, cap: 'Detail ' + String.fromCharCode(65 + (nth % 26)), stroke: '#1c1c1c', sw: 0.75 };
       S.notes.push(n); sel = n.id; multi = []; tool = 'select';
     }
-    function srcName(src) { return src === 'measure' ? 'Measure: ' + (M.src === 'none' ? 'no drawing open' : baseName()) : 'Layout: ' + SOURCES[src]; }
+    function srcName(src) { return src === 'measure' ? 'Draw: ' + (M.src === 'none' ? 'no drawing open' : baseName()) : 'Layout: ' + SOURCES[src]; }
     function guideById(id) { return (S.guides || []).find(function (gd) { return gd.id === id; }); }
     function hitGuide(p) { if (!guidesOn) return null; var tol = 5 / pxPerPt(); return (S.guides || []).slice().reverse().find(function (gd) { return Math.abs((gd.o === 'v' ? p.x : p.y) - gd.p) < tol; }) || null; }
     // A new guide goes through the middle of the drawing frame, stepped aside if one is already there.
@@ -5424,7 +5684,7 @@ details[open] > summary .sum { display: none; }
       if (sheets.length > 1) sh += '<div class="row"><button type="button" class="btn" data-sact="sheetleft"' + (cur ? '' : ' disabled') + '>← Move earlier</button><button type="button" class="btn" data-sact="sheetright"' + (cur < sheets.length - 1 ? '' : ' disabled') + '>Move later →</button></div>';
       sh += '<p class="hint" style="margin:0">' + (sheets.length > 1 ? 'Sheet ' + (cur + 1) + ' of ' + sheets.length + '. Tabs above the sheet switch between them (Page Up / Page Down too).' : 'Add sheets to put each drawing on its own page.') + ' A new sheet keeps this one\u2019s paper and project details.</p>';
       h += sec('sh_sheet', 'Sheet', sh);
-      var dv = '<label class="field">Show<select data-sk="src"><option value="measure"' + (S.src === 'measure' ? ' selected' : '') + '>Measure: ' + esc(M.src === 'none' ? 'no drawing open' : baseName() + (M.pages > 1 ? ', page ' + M.page : '')) + '</option>' +
+      var dv = '<label class="field">Show<select data-sk="src"><option value="measure"' + (S.src === 'measure' ? ' selected' : '') + '>Draw: ' + esc(M.src === 'none' ? 'no drawing open' : baseName() + (M.pages > 1 ? ', page ' + M.page : '')) + '</option>' +
         Object.keys(SOURCES).map(function (k) { return '<option value="' + k + '"' + (S.src === k ? ' selected' : '') + '>Layout: ' + SOURCES[k] + '</option>'; }).join('') + '</select></label>';
       if (S.src === 'measure') {
         var groups = {}; PRESETS.forEach(function (p) { (groups[p.group] = groups[p.group] || []).push(p); });
@@ -5433,7 +5693,7 @@ details[open] > summary .sum { display: none; }
         var r = region();
         if (r && r.warn) dv += '<p class="err">' + esc(r.warn) + '</p>';
         if (M.src === 'blank') dv += '<label class="chk"><input type="checkbox" data-sk="grid"' + (S.grid !== false ? ' checked' : '') + '> Canvas grid</label>';
-        dv += '<div class="row"><button type="button" class="btn" data-sact="center"' + (S.pan.x || S.pan.y ? '' : ' disabled') + '>Center drawing</button></div><p class="hint" style="margin:0">Hand tool (H) slides the drawing in its frame. Measurements show as in Measure.</p>';
+        dv += '<div class="row"><button type="button" class="btn" data-sact="center"' + (S.pan.x || S.pan.y ? '' : ' disabled') + '>Center drawing</button></div><p class="hint" style="margin:0">Hand tool (H) slides the drawing in its frame. Measurements show as in Draw.</p>';
       } else {
         dv += '<label class="field">Sheet scale<select data-sk="scale">' + scaleOpts(S.scale, 'Fit frame') + '</select></label>';
         dv += '<div class="row"><button type="button" class="btn" data-sact="center"' + (S.pan.x || S.pan.y ? '' : ' disabled') + '>Center drawing</button></div><p class="hint" style="margin:0">Layout fills the frame; the hand tool (H) slides it. Change the drawing in Layout.</p>';
@@ -5559,8 +5819,8 @@ details[open] > summary .sum { display: none; }
         left(); History.record(); return;
       }
       if (d.sp === 'who') { edit(function (n) { n.who = S.style.who = e.target.value; n.hIn = FIGS[n.who].hIn; fitFig(n); }); left(); History.record(); return; }
-      if (d.sp === 'realW') { var rw = parseLen(e.target.value), rr2 = realPerPt(); edit(function (n) { if (rw > 0 && isFinite(rr2)) { var nw = rw / rr2, cx = n.x + n.w / 2, cy = n.y + n.h / 2; n.h = n.h * nw / n.w; n.w = nw; n.x = cx - n.w / 2; n.y = cy - n.h / 2; } }); left(); History.record(); return; }
-      if (d.sp === 'hIn') { var hv = parseLen(e.target.value); edit(function (n) { if (hv > 0) { n.hIn = hv; fitFig(n); } }); left(); History.record(); return; }
+      if (d.sp === 'realW') { var rw = parseLen(e.target.value, true), rr2 = realPerPt(); edit(function (n) { if (rw > 0 && isFinite(rr2)) { var nw = rw / rr2, cx = n.x + n.w / 2, cy = n.y + n.h / 2; n.h = n.h * nw / n.w; n.w = nw; n.x = cx - n.w / 2; n.y = cy - n.h / 2; } }); left(); History.record(); return; }
+      if (d.sp === 'hIn') { var hv = parseLen(e.target.value, true); edit(function (n) { if (hv > 0) { n.hIn = hv; fitFig(n); } }); left(); History.record(); return; }
       if (d.sp) {
         var v = e.target.type === 'checkbox' ? e.target.checked : /size|sw/.test(d.sp) ? Number(e.target.value) : e.target.value;
         edit(function (n) {
@@ -5743,10 +6003,10 @@ details[open] > summary .sum { display: none; }
 
   function renderHome() {
     var cont = M.src !== 'none' ? '<button type="button" class="btn strong" data-home="continue">Continue: ' + esc(M.name || 'your drawing') + '</button>' : '';
-    stage.innerHTML = '<div class="home-wrap"><div class="home-hero"><h2>DIM</h2><p>Measure plans and photos, lay out murals, film and markers, and make shop drawings, all in your browser. Files stay on this device.</p>' +
-      '<p><b>Get started:</b> open a drawing with <b>Open file</b>, or drag and drop it here. Measure’s Drawing panel on the right has the same button.</p>' + FILE_TYPES +
-      '<div class="row">' + cont + '<label class="btn' + (cont ? '' : ' strong') + '" for="home-file">Open file</label><input type="file" id="home-file" accept="application/pdf,image/*,.dim,.json" hidden><button type="button" class="btn" data-home="blank">Start a blank canvas</button><button type="button" class="btn" data-home="sample">Try the sample plan</button></div></div>' +
-      '<div class="home-cards"><div><h3>Measure</h3><p>Set the scale, then measure lengths, curves, areas and counts. Snap to the drawing’s lines and mark up photos.</p><div><button type="button" class="btn" data-home="measure">Go to Measure</button></div></div>' +
+    stage.innerHTML = '<div class="home-wrap"><div class="home-hero"><h2>DIM</h2><p>Draw and measure at true size, mark up plans and photos, lay out murals, film and markers, and make shop drawings, all in your browser. Files stay on this device.</p>' +
+      '<p><b>Get started:</b> start drawing on a blank canvas, or open a plan or photo with <b>Open file</b> (or drag and drop it here).</p>' + FILE_TYPES +
+      '<div class="row">' + cont + '<label class="btn' + (cont ? '' : ' strong') + '" for="home-file">Open file</label><input type="file" id="home-file" accept="application/pdf,image/*,.dim,.json" hidden><button type="button" class="btn" data-home="blank">New blank canvas</button><button type="button" class="btn" data-home="sample">Try the sample plan</button></div></div>' +
+      '<div class="home-cards"><div><h3>Draw</h3><p>Click and drag lines, rectangles and ellipses on a true-size grid that snaps to fractions of an inch. Measure lengths, areas and counts, on a blank canvas or over a plan or photo.</p><div><button type="button" class="btn" data-home="measure">Go to Draw</button></div></div>' +
       '<div><h3>Layout</h3><p>Split murals into panels, lay out privacy film, and nest distraction markers on the roll, with quotes.</p><div><button type="button" class="btn" data-home="layout">Go to Layout</button></div></div>' +
       '<div><h3>Shop drawing</h3><p>Put a drawing or layout on a sheet with your title block, logo, scale bar, text and shapes. Export a PDF.</p><div><button type="button" class="btn" data-home="shop">Go to Shop drawing</button></div></div></div></div>';
     $('home-file').addEventListener('change', function (e) { openFile(e.target.files && e.target.files[0]); e.target.value = ''; });
@@ -5764,9 +6024,15 @@ details[open] > summary .sum { display: none; }
     document.querySelectorAll('[data-mode]').forEach(function (b) { b.classList.toggle('on', b.dataset.mode === m); b.setAttribute('aria-pressed', b.dataset.mode === m ? 'true' : 'false'); });
     zoomEl.hidden = m !== 'measure';
     stage.style.cursor = '';
+    stage.classList.toggle('draw', m === 'measure');
     $('unitbar').hidden = m === 'home';
+    $('fbar-br').hidden = m === 'home';
+    document.querySelector('.hist').hidden = m === 'measure';
     $('legend').hidden = m !== 'measure';
+    fpopOpen = false;
     if (m === 'measure') {
+      // Draw opens on a blank canvas when nothing else is open.
+      if (M.src === 'none') { resetDoc('Blank canvas'); M.src = 'blank'; setBlank(blankDefault()); }
       buildPage(); renderAll();
       requestAnimationFrame(function () { if (M.autoFit) fit(); });
     } else if (m === 'layout') {
@@ -5780,13 +6046,23 @@ details[open] > summary .sum { display: none; }
       pageEl = canvasEl = baseEl = ovEl = null;
       renderHome();
     }
+    renderFloat(); paintUnits();
   }
   document.querySelectorAll('[data-mode]').forEach(function (b) { b.addEventListener('click', function () { setMode(b.dataset.mode); }); });
   document.querySelector('.logo').addEventListener('click', function () { setMode('home'); });
-  function paintUnits() { $('units').querySelectorAll('[data-u]').forEach(function (b) { b.classList.toggle('on', b.dataset.u === UNITS); b.setAttribute('aria-pressed', b.dataset.u === UNITS ? 'true' : 'false'); }); }
+  // Layout works in inches (rolls, film and markers), so it shows only IN / FT-IN and falls back to the last imperial choice.
+  function paintUnits() {
+    var lay = mode === 'layout', shown = lay && isMetric() ? IMP_UNITS : UNITS;
+    $('units').querySelectorAll('[data-u]').forEach(function (b) { b.classList.toggle('on', b.dataset.u === shown); b.setAttribute('aria-pressed', b.dataset.u === shown ? 'true' : 'false'); if (b.classList.contains('met')) b.hidden = lay; });
+    $('fmt').hidden = isMetric() && !lay;
+  }
   $('units').addEventListener('click', function (e) {
     var b = e.target.closest('[data-u]'); if (!b || b.dataset.u === UNITS) return;
-    UNITS = b.dataset.u; try { localStorage.setItem('dim-units', UNITS); } catch (err) {}
+    var was = isMetric();
+    UNITS = b.dataset.u; if (!isMetric()) IMP_UNITS = UNITS;
+    try { localStorage.setItem('dim-units', UNITS); localStorage.setItem('dim-units-imp', IMP_UNITS); } catch (err) {}
+    if (was !== isMetric() && M.blank) { M.blank.step = nearestStep(M.blank.step); paintGrid(); }
+    if (was !== isMetric()) M.round = '';
     paintUnits(); rerender();
   });
   paintUnits();
