@@ -47,7 +47,7 @@
 }
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; }
-body { background: var(--b05); color: var(--b00); font-family: var(--ui); font-size: 13px; line-height: 1.5; font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }
+body { background: var(--b05); color: var(--b00); font-family: var(--ui); font-size: 13px; line-height: 1.5; font-variant-numeric: tabular-nums; }
 button, input, select, summary { font: inherit; color: inherit; }
 button { cursor: pointer; }
 button:disabled { opacity: .45; cursor: default; }
@@ -174,10 +174,45 @@ kbd { font-family: var(--ui); font-size: 10.5px; background: var(--b08); border:
 .fpop h4 { margin: 0; font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--b02); }
 .fpop .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 
+/* Wide windows: no title bar; the top-left bar holds DIM, the project and file actions */
+body.fl .bar { display: none; }
+body.fl .app { grid-template-rows: minmax(0, 1fr); }
+.stage.flpad { padding: 52px 28px 64px; }
+.stage.flpad.stack { padding-bottom: 100px; }
+.fbar.tl { top: 10px; left: 10px; gap: 4px; }
+.fbar.tl[hidden] { display: none; }
+.fbar.tl label.sq { cursor: pointer; }
+.tbox.brand { padding: 0 2px 0 0; gap: 0; }
+.tbtn.logo { font-family: var(--logo); font-weight: 500; font-size: 14px; letter-spacing: 0; padding: 0 10px; }
+.tbtn.ic { width: 28px; padding: 0; justify-content: center; }
+.tbox.doc input { height: 26px; width: 200px; border: 0; background: var(--b08); font-weight: 600; font-size: 12px; padding: 0 8px; }
+.tbox.pager { gap: 2px; padding: 0 2px; font-size: 11px; font-weight: 600; }
+.dock .pages { display: inline-flex; gap: 1px; }
+.dchip.pg.on { background: var(--yellow); color: var(--on-yellow); }
+.dchip .ls { display: none; }
+.dock.tight .dchip { padding: 0 6px; letter-spacing: .04em; }
+.dock.tight .dchip .lf { display: none; }
+.dock.tight .dchip .ls { display: inline; }
+.main.fl.draw .dk-tool { left: calc(var(--rail) + 32px + var(--tlw, 0px)); top: 18px; }
+/* Layout and Shop drawing on wide windows: tools in a rail, their panels as cards the dock opens and closes */
+.main.pnl { --rail: 84px; grid-template-columns: var(--rail) auto minmax(0, 1fr) auto; }
+.main.pnl.lay { --rail: 0px; column-gap: 0; }
+.main.pnl.lay.lc > .center, .main.pnl.lay.rc > .center { margin: 0 4px; }
+.main.pnl > .left { display: contents; }
+.main.pnl #tools { grid-column: 1; grid-row: 1; align-self: start; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; padding: 10px 8px; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 55%, transparent); border-radius: 4px; box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
+.main.pnl.lay #tools, .main.pnl #legend { display: none; }
+.main.pnl #left { grid-column: 2; grid-row: 1; width: 330px; min-height: 0; overflow: auto; display: none; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 45%, transparent); border-radius: 4px; box-shadow: 0 6px 22px rgb(0 0 0 / .12); }
+.main.pnl.lc #left { display: block; }
+.main.pnl > .center { grid-column: 3; grid-row: 1; }
+.main.pnl > .right { grid-column: 4; grid-row: 1; width: 330px; display: none; box-shadow: 0 6px 22px rgb(0 0 0 / .12); border-color: color-mix(in oklch, var(--line) 45%, transparent); }
+.main.pnl.rc > .right { display: block; }
+
 /* Bottom row over the canvas: the dock (centered in the free space) and the units bar */
 .fbar.bottom { left: 10px; right: 14px; bottom: 12px; align-items: flex-end; flex-wrap: nowrap; gap: 8px; max-width: none; }
 .fbar.bottom > .fbar.br { position: static; margin-left: auto; max-width: none; flex-wrap: nowrap; flex: none; }
-.dock { margin: 0 auto; flex-wrap: nowrap; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.fbar.bottom.stack { flex-wrap: wrap-reverse; }
+.fbar.bottom.stack > .dock { flex-basis: 100%; justify-content: center; }
+.dock { margin: 0 auto; flex: 0 1 auto; flex-wrap: nowrap; min-width: 0; overflow-x: auto; scrollbar-width: none; }
 .dchip { height: 28px; display: inline-flex; align-items: center; gap: 6px; padding: 0 9px; background: none; border: 0; border-radius: 2px; color: var(--b00); font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
 .dchip i { width: 10px; height: 10px; border-radius: 2px; flex: none; outline: 1px solid color-mix(in oklch, var(--line) 40%, transparent); }
 .dchip .dn { font-size: 10px; font-weight: 600; letter-spacing: 0; color: var(--b02); }
@@ -218,6 +253,7 @@ kbd { font-family: var(--ui); font-size: 10.5px; background: var(--b08); border:
 .dk-drop { width: 280px; max-height: calc(100vh - 260px); overflow: auto; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 45%, transparent); border-radius: 3px; box-shadow: 0 6px 22px rgb(0 0 0 / .16); }
 .dk-drop .block:last-child { border-bottom: 0; }
 .main.draw .dk-card, .main.draw.dk-right > .right { left: calc(var(--rail) + 26px); top: 60px; bottom: 104px; width: 340px; display: flex; flex-direction: column; }
+.main.draw.dk-right > .right { left: auto; right: 22px; }
 .main.draw.dk-right > .right { display: block; }
 .main.draw .dk-card > * { flex: none; }
 .dk-head { display: flex; align-items: center; gap: 8px; padding: 12px 12px 10px; border-bottom: 1px solid color-mix(in oklch, var(--line) 25%, transparent); position: sticky; top: 0; background: var(--b07); z-index: 1; }
@@ -366,6 +402,7 @@ kbd { font-family: var(--ui); font-size: 10.5px; background: var(--b08); border:
 
 /* Layout */
 .lay-canvas { display: block; margin: auto; flex: none; }
+.stage.flpad .sheet-tabs { top: 50px; }
 .sheet-tabs { position: absolute; top: 3px; left: 28px; right: 28px; display: flex; gap: 3px; overflow-x: auto; scrollbar-width: none; }
 .sheet-tabs button { flex: none; height: 22px; padding: 0 10px; font-size: 11.5px; white-space: nowrap; color: var(--b00); background: var(--b07); border: 1px solid var(--line); border-radius: 2px; }
 .sheet-tabs button:hover { background: var(--b08); }
@@ -540,6 +577,7 @@ details[open] > summary .sum { display: none; }
       <div class="stage-wrap">
         <div class="stage" id="stage"></div>
         <!-- Top left: undo, overlays, dimensions, settings. Bottom right: units, number format, scale or grid, zoom. -->
+        <div class="fbar tl" id="fbar-tl" role="toolbar" aria-label="DIM and this project" hidden></div>
         <div class="fbar tr" id="fbar-tr" role="toolbar" aria-label="Canvas actions"></div>
         <div class="fbar bottom">
         <div class="fgroup dock" id="dock" role="toolbar" aria-label="Items and panels" hidden></div>
@@ -680,7 +718,7 @@ details[open] > summary .sum { display: none; }
     var opts = isMetric() ? [[String(1 / 25.4), '1 mm'], [String(5 / 25.4), '5 mm'], [String(10 / 25.4), '1 cm']] : [['0.25', '1/4"'], ['1', '1"']];
     return '<option value=""' + (!M.round ? ' selected' : '') + '>Off: exact</option>' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (M.round === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('');
   }
-  function blankDefault() { return isMetric() ? { w: 6000 / 25.4, h: 3600 / 25.4, grid: true, step: 10 / 25.4 } : { w: 240, h: 144, grid: true }; }
+  function blankDefault() { return isMetric() ? { w: 3600 / 25.4, h: 2400 / 25.4, grid: true, step: 10 / 25.4 } : { w: 144, h: 96, grid: true }; }
   function gridOn() { return M.src === 'blank' && M.blank && M.blank.snap; }
   // The two line weights shown at this zoom: the finest grid level at least 7px apart, and the next level up.
   function gridLevels() {
@@ -709,10 +747,21 @@ details[open] > summary .sum { display: none; }
     M.w = M.blank.w; M.h = M.blank.h; M.pages = 1;
     M.scales = { 1: { inPerUnit: 1, label: 'Blank canvas, true size', how: 'blank', id: 'blank' } };
   }
+  // New canvases are named Drawing 1, Drawing 2… (counted in this browser).
+  function nextDrawingName() {
+    var n = 1; try { n = (parseInt(localStorage.getItem('dim-drawings'), 10) || 0) + 1; localStorage.setItem('dim-drawings', String(n)); } catch (e) { n = (nextDrawingName.n = (nextDrawingName.n || 0) + 1); }
+    return 'Drawing ' + n;
+  }
   function newBlank() {
-    resetDoc('Blank canvas'); M.src = 'blank'; M.pdf = null; M.img = null; M.pageObj = null; M.fileBytes = null; M.fileType = '';
+    resetDoc(nextDrawingName()); M.src = 'blank'; M.pdf = null; M.img = null; M.pageObj = null; M.fileBytes = null; M.fileType = '';
     setBlank(blankDefault()); if (mode !== 'measure') setMode('measure');
-    buildPage(); fit(); renderAll(); History.reset();
+    buildPage(); fit(); renderAll(); History.reset(); askCanvasSize();
+  }
+  // A new canvas opens Drawing settings with the width selected, so the size is the first thing you can change.
+  function askCanvasSize() {
+    if (!dockOn()) { openSecs.drawing = true; renderRight(); }
+    else if (M.panel !== 'drawing') setDock('drawing');
+    setTimeout(function () { var w = $('blank-w'); if (w) { w.focus(); w.select(); } }, 0);
   }
   function sampleSVG() {
     var o = '<rect x="0" y="0" width="1728" height="1296" fill="#fff"/><rect x="36" y="36" width="1656" height="1224" fill="none" stroke="#222" stroke-width="2"/>';
@@ -1610,7 +1659,18 @@ details[open] > summary .sum { display: none; }
     var it = itemById(s.item); if (!it) return false;
     M.items = M.items.filter(function (x) { return x !== it; }); M.sel = null; renderOverlay(); renderPanels(); return true;
   }
+  function nearestOf(pts, p) { var b = null; pts.forEach(function (q) { if (!b || dist(q, p) < dist(b, p)) b = q; }); return b ? { x: b.x, y: b.y } : null; }
+  // Where a moved item's reference point lands: another item's point nearby, else the snap grid.
+  function snapMove(p, selfId) {
+    var tol = 9 / M.zoom, best = null, bd = tol;
+    M.items.forEach(function (it) { if (it.id === selfId || it.page !== M.page) return; it.pts.forEach(function (q) { var d = dist(p, q); if (d < bd) { bd = d; best = q; } }); });
+    if (best) return { p: { x: best.x, y: best.y }, kind: 'point' };
+    if (gridOn()) return { p: gridSnap(p).p, kind: 'grid' };
+    return { p: p, kind: '' };
+  }
   function nudge(dx, dy) {
+    // On a blank canvas with Snap on, arrow keys move by one grid step (Shift: ten).
+    if (gridOn()) { var gs = M.blank.step * M.zoom; dx = Math.sign(dx) * Math.abs(dx) * gs; dy = Math.sign(dy) * Math.abs(dy) * gs; }
     var s = M.sel; if (!s) return false;
     var it = itemById(s.item); if (!it) return false;
     var pts = s.pt != null ? [it.pts[s.pt]] : it.pts;
@@ -1746,7 +1806,7 @@ details[open] > summary .sum { display: none; }
               M.sel = { item: hit.id, pt: bi };
               M.drag = { item: hit.id, idx: bi, start: { x: hit.pts[bi].x, y: hit.pts[bi].y }, anchor: null, moved: false, inserted: ins };
             } else if (hit.type === 'dim' && !e.shiftKey) M.drag = { item: hit.id, dimoff: true, moved: false };
-            else M.drag = { item: hit.id, whole: true, from: p, orig: hit.pts.map(function (q) { return { x: q.x, y: q.y }; }), moved: false };
+            else M.drag = { item: hit.id, whole: true, from: p, orig: hit.pts.map(function (q) { return { x: q.x, y: q.y }; }), ref: nearestOf(hit.pts, p), moved: false };
             pageEl.setPointerCapture(e.pointerId); pageEl.classList.add('dragging');
           }
         }
@@ -1778,7 +1838,10 @@ details[open] > summary .sum { display: none; }
       if (M.drag && M.drag.dimoff) { var di2 = itemById(M.drag.item); if (di2) { di2.off = offFrom(di2.pts[0], di2.pts[1], toPage(e)); M.drag.moved = true; renderOverlay(); } return; }
       if (M.drag && (M.drag.whole || M.drag.resize)) {
         var dp = toPage(e), dit = itemById(M.drag.item); if (!dit) { M.drag = null; return; }
-        if (M.drag.whole) { var ddx = dp.x - M.drag.from.x, ddy = dp.y - M.drag.from.y; dit.pts = M.drag.orig.map(function (q) { return { x: q.x + ddx, y: q.y + ddy }; }); }
+        if (M.drag.whole) {
+          var ddx = dp.x - M.drag.from.x, ddy = dp.y - M.drag.from.y;
+          // The point you grabbed nearest lands on the grid or on another item's point (Alt moves freely).
+          if (!e.altKey && M.drag.ref) { var rf = M.drag.ref, sn = snapMove({ x: rf.x + ddx, y: rf.y + ddy }, dit.id); ddx = sn.p.x - rf.x; ddy = sn.p.y - rf.y; M.snapped = !!sn.kind; M.snapKind = sn.kind; } dit.pts = M.drag.orig.map(function (q) { return { x: q.x + ddx, y: q.y + ddy }; }); }
         else { var c = M.drag.c, f = Math.max(0.02, dist(dp, c) / M.drag.d0); dit.pts = M.drag.orig.map(function (q) { return { x: c.x + (q.x - c.x) * f, y: c.y + (q.y - c.y) * f }; }); }
         M.drag.moved = true; renderOverlay(); return;
       }
@@ -1856,7 +1919,9 @@ details[open] > summary .sum { display: none; }
     var key = e.key.toLowerCase();
     if (e.key === ' ') { spaceHeld = true; if (pageEl) pageEl.classList.add('pan'); e.preventDefault(); }
     else if (e.key === 'Enter') { if (e.target.tagName === 'BUTTON') e.preventDefault(); finish(); }
-    else if (e.key === 'Escape') { if (!M.draft.length && !M.calib.length && !M.sel && M.dock) { setDock(M.dock); return; } M.draft = []; M.calib = []; M.sel = null; renderOverlay(); renderPanels(); }
+    else if (e.key === ',') { openPanel('drawing'); }
+    else if (e.key === '.') { openPanel('export'); }
+    else if (e.key === 'Escape') { if (!M.draft.length && !M.calib.length && !M.sel && (M.panel || M.dock)) { setDock(M.panel || M.dock); return; } M.draft = []; M.calib = []; M.sel = null; renderOverlay(); renderPanels(); }
     else if ((e.key === 'Backspace' || e.key === 'Delete') && M.draft.length) { M.draft.pop(); renderOverlay(); e.preventDefault(); }
     else if ((e.key === 'Backspace' || e.key === 'Delete') && M.sel) { deleteSelection(); e.preventDefault(); }
     else if (ARROWS[e.key] && M.sel) { var d = ARROWS[e.key], f = e.shiftKey ? 10 : 1; nudge(d[0] * f, d[1] * f); e.preventDefault(); }
@@ -2052,16 +2117,7 @@ details[open] > summary .sum { display: none; }
   // Top left of the canvas (dock layout): the document box with its menu, then the selection box (live size, click to type one).
   // Scale and Resize panels, and short notes, drop down under them.
   function topLeftBoxes() {
-    var nm = M.src === 'blank' ? 'Blank canvas' : M.src === 'none' ? 'No drawing' : baseName() + (M.pages > 1 ? ' · p. ' + M.page + '/' + M.pages : '');
-    var h = '<div class="dk-tool"><div class="dk-row"><div class="tbox doc"><button type="button" class="tbtn" data-docmenu aria-expanded="' + !!M.docMenu + '" title="' + esc(M.name || nm) + '">' +
-      '<svg width="14" height="14" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 2h7l4 4v10H4z M11 2v4h4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg><span class="dname">' + esc(nm) + '</span><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></button>';
-    if (M.docMenu) {
-      h += '<div class="dmenu" role="menu"><button type="button" role="menuitem" data-docact="blank">New blank canvas</button><label role="menuitem" for="doc-file">Open file…</label><input type="file" id="doc-file" accept="application/pdf,image/*,.dim,.json" hidden>' +
-        '<button type="button" role="menuitem" data-docact="sample">Sample plan</button><hr><button type="button" role="menuitem" data-docact="save">Save project (.dim)</button>';
-      if (M.pages > 1) h += '<hr><button type="button" role="menuitem" data-docact="prev"' + (M.page === 1 ? ' disabled' : '') + '>Previous page</button><button type="button" role="menuitem" data-docact="next"' + (M.page === M.pages ? ' disabled' : '') + '>Next page</button>';
-      h += '<hr><button type="button" role="menuitem" data-docact="drawing">Drawing settings</button><button type="button" role="menuitem" data-docact="reset"' + (M.items.length ? '' : ' disabled') + '>' + (M.src === 'blank' ? 'Reset canvas' : 'Clear measurements') + '</button></div>';
-    }
-    h += '</div><div class="tbox sel" id="readout-block" hidden><span class="label" id="readout-label"></span><span class="readout" id="readout"></span></div></div>';
+    var h = '<div class="dk-tool"><div class="dk-row"><div class="tbox sel" id="readout-block" hidden><span class="label" id="readout-label"></span><span class="readout" id="readout"></span></div></div>';
     var drop = '';
     if (M.tool === 'scale') drop += scalePanel();
     if (M.tool === 'resize') drop += resizePanel();
@@ -2069,18 +2125,6 @@ details[open] > summary .sum { display: none; }
     if (drop) h += '<div class="dk-drop">' + drop + '</div>';
     return h + '<p class="tip" id="tip" hidden></p></div>';
   }
-  leftEl.addEventListener('click', function (e) {
-    if (mode !== 'measure') return;
-    if (e.target.closest('[data-docmenu]')) { M.docMenu = !M.docMenu; renderLeft(); return; }
-    var b = e.target.closest('[data-docact]'); if (!b) return;
-    var a = b.dataset.docact; M.docMenu = false;
-    if (a === 'blank') newBlank(); else if (a === 'sample') useSample(); else if (a === 'save') Project.save();
-    else if (a === 'prev' && M.page > 1) goPage(M.page - 1); else if (a === 'next' && M.page < M.pages) goPage(M.page + 1);
-    else if (a === 'reset') resetDrawing(); else if (a === 'drawing') { setDock('drawing'); return; }
-    renderLeft();
-  });
-  leftEl.addEventListener('change', function (e) { if (e.target.id === 'doc-file') { M.docMenu = false; openFile(e.target.files && e.target.files[0]); e.target.value = ''; } });
-  document.addEventListener('pointerdown', function (e) { if (M.docMenu && !e.target.closest('.tbox.doc')) { M.docMenu = false; if (mode === 'measure') renderLeft(); } });
   // One measurement or shape in a list; the selected one opens its controls.
   function itemRow(it) {
       var on = M.sel && M.sel.item === it.id, chip = itemCol(it);
@@ -2175,10 +2219,10 @@ details[open] > summary .sum { display: none; }
     h += sec('keys', 'Shortcuts', '<div class="keys"><kbd>⌘Z</kbd><span>Undo (Shift for redo)</span><kbd>⌘S</kbd><span>Save project</span><kbd>⌘0</kbd><span>Fit page</span><kbd>V</kbd><span>Edit: drag points or whole lines; drag a curve to bend it (Shift+drag moves it)</span><kbd>Right-click</kbd><span>Remove a point (or the last one while drawing)</span><kbd>Delete</kbd><span>Remove the selected point or measurement</span><kbd>Dbl-click</kbd><span>On an edge in Edit: add a point</span><kbd>Arrows</kbd><span>Nudge the selection (Shift ×10)</span><kbd>H</kbd><span>Pan, or hold Space</span><kbd>S</kbd><span>Set the drawing scale</span><kbd>Z</kbd><span>Resize a measurement</span><kbd>L</kbd><span>Length</span><kbd>R</kbd><span>Run</span><kbd>K</kbd><span>Curve (3 points make an arc)</span><kbd>A</kbd><span>Area</span><kbd>B</kbd><span>Rectangle area</span><kbd>O</kbd><span>Circle: center, then edge</span><kbd>C</kbd><span>Count (Enter starts a new count)</span><kbd>G</kbd><span>Angle</span><kbd>T</kbd><span>Note</span><kbd>D</kbd><span>Dimension: hover an edge, click and pull away (or click two points)</span><kbd>F</kbd><span>Fit page</span><kbd>Shift</kbd><span>Straight lines</span><kbd>Alt</kbd><span>Place without snapping</span><kbd>Enter</kbd><span>Finish run, curve, area or count</span><kbd>Esc</kbd><span>Cancel</span><kbd>⌘</kbd><span>+ scroll to zoom</span></div>');
     h += aboutSec();
     rightEl.innerHTML = h;
-    if (dockOn() && isSetView(M.dock)) {
-      var ds = dockSpec(M.dock), only = ds[2];
+    if (dockOn() && M.panel) {
+      var ds = dockSpec(M.panel), only = ds[2];
       rightEl.querySelectorAll('details[data-sec]').forEach(function (dt) { var keep = only.indexOf(dt.dataset.sec) >= 0; dt.hidden = !keep; if (keep) dt.open = true; dt.classList.toggle('solo', keep && only.length === 1); });
-      rightEl.insertAdjacentHTML('afterbegin', '<div class="dk-head"><b>' + esc(ds[1]) + '</b><span class="dk-sub"></span><button type="button" class="dk-x" data-dkclose aria-label="Close">×</button></div>');
+      rightEl.insertAdjacentHTML('afterbegin', '<div class="dk-head"><b>' + esc(ds[1]) + '</b><span class="dk-sub"></span><button type="button" class="dk-x" data-dkclose="' + M.panel + '" aria-label="Close">×</button></div>');
     }
   }
   function num0(n) { return Number(n).toLocaleString(); }
@@ -2186,7 +2230,7 @@ details[open] > summary .sum { display: none; }
     return sec('about', 'About', '<p>DIM measures drawings and photos, lays out murals, privacy film and distraction markers, and makes shop drawings.</p><p class="hint" style="margin:0">Files open on this device and are never uploaded. PDFs are drawn with Mozilla pdf.js and written with pdf-lib.</p>');
   }
   function renderPanels() {
-    applyDockLayout(); renderLeft(); renderRight(); renderFloat(); renderDock();
+    applyDockLayout(); renderLeft(); renderRight(); renderTopLeft(); renderFloat(); renderDock();
     if (M.note) { clearTimeout(renderPanels.t); renderPanels.t = setTimeout(function () { M.note = ''; if (mode === 'measure') renderLeft(); }, 3000); }
     History.record();
   }
@@ -2366,7 +2410,7 @@ details[open] > summary .sum { display: none; }
   function dimmedOut(it) { return dockOn() && isItemsView(M.dock) && M.dock !== 'all' && !inView(it, M.dock); }
   function itemsCard(v, mine) {
     var sp = dockSpec(v), list = mine.filter(function (it) { return inView(it, v); }), sc = scaleNow(), h = '';
-    h += '<div class="dk-head"><span class="dk-ic" style="background:' + sp[2] + '"></span><b>' + esc(sp[1]) + '</b><span class="dk-sub">' + esc(M.name || 'Drawing') + (M.pages > 1 ? ' · page ' + M.page : '') + '</span><button type="button" class="dk-x" data-dkclose aria-label="Close">×</button></div>';
+    h += '<div class="dk-head"><span class="dk-ic" style="background:' + sp[2] + '"></span><b>' + esc(sp[1]) + '</b><span class="dk-sub">' + esc(M.name || 'Drawing') + (M.pages > 1 ? ' · page ' + M.page : '') + '</span><button type="button" class="dk-x" data-dkclose="' + v + '" aria-label="Close">×</button></div>';
     var big = '—', line = '', tiles;
     if (v === 'shapes') {
       var by = function (k) { return list.filter(function (it) { return it.shape === k; }).length; };
@@ -2388,36 +2432,126 @@ details[open] > summary .sum { display: none; }
     else h += '<div class="list dk-list">' + list.map(itemRow).join('') + '</div>';
     return h;
   }
-  function renderDock() {
+  // Pages live in the dock: Draw, Layout's four jobs, and Shop drawing, each one click away.
+  var PAGES = [['measure', 'Draw'], ['graphic', 'Graphic'], ['mural', 'Mural'], ['film', 'Privacy film', 'Film'], ['markers', 'Markers'], ['shop', 'Shop drawing', 'Shop']];
+  var LEFT_LABEL = { graphic: 'Elevations', mural: 'Panels', film: 'Panes', markers: 'Runs' };
+  // Layout and Shop drawing: which cards are open (left: the page's inputs or list; right: settings and export).
+  var UI = { layout: { l: true, r: true }, shop: { l: false, r: true } };
+  try { var ui0 = JSON.parse(localStorage.getItem('dim-cards') || 'null'); if (ui0 && ui0.layout && ui0.shop) UI = ui0; } catch (e) {}
+  function flOn() { return dockMQ.matches; }
+  function curPage() { return mode === 'layout' ? Lay.getJob() : mode; }
+  function showPage(p) {
+    if (p === 'measure' || p === 'shop') { if (mode !== p) setMode(p); return; }
+    if (mode === 'layout') { Lay.job(p); renderChrome(); } else { Lay.setJob(p); setMode('layout'); }
+  }
+  // When the dock runs out of room, page names shorten (Film, Shop) and chips tighten up.
+  // Still too wide: the units bar steps up a line so the dock gets the whole width.
+  function fitDock() {
+    var el = $('dock'), row = el && el.parentNode; if (!el || el.hidden) return;
+    var over = function () { return el.scrollWidth > el.clientWidth + 1; };
+    el.classList.remove('tight'); row.classList.remove('stack');
+    if (over()) el.classList.add('tight');
+    if (over()) row.classList.add('stack');
+    stage.classList.toggle('stack', row.classList.contains('stack'));
+  }
+  function renderDock() { renderDock0(); fitDock(); }
+  function renderDock0() {
     var el = $('dock'); if (!el) return;
-    if (!dockOn()) { el.hidden = true; return; }
+    if (!flOn()) { el.hidden = true; return; }
     el.hidden = false;
+    var cp = curPage(), pages = '<span class="pages">' + PAGES.map(function (pg) { var on = cp === pg[0]; return '<button type="button" class="dchip pg' + (on ? ' on' : '') + '" data-page="' + pg[0] + '" aria-pressed="' + on + '" title="' + pg[1] + '">' + (pg[2] ? '<span class="lf">' + pg[1] + '</span><span class="ls">' + pg[2] + '</span>' : pg[1]) + '</button>'; }).join('') + '</span>';
+    var card = function (k, label) { var on = !!(UI[mode] && UI[mode][k]); return '<button type="button" class="dchip' + (on ? ' on' : '') + '" data-card="' + k + '" aria-pressed="' + on + '">' + label + '</button>'; };
+    el.classList.toggle('has-on', mode === 'measure' && isItemsView(M.dock));
+    if (mode === 'layout') { el.innerHTML = pages + '<span class="fsep"></span>' + card('l', LEFT_LABEL[cp] || 'Inputs') + card('r', 'Details'); return; }
+    if (mode === 'shop') { el.innerHTML = pages + '<span class="fsep"></span>' + card('l', 'On sheet') + card('r', 'Sheet'); return; }
+    if (mode !== 'measure') { el.innerHTML = pages; return; }
     var mine = M.items.filter(function (it) { return it.page === M.page; });
-    var chip = function (d, n) { var on = M.dock === d[0]; return '<button type="button" class="dchip' + (on ? ' on' : '') + (n === 0 ? ' zero' : '') + '" data-dock="' + d[0] + '" aria-pressed="' + on + '">' + (n != null ? '<i style="background:' + d[2] + '"></i>' : '') + esc(d[1]) + (n ? '<span class="dn">' + n + '</span>' : '') + '</button>'; };
+    var chip = function (d, n) { var on = M.dock === d[0] || M.panel === d[0]; return '<button type="button" class="dchip' + (on ? ' on' : '') + (n === 0 ? ' zero' : '') + '" data-dock="' + d[0] + '" aria-pressed="' + on + '">' + (n != null ? '<i style="background:' + d[2] + '"></i>' : '') + esc(d[1]) + (n ? '<span class="dn">' + n + '</span>' : '') + '</button>'; };
     el.classList.toggle('has-on', isItemsView(M.dock));
     // All and Shapes always show; a category chip shows once something uses it (or while its card is open).
-    el.innerHTML = DOCK_ITEMS.map(function (d) { var n = mine.filter(function (it) { return inView(it, d[0]); }).length; return d[0] === 'all' || d[0] === 'shapes' || n || M.dock === d[0] ? chip(d, n) : ''; }).join('') + '<span class="fsep"></span>' + DOCK_SETS.filter(function (d) { return d[3]; }).map(function (d) { return chip(d, null); }).join('');
+    el.innerHTML = pages + '<span class="fsep"></span>' + DOCK_ITEMS.map(function (d) { var n = mine.filter(function (it) { return inView(it, d[0]); }).length; return d[0] === 'all' || d[0] === 'shapes' || n || M.dock === d[0] ? chip(d, n) : ''; }).join('') + '<span class="fsep"></span>' + DOCK_SETS.filter(function (d) { return d[3]; }).map(function (d) { return chip(d, null); }).join('');
   }
+  // Wide windows: no title bar; floating boxes over the canvas; Draw floats its cards, Layout and Shop drawing show theirs beside it.
   function applyDockLayout() {
-    var mainEl = document.querySelector('.main'), on = dockOn();
+    var mainEl = document.querySelector('.main'), fl = flOn(), on = dockOn(), pnl = fl && (mode === 'layout' || mode === 'shop'), u = UI[mode] || {};
+    document.body.classList.toggle('fl', fl);
+    mainEl.classList.toggle('fl', fl);
     mainEl.classList.toggle('draw', on);
-    mainEl.classList.toggle('dk-right', on && isSetView(M.dock));
+    mainEl.classList.toggle('dk-right', on && !!M.panel);
+    mainEl.classList.toggle('pnl', pnl); mainEl.classList.toggle('lay', pnl && mode === 'layout'); mainEl.classList.toggle('shopm', pnl && mode === 'shop');
+    mainEl.classList.toggle('lc', pnl && !!u.l); mainEl.classList.toggle('rc', pnl && !!u.r);
+    stage.classList.toggle('flpad', fl);
+  }
+  // Everything around the canvas on wide windows, for whichever page is open.
+  function renderChrome() { applyDockLayout(); renderTopLeft(); renderFloat(); renderDock(); }
+  function toggleCard(k, force) {
+    var u = UI[mode]; if (!u) return;
+    u[k] = force == null ? !u[k] : force;
+    try { localStorage.setItem('dim-cards', JSON.stringify(UI)); } catch (e) {}
+    renderChrome();
   }
   function setDock(v) {
-    M.dock = M.dock === v ? null : v; M.hl = null;
+    // Item cards open on the left, panel cards (settings, export, totals, help) on the right; one of each at a time.
+    if (isSetView(v)) M.panel = M.panel === v ? null : v; else { M.dock = M.dock === v ? null : v; M.hl = null; }
     applyDockLayout(); renderLeft(); renderRight(); renderDock(); renderOverlay();
   }
   document.addEventListener('click', function (e) {
+    var pg = e.target.closest('[data-page]'); if (pg) { showPage(pg.dataset.page); return; }
+    var cd = e.target.closest('[data-card]'); if (cd) { toggleCard(cd.dataset.card); return; }
     if (mode !== 'measure') return;
     var d = e.target.closest('[data-dock]'); if (d) { setDock(d.dataset.dock); return; }
-    if (e.target.closest('[data-dkclose]')) setDock(M.dock);
+    var x = e.target.closest('[data-dkclose]'); if (x) setDock(x.dataset.dkclose);
   });
   // Hovering a card finds its item on the canvas.
   leftEl.addEventListener('mouseover', function (e) { if (!dockOn()) return; var r = e.target.closest('[data-item]'), id = r ? Number(r.dataset.item) : null; if (id !== M.hl) { M.hl = id; renderOverlay(); } });
   leftEl.addEventListener('mouseleave', function () { if (M.hl) { M.hl = null; renderOverlay(); } });
-  if (dockMQ.addEventListener) dockMQ.addEventListener('change', function () { if (mode === 'measure') { applyDockLayout(); renderAll(); renderFloat(); } });
+  if (dockMQ.addEventListener) dockMQ.addEventListener('change', function () { renderChrome(); if (mode === 'measure') renderAll(); else if (mode === 'layout') Lay.enter(); else if (mode === 'shop') Shop.enter(); });
 
-  // ---- Floating bars (Draw) ----
+  // ---- Top left (wide windows): DIM and this project ----
+  var renaming = false;
+  function renderTopLeft() {
+    var tl = $('fbar-tl');
+    if (!flOn()) { tl.hidden = true; return; }
+    tl.hidden = false;
+    if (renaming) return;
+    var nm = M.src === 'none' ? 'Untitled' : M.name ? M.name.replace(/\.(pdf|png|jpe?g|gif|webp|heic|dim|json)$/i, '') : 'Untitled';
+    var sq = function (act, icon, title) { return '<button type="button" class="sq" data-tl="' + act + '" title="' + title + '" aria-label="' + title + '">' + ficon(icon) + '</button>'; };
+    var h = '<span class="tbox brand"><button type="button" class="tbtn logo" data-tl="home" title="Home">DIM</button><button type="button" class="tbtn ic" data-tl="theme" title="Light or dark theme" aria-label="Light or dark theme">' + HALF.replace('width="18" height="18"', 'width="15" height="15"') + '</button></span>';
+    h += '<span class="tbox doc"><button type="button" class="tbtn" data-tl="rename" title="Rename">' + ficon('file') + '<span class="dname">' + esc(nm) + '</span></button></span>';
+    h += sq('new', 'new', 'New blank canvas') + '<label class="sq" for="tl-file" title="Open a PDF, image or .dim project" aria-label="Open file">' + ficon('open') + '</label><input type="file" id="tl-file" accept="application/pdf,image/*,.dim,.json" hidden>' + sq('save', 'save', 'Save project (.dim)');
+    if (mode === 'measure' && M.pages > 1) h += '<span class="sqgap"></span><span class="tbox pager"><button type="button" class="tbtn ic" data-tl="prev" aria-label="Previous page"' + (M.page === 1 ? ' disabled' : '') + '>‹</button><span>' + M.page + ' / ' + M.pages + '</span><button type="button" class="tbtn ic" data-tl="next" aria-label="Next page"' + (M.page === M.pages ? ' disabled' : '') + '>›</button></span>';
+    tl.innerHTML = h;
+    document.querySelector('.main').style.setProperty('--tlw', tl.offsetWidth + 'px');
+  }
+  function startRename() {
+    var box = $('fbar-tl').querySelector('.tbox.doc'); if (!box) return;
+    renaming = true;
+    box.innerHTML = '<input type="text" id="tl-name" aria-label="Project name" value="' + esc((M.name || '').replace(/\.(pdf|png|jpe?g|gif|webp|heic|dim|json)$/i, '')) + '">';
+    var inp = $('tl-name'); inp.focus(); inp.select();
+  }
+  function endRename(keep) {
+    if (!renaming) return;
+    var inp = $('tl-name'), v = inp ? inp.value.trim() : '';
+    renaming = false;
+    if (keep && v) { M.name = v; $('doc-name').textContent = v; document.title = v + ' · DIM'; try { Autosave.schedule(); } catch (err) {} }
+    renderTopLeft(); if (mode === 'measure') { renderLeft(); renderRight(); }
+  }
+  $('fbar-tl').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-tl]'); if (!b) return;
+    var a = b.dataset.tl;
+    if (a === 'home') setMode('home');
+    else if (a === 'theme') $('theme').click();
+    else if (a === 'rename') startRename();
+    else if (a === 'new') newBlank();
+    else if (a === 'save') Project.save();
+    else if (a === 'prev' && M.page > 1) goPage(M.page - 1);
+    else if (a === 'next' && M.page < M.pages) goPage(M.page + 1);
+  });
+  $('fbar-tl').addEventListener('change', function (e) { if (e.target.id === 'tl-file') { openFile(e.target.files && e.target.files[0]); e.target.value = ''; } });
+  $('fbar-tl').addEventListener('keydown', function (e) { if (e.target.id === 'tl-name') { if (e.key === 'Enter') endRename(true); else if (e.key === 'Escape') endRename(false); } });
+  $('fbar-tl').addEventListener('focusout', function (e) { if (e.target.id === 'tl-name') endRename(true); });
+
+  // ---- Floating bars ----
   var FICON = {
     undo: '<path d="M6.5 4L3 7.5 6.5 11M3.5 7.5H11a4 4 0 0 1 0 8H8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>',
     redo: '<path d="M11.5 4L15 7.5 11.5 11M14.5 7.5H7a4 4 0 0 0 0 8h3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>',
@@ -2426,25 +2560,39 @@ details[open] > summary .sum { display: none; }
     tag: '<rect x="2" y="5.5" width="14" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5 9h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>',
     dims: '<rect x="4.5" y="6.5" width="9" height="7" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 3h9M4.5 1.8v2.4M13.5 1.8v2.4M16 6.5v7M14.8 6.5h2.4M14.8 13.5h2.4" fill="none" stroke="currentColor" stroke-width="1.1"/>',
     export: '<path d="M9 2.5v9M5.5 8L9 11.5 12.5 8M3 13v2.5h12V13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>',
-    gear: '<circle cx="9" cy="9" r="2.4" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M9 1.8v2.1M9 14.1v2.1M1.8 9h2.1M14.1 9h2.1M3.9 3.9l1.5 1.5M12.6 12.6l1.5 1.5M3.9 14.1l1.5-1.5M12.6 5.4l1.5-1.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>'
+    file: '<path d="M4 2h7l4 4v10H4z M11 2v4h4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
+    new: '<path d="M4 2h7l4 4v10H4z M11 2v4h4M9.5 8.5v5M7 11h5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>',
+    open: '<path d="M2 5V3.5h5l1.5 1.5H16v2M2 5v10h12.5L17 7.5H4.5L2 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
+    save: '<path d="M3 3h10l2 2v10H3z M6 3v4h6V3 M6 15v-5h6v5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
+    gear: '<g fill="currentColor"><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(0 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(45 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(90 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(135 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(180 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(225 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(270 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(315 9 9)"/></g><circle cx="9" cy="9" r="5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="9" cy="9" r="1.9" fill="none" stroke="currentColor" stroke-width="1.4"/>'
   };
   var TAG_MODES = [['full', 'Name + size'], ['size', 'Size only'], ['off', 'Selected only']];
   function ficon(k) { return '<svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true">' + FICON[k] + '</svg>'; }
   // Top right of the canvas: one small square per action (undo, redo; grid, snap, tags, shape sizes; settings), then Export.
   function renderFloat() {
     var tr = $('fbar-tr'), sc = $('fscale');
-    if (mode !== 'measure') { tr.hidden = true; sc.hidden = true; return; }
-    tr.hidden = false;
     var blank = M.src === 'blank', c = History.can(), gap = '<span class="sqgap"></span>';
     var sq = function (act, icon, title, on, extra, key) { return '<button type="button" class="sq' + (on ? ' on' : '') + '" data-fa="' + act + '" title="' + title + '" aria-label="' + title + '"' + (on != null ? ' aria-pressed="' + !!on + '"' : '') + (extra || '') + '>' + ficon(icon) + (key ? '<span class="tk">' + key + '</span>' : '') + '</button>'; };
+    var undo = function () { return sq('undo', 'undo', 'Undo (⌘Z)', null, ' id="f-undo"' + (c.u ? '' : ' disabled')) + sq('redo', 'redo', 'Redo (⌘⇧Z)', null, ' id="f-redo"' + (c.r ? '' : ' disabled')); };
+    if (mode !== 'measure') {
+      sc.hidden = true;
+      // Layout and Shop drawing (wide windows): undo, settings and Export, which open the right-hand card.
+      if (!flOn() || (mode !== 'layout' && mode !== 'shop')) { tr.hidden = true; return; }
+      tr.hidden = false;
+      var rv = mode === 'layout' ? Lay.getView() : '', rOpen = !!UI[mode].r;
+      tr.innerHTML = undo() + gap + sq('settings', 'gear', (mode === 'layout' ? 'Layout settings' : 'Sheet settings') + ' (,)', rOpen && rv !== 'export' && !(mode === 'shop' && shopExp)) +
+        '<button type="button" class="sqx' + (rOpen && (rv === 'export' || (mode === 'shop' && shopExp)) ? ' on' : '') + '" data-fa="export" title="Export (.)">' + ficon('export') + 'Export</button>';
+      return;
+    }
+    tr.hidden = false;
     var tm = TAG_MODES.find(function (t) { return t[0] === (M.tags || 'full'); }) || TAG_MODES[0];
-    var h = sq('undo', 'undo', 'Undo (⌘Z)', null, ' id="f-undo"' + (c.u ? '' : ' disabled')) + sq('redo', 'redo', 'Redo (⌘⇧Z)', null, ' id="f-redo"' + (c.r ? '' : ' disabled')) + gap;
+    var h = undo() + gap;
     if (blank) h += sq('grid', 'grid', 'Show the grid', M.blank.grid) + sq('snap', 'magnet', 'Snap to the grid (hold Alt to place freely)', M.blank.snap);
     else h += sq('snapd', 'magnet', M.src === 'pdf' ? 'Snap to the drawing’s lines (hold Alt to place freely)' : 'Only PDFs have lines to snap to', M.snapDrawing && M.src === 'pdf', M.src === 'pdf' ? '' : ' disabled');
     h += sq('tags', 'tag', 'Measurement tags: ' + tm[1] + ' (click to change)', M.tags !== 'off', '', M.tags === 'size' ? 'S' : M.tags === 'off' ? '' : 'N');
     h += sq('ssize', 'dims', 'Shape sizes: show the size of each Draw shape', M.shapeSizes) + gap;
-    h += sq('settings', 'gear', 'Drawing settings', dockOn() && M.dock === 'drawing');
-    h += '<button type="button" class="sqx' + (dockOn() && M.dock === 'export' ? ' on' : '') + '" data-fa="export" title="Export a marked-up PDF or JPG, the list or a CSV">' + ficon('export') + 'Export</button>';
+    h += sq('settings', 'gear', 'Drawing settings (,)', dockOn() && M.panel === 'drawing');
+    h += '<button type="button" class="sqx' + (dockOn() && M.panel === 'export' ? ' on' : '') + '" data-fa="export" title="Export a marked-up PDF or JPG, the list or a CSV (.)">' + ficon('export') + 'Export</button>';
     tr.innerHTML = h;
     // Bottom right: the snap grid on a blank canvas, the drawing's scale otherwise.
     sc.hidden = M.src === 'none';
@@ -2452,15 +2600,28 @@ details[open] > summary .sum { display: none; }
     else { var s0 = scaleNow(); sc.innerHTML = '<button type="button" class="fbtn" data-fa="scale" title="Set the scale (S)">Scale <em>' + esc(s0 ? scaleLabel(s0) : 'not set') + '</em></button>'; }
   }
   // Settings and Export open as a card in the dock layout, or open their section of the side panel on narrow windows.
+  var shopExp = false;   // Shop drawing: the right card was opened from Export (scrolled to it)
   function openPanel(v) {
+    if (mode === 'layout' || mode === 'shop') {
+      var want = v === 'export' ? 'export' : 'edit', u = UI[mode];
+      var showing = mode === 'layout' ? Lay.getView() === want || (want === 'edit' && Lay.getView() === 'totals') : (want === 'export') === shopExp;
+      if (u.r && showing) { toggleCard('r', false); return; }
+      if (mode === 'layout') Lay.view(want);
+      else { shopExp = want === 'export'; if (shopExp) { openSecs.sh_exp = true; Shop.enter(); } }
+      toggleCard('r', true);
+      if (mode === 'shop' && shopExp) { var dx = rightEl.querySelector('details[data-sec="sh_exp"]'); if (dx) dx.scrollIntoView({ block: 'start' }); } else rightEl.scrollTop = 0;
+      return;
+    }
     if (dockOn()) { setDock(v); renderFloat(); return; }
     var sec = dockSpec(v)[2][0]; openSecs[sec] = true; renderRight();
     var d = rightEl.querySelector('details[data-sec="' + sec + '"]'); if (d) d.scrollIntoView({ block: 'start', behavior: 'smooth' });
   }
   function setBlankOpt(k, v) { var nb = Object.assign({}, M.blank); nb[k] = v; setBlank(nb); }
   $('fbar-tr').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-fa]'); if (!b || mode !== 'measure') return;
+    var b = e.target.closest('[data-fa]'); if (!b) return;
     var a = b.dataset.fa;
+    if (mode === 'layout' || mode === 'shop') { if (a === 'undo') History.undo(); else if (a === 'redo') History.redo(); else if (a === 'settings') openPanel('drawing'); else if (a === 'export') openPanel('export'); renderFloat(); return; }
+    if (mode !== 'measure') return;
     if (a === 'undo') History.undo();
     else if (a === 'redo') History.redo();
     else if (a === 'grid') { setBlankOpt('grid', !M.blank.grid); paintGrid(); renderRight(); }
@@ -2471,6 +2632,10 @@ details[open] > summary .sum { display: none; }
     else if (a === 'settings') { openPanel('drawing'); return; }
     else if (a === 'export') { openPanel('export'); return; }
     renderFloat();
+  });
+  document.addEventListener('keydown', function (e) {
+    if ((mode !== 'layout' && mode !== 'shop') || typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === ',') { e.preventDefault(); openPanel('drawing'); } else if (e.key === '.') { e.preventDefault(); openPanel('export'); }
   });
   $('fbar-br').addEventListener('change', function (e) { if (e.target.id === 'f-gstep') { setBlankOpt('step', Number(e.target.value)); paintGrid(); renderRight(); renderOverlay(); } });
   $('fbar-br').addEventListener('click', function (e) { var b = e.target.closest('[data-fa="scale"]'); if (b && mode === 'measure') setTool('scale'); });
@@ -3359,7 +3524,7 @@ details[open] > summary .sum { display: none; }
       SINK = offTarget ? INK2 : css('--canvas-ink'); SINK2 = offTarget ? INK : css('--canvas-ink2');
       if (offTarget) { var oc = offTarget.canvas.getContext('2d'); oc.setTransform(offTarget.r, 0, 0, offTarget.r, (offTarget.dx || 0) * offTarget.r, (offTarget.dy || 0) * offTarget.r); return { ctx: oc, cw: offTarget.w, ch: offTarget.h }; }
       var cs = getComputedStyle(stage), pad = parseFloat(cs.paddingLeft);
-      var cw = Math.max(240, stage.clientWidth - 2 * pad), ch = Math.max(220, stage.clientHeight - 2 * pad);
+      var cw = Math.max(240, stage.clientWidth - 2 * pad), ch = Math.max(220, stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom));
       if (!canvas || !stage.contains(canvas)) { stage.innerHTML = '<canvas class="lay-canvas" role="img"></canvas>'; canvas = stage.querySelector('canvas'); }
       var dpr = window.devicePixelRatio || 1;
       canvas.width = Math.round(cw * dpr); canvas.height = Math.round(ch * dpr);
@@ -5153,6 +5318,8 @@ details[open] > summary .sum { display: none; }
       markerRuns: function () { syncLens(); return L.markers.runs.map(function (r) { return r.name + ' · ' + fmtFt(r.len); }); },
       enter: all, draw: draw, renderTo: renderTo, fmtIn: function (x) { return fmtIn(x); }, tools: tools, markerArt: function () { return L.markers.graphics || []; }, setMarkerArt: setMarkerArt, graphicArt: function () { return L.graphic.graphics || []; }, setGraphicArt: setGraphicArt,
       graphicRuns: function () { syncLens(L.graphic); return L.graphic.runs.map(function (r) { return r.name + ' · ' + fmtFt(elevLen(r)); }); }, left: left, right: right, status: status, getState: getState, setState: setState,
+      getJob: function () { return L.job; }, setJob: function (j) { L.job = j; L.note = ''; }, job: function (j) { L.job = j; L.note = ''; all(); },
+      getView: function () { return rview; }, view: function (v) { rview = v; right(); },
       imageBlob: function () { return L.mural.imgBlob || null; }, imageName: function () { return L.mural.imgName || ''; } };
   })();
 
@@ -5565,7 +5732,7 @@ details[open] > summary .sum { display: none; }
     function pxPerPt() { var g = geom(); return svg ? svg.clientWidth / g.W : 1; }
     function fitSvg() {
       if (!svg) return;
-      var g = geom(), aw = stage.clientWidth - 56, ah = stage.clientHeight - 56, f = Math.max(0.05, Math.min(aw / g.W, ah / g.H));
+      var scs = getComputedStyle(stage), g = geom(), aw = stage.clientWidth - parseFloat(scs.paddingLeft) - parseFloat(scs.paddingRight), ah = stage.clientHeight - parseFloat(scs.paddingTop) - parseFloat(scs.paddingBottom), f = Math.max(0.05, Math.min(aw / g.W, ah / g.H));
       svg.setAttribute('viewBox', '0 0 ' + g.W + ' ' + g.H); svg.style.width = Math.round(g.W * f) + 'px'; svg.style.height = Math.round(g.H * f) + 'px';
     }
     function hexOr(c, none) { return c || none; }
@@ -6223,6 +6390,7 @@ details[open] > summary .sum { display: none; }
     });
     statusEl.textContent = M.src !== 'none' ? 'Home · ' + M.name + ' is open' : 'Home';
   }
+  var booting = true;   // during startup Draw is set up behind Home; it shouldn't name a new canvas yet
   function setMode(m) {
     mode = m; applyDockLayout();
     document.querySelector('.main').classList.toggle('home', m === 'home');
@@ -6234,10 +6402,13 @@ details[open] > summary .sum { display: none; }
     $('fbar-br').hidden = m === 'home';
     document.querySelector('.hist').hidden = m === 'measure';
     $('legend').hidden = m !== 'measure';
-    M.docMenu = false;
+    shopExp = false;
     if (m === 'measure') {
       // Draw opens on a blank canvas when nothing else is open.
-      if (M.src === 'none') { resetDoc('Blank canvas'); M.src = 'blank'; setBlank(blankDefault()); }
+      var fresh = M.src === 'none' && !booting;
+      if (fresh) { resetDoc(nextDrawingName()); M.src = 'blank'; setBlank(blankDefault()); }
+      if (M.dock === undefined) M.dock = 'all';
+      if (fresh && dockOn()) M.panel = 'drawing';
       buildPage(); renderAll();
       requestAnimationFrame(function () { if (M.autoFit) fit(); });
     } else if (m === 'layout') {
@@ -6251,7 +6422,7 @@ details[open] > summary .sum { display: none; }
       pageEl = canvasEl = baseEl = ovEl = null;
       renderHome();
     }
-    renderFloat(); paintUnits(); renderDock();
+    renderChrome(); paintUnits();
   }
   document.querySelectorAll('[data-mode]').forEach(function (b) { b.addEventListener('click', function () { setMode(b.dataset.mode); }); });
   document.querySelector('.logo').addEventListener('click', function () { setMode('home'); });
@@ -6293,7 +6464,7 @@ details[open] > summary .sum { display: none; }
     paintTheme(); if (mode === 'layout') Lay.draw();
   });
   paintTheme();
-  if (window.ResizeObserver) new ResizeObserver(function () { if (mode === 'measure' && M.autoFit) fit(); else if (mode === 'layout') Lay.draw(); else if (mode === 'shop') Shop.paint(); }).observe(stage);
+  if (window.ResizeObserver) new ResizeObserver(function () { fitDock(); if (mode === 'measure' && M.autoFit) fit(); else if (mode === 'layout') Lay.draw(); else if (mode === 'shop') Shop.paint(); }).observe(stage);
   window.addEventListener('beforeunload', function (e) { if (M.src !== 'sample' && M.items.length) { e.preventDefault(); e.returnValue = ''; } });
   document.addEventListener('keydown', function (e) {
     if (!(e.ctrlKey || e.metaKey) || e.altKey || typing(e)) return;
@@ -6311,7 +6482,7 @@ details[open] > summary .sum { display: none; }
   // Start on Home; anything kept in this browser is restored first so Home can offer to continue it.
   Autosave.load().then(function (rec) {
     if (rec && rec.state && rec.state.app === 'DIM') return restoreState(rec.state, rec.file || null, rec.img || null, 'Picked up where you left off.');
-  }).catch(function () {}).then(function () { setMode('home'); });
+  }).catch(function () {}).then(function () { booting = false; setMode('home'); });
 })();
 </script>
 </body>
