@@ -154,6 +154,10 @@ kbd { font-family: var(--ui); font-size: 10.5px; background: var(--b08); border:
 .sqgap { width: 6px; flex: none; }
 .sqx { height: 30px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; margin-left: 4px; background: var(--strong); color: var(--strong-ink); border: 1px solid var(--strong); border-radius: 3px; font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; box-shadow: 0 1px 2px rgb(0 0 0 / .12); flex: none; }
 .sqx:hover, .sqx.on { background: var(--strong-hover); }
+/* Hovering a button that's on keeps its dark fill and light icon, so you can still see what it is */
+.sq.on:hover:not(:disabled) { background: var(--strong-hover); border-color: var(--strong-hover); color: var(--strong-ink); }
+.fbtn.on:hover:not(:disabled) { background: var(--strong-hover); color: var(--strong-ink); }
+.sqx:hover { color: var(--strong-ink); }
 .status .hintx { color: var(--b01); }
 .status .hintx b { color: var(--b00); }
 .fbar.br { right: 14px; bottom: 12px; justify-content: flex-end; }
@@ -179,6 +183,7 @@ body.fl .bar { display: none; }
 body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .stage.flpad { padding: 52px 28px 64px; }
 .stage.flpad.stack { padding-bottom: 100px; }
+.dchips[hidden], .dock[hidden] { display: none; }
 .fbar.tl { top: 10px; left: 10px; gap: 4px; }
 .fbar.tl[hidden] { display: none; }
 .fbar.tl label.sq { cursor: pointer; }
@@ -190,9 +195,10 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .dock .pages { display: inline-flex; gap: 1px; }
 .dchip.pg.on { background: var(--yellow); color: var(--on-yellow); }
 .dchip .ls { display: none; }
-.dock.tight .dchip { padding: 0 6px; letter-spacing: .04em; }
-.dock.tight .dchip .lf { display: none; }
-.dock.tight .dchip .ls { display: inline; }
+.tight .dchip { padding: 0 6px; letter-spacing: .04em; }
+.tight .dchip .lf { display: none; }
+.tight .dchip .ls { display: inline; }
+.fbar.bottom.stack .units button { padding: 0 7px; }
 .main.fl.draw .dk-tool { left: calc(var(--rail) + 32px + var(--tlw, 0px)); top: 18px; }
 /* Layout and Shop drawing on wide windows: tools in a rail, their panels as cards the dock opens and closes */
 .main.pnl { --rail: 84px; grid-template-columns: var(--rail) auto minmax(0, 1fr) auto; }
@@ -203,25 +209,34 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .main.pnl.lay #tools, .main.pnl #legend { display: none; }
 .main.pnl #left { grid-column: 2; grid-row: 1; width: 330px; min-height: 0; overflow: auto; display: none; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 45%, transparent); border-radius: 4px; box-shadow: 0 6px 22px rgb(0 0 0 / .12); }
 .main.pnl.lc #left { display: block; }
+.lp.focus .lp-head { align-items: flex-start; gap: 6px; }
+.lp.focus .lp-head > div:first-child { flex: 1; min-width: 0; }
+.lp.focus .lp-title { font-size: 15px; }
+.lp.focus .lp-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .main.pnl > .center { grid-column: 3; grid-row: 1; }
 .main.pnl > .right { grid-column: 4; grid-row: 1; width: 330px; display: none; box-shadow: 0 6px 22px rgb(0 0 0 / .12); border-color: color-mix(in oklch, var(--line) 45%, transparent); }
 .main.pnl.rc > .right { display: block; }
 
 /* Bottom row over the canvas: the dock (centered in the free space) and the units bar */
-.fbar.bottom { left: 10px; right: 14px; bottom: 12px; align-items: flex-end; flex-wrap: nowrap; gap: 8px; max-width: none; }
-.fbar.bottom > .fbar.br { position: static; margin-left: auto; max-width: none; flex-wrap: nowrap; flex: none; }
-.fbar.bottom.stack { flex-wrap: wrap-reverse; }
-.fbar.bottom.stack > .dock { flex-basis: 100%; justify-content: center; }
-.dock { margin: 0 auto; flex: 0 1 auto; flex-wrap: nowrap; min-width: 0; overflow-x: auto; scrollbar-width: none; }
+.fbar.bottom { left: 10px; right: 14px; bottom: 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: end; gap: 8px; max-width: none; }
+.fbar.bottom > .dchips { grid-column: 1; grid-row: 1; justify-self: start; max-width: 100%; }
+.fbar.bottom > .dock { grid-column: 2; grid-row: 1; justify-self: center; }
+.fbar.bottom > .fbar.br { grid-column: 3; grid-row: 1; justify-self: end; position: static; max-width: none; flex-wrap: nowrap; }
+.fbar.bottom.stack { grid-template-columns: minmax(0, 1fr) auto; }
+.fbar.bottom.stack > .fbar.br { grid-column: 2; grid-row: 1; }
+.fbar.bottom.stack > .dock { grid-column: 1 / -1; grid-row: 2; }
+.dock, .dchips { flex-wrap: nowrap; min-width: 0; overflow-x: auto; scrollbar-width: none; }
 .dchip { height: 28px; display: inline-flex; align-items: center; gap: 6px; padding: 0 9px; background: none; border: 0; border-radius: 2px; color: var(--b00); font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
 .dchip i { width: 10px; height: 10px; border-radius: 2px; flex: none; outline: 1px solid color-mix(in oklch, var(--line) 40%, transparent); }
 .dchip .dn { font-size: 10px; font-weight: 600; letter-spacing: 0; color: var(--b02); }
 .dchip:hover { background: var(--b08); }
+.dchip.on:hover { background: var(--strong-hover); color: var(--strong-ink); }
+.dchip.pg.on:hover { background: var(--yellow); color: var(--on-yellow); }
 .dchip.zero { color: var(--b02); }
-.dock.has-on .dchip:not(.on) { color: var(--b02); }
+.dchips.has-on .dchip:not(.on) { color: var(--b02); }
 .dchip.on { background: var(--strong); color: var(--strong-ink); }
 .dchip.on .dn { color: inherit; opacity: .7; }
-.dock .flab { padding-left: 4px; }
+.dchips .flab { padding-left: 4px; }
 
 /* Draw on wide windows: a tool rail, the canvas, and floating cards instead of side panels */
 .main.draw { position: relative; --rail: 84px; grid-template-columns: var(--rail) minmax(0, 1fr); }
@@ -254,6 +269,7 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .dk-drop .block:last-child { border-bottom: 0; }
 .main.draw .dk-card, .main.draw.dk-right > .right { left: calc(var(--rail) + 26px); top: 60px; bottom: 104px; width: 340px; display: flex; flex-direction: column; }
 .main.draw.dk-right > .right { left: auto; right: 22px; }
+.main.draw.dstack .dk-card, .main.draw.dstack.dk-right > .right { bottom: 142px; }
 .main.draw.dk-right > .right { display: block; }
 .main.draw .dk-card > * { flex: none; }
 .dk-head { display: flex; align-items: center; gap: 8px; padding: 12px 12px 10px; border-bottom: 1px solid color-mix(in oklch, var(--line) 25%, transparent); position: sticky; top: 0; background: var(--b07); z-index: 1; }
@@ -341,6 +357,10 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .sty select { flex: 1 1 0; min-width: 0; }
 .item .sw { width: 14px; height: 14px; border: 1px solid var(--line); border-radius: 2px; padding: 0; flex: none; }
 .item .sw.on { outline: 2px solid var(--line); outline-offset: 1px; }
+.sibs { display: inline-flex; gap: 2px; }
+.item .sib { width: 26px; height: 24px; display: inline-grid; place-items: center; padding: 0; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 35%, transparent); border-radius: 2px; color: var(--b01); }
+.item .sib:hover { border-color: color-mix(in oklch, var(--line) 75%, transparent); color: var(--b00); }
+.item .sib.on, .item .sib.on:hover { background: var(--strong); border-color: var(--strong); color: var(--strong-ink); }
 .item .sw.auto { background: linear-gradient(135deg, var(--green) 0 33%, var(--blue) 33% 66%, var(--purple) 66%); }
 .sty { position: relative; }
 .item .sw.cust { background: conic-gradient(#e5484d, #f5d90a, #30a46c, #3e7bfa, #8e4ec6, #e93d82, #e5484d); position: relative; }
@@ -580,7 +600,8 @@ details[open] > summary .sum { display: none; }
         <div class="fbar tl" id="fbar-tl" role="toolbar" aria-label="DIM and this project" hidden></div>
         <div class="fbar tr" id="fbar-tr" role="toolbar" aria-label="Canvas actions"></div>
         <div class="fbar bottom">
-        <div class="fgroup dock" id="dock" role="toolbar" aria-label="Items and panels" hidden></div>
+        <div class="fgroup dchips" id="dchips" role="toolbar" aria-label="This page" hidden></div>
+        <div class="fgroup dock" id="dock" role="toolbar" aria-label="Pages" hidden></div>
         <div class="fbar br" id="fbar-br">
           <span class="fgroup" id="fscale" hidden></span>
           <span class="fgroup" id="unitbar">
@@ -649,7 +670,7 @@ details[open] > summary .sum { display: none; }
   var TYPE_NAME = { length: 'Length', run: 'Run', curve: 'Curve', area: 'Area', count: 'Count', angle: 'Angle', note: 'Note', dim: 'Dimension' };
   // Draw shapes (Line, Rectangle, Ellipse, Polyline): plain drawings with a stroke and fill, kept out of totals and exports' lists.
   var SHAPE_INK = '#1c1c1c', SHAPE_NAME = { line: 'Line', rect: 'Rectangle', ellipse: 'Ellipse', poly: 'Shape' };
-  var FILLS = [['none', 'None'], ['tint', 'Tint'], ['solid', 'Solid'], ['white', 'White']], STROKES = [[1, 'Thin'], [1.5, 'Regular'], [3, 'Bold']];
+  var FILLS = [['none', 'No fill'], ['tint', 'Tint'], ['solid', 'Solid']], STROKES = [[1, 'Thin'], [1.5, 'Regular'], [3, 'Bold']];
   var BOX_TOOLS = /^(rect|srect|sell)$/, DRAG_TOOLS = /^(sline|srect|sell|length|rect|circle|dim)$/;
   function shapeFill(it) { var f = it.fill || 'none', c = it.color || SHAPE_INK; return f === 'solid' ? { c: c, o: 1 } : f === 'tint' ? { c: c, o: 0.18 } : f === 'white' ? { c: '#ffffff', o: 1 } : { c: 'none', o: 0 }; }
   function shapeName(k) { M.n['s_' + k] = (M.n['s_' + k] || 0) + 1; return SHAPE_NAME[k] + ' ' + M.n['s_' + k]; }
@@ -677,7 +698,7 @@ details[open] > summary .sum { display: none; }
     scales: {},
     items: [], draft: [], calib: [], hover: null, snapped: false, n: freshN(), error: '', note: '', last: null,
     snapDrawing: true, snaps: {}, snapKind: '', fileBytes: null, fileType: '', activeCount: null,
-    style: { color: '', end: '' }, round: '', tags: 'full', shapeStyle: { color: '#1c1c1c', fill: 'none', sw: 1.5 }, shapeSizes: false
+    style: { color: '', end: '' }, round: '', tags: 'full', shapeStyle: { color: '#1c1c1c', fill: 'none', sw: 1.5 }
   };
   try { var tg0 = localStorage.getItem('dim-tags'); if (tg0 === 'size' || tg0 === 'off') M.tags = tg0; } catch (e) {}
   var F = 18, OX = 144, OY = 180;
@@ -1377,7 +1398,6 @@ details[open] > summary .sum { display: none; }
     var mode = M.tags || 'full', out = [];
     items.forEach(function (it) {
       var isSel = selId === it.id; if (mode === 'off' && !isSel) return;
-      if (it.shape && !M.shapeSizes && !isSel) return;
       var val = itemValue(it), sp, nm = it.name || '';
       if (it.type === 'dim') {
         var dg = dimGeom(it, 0, 0), A = dg.a, B = dg.b, deg = Math.atan2(B.y - A.y, B.x - A.x) * 180 / Math.PI;
@@ -1386,7 +1406,8 @@ details[open] > summary .sum { display: none; }
         return;
       }
       sp = tagSpot(it, off);
-      var full = it.type === 'note' ? nm : mode === 'size' ? val : nm + '  ' + val;
+      // Shapes only ever show their size; measurements show name and size unless Dims says size only.
+      var full = it.type === 'note' ? nm : mode === 'size' || it.shape ? val : nm + '  ' + val;
       var short = it.type === 'note' ? (nm.length > 14 ? nm.slice(0, 13) + '…' : nm) : val;
       out.push({ it: it, x: sp.x, y: sp.y, ax: sp.ax, ay: sp.ay, rot: it.type === 'note' ? it.rot || 0 : 0, text: full, short: short, fill: itemCol(it), ink: itemInk(it),
         fixed: it.type === 'note', pri: isSel ? 2 : it.id === M.last ? 1 : 0 });
@@ -2144,9 +2165,15 @@ details[open] > summary .sum { display: none; }
       var sc3 = it.color || SHAPE_INK, closed = it.type === 'area';
       var sh = '<div class="sty">' + PALETTE.map(function (c) { return '<button type="button" class="sw' + (sc3 === c ? ' on' : '') + '" data-color="' + c + '" style="background:' + c + '" aria-label="Color ' + c + '"></button>'; }).join('') +
         '<input type="color" class="swpick" data-colorpick="' + it.id + '" value="' + sc3 + '" title="Any color" aria-label="Pick any color"></div>';
-      sh += '<label class="sty"><span class="sty-l">Stroke</span><select data-sw="' + it.id + '">' + STROKES.map(function (o) { return '<option value="' + o[0] + '"' + ((it.sw || 1.5) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>';
-      if (closed) sh += '<label class="sty"><span class="sty-l">Fill</span><select data-fill="' + it.id + '">' + FILLS.map(function (o) { return '<option value="' + o[0] + '"' + ((it.fill || 'none') === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>';
-      else sh += '<label class="sty"><span class="sty-l">Ends</span><select data-end="' + it.id + '">' + ENDS.map(function (o) { return '<option value="' + o[0] + '"' + (endStyle(it) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>';
+      // Stroke weight and fill as small icon buttons.
+      var ib = function (attr, v, on, title, svg) { return '<button type="button" class="sib' + (on ? ' on' : '') + '" ' + attr + '="' + v + '" title="' + title + '" aria-label="' + title + '" aria-pressed="' + on + '"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">' + svg + '</svg></button>'; };
+      sh += '<div class="sty"><span class="sty-l">Stroke</span><span class="sibs">' + STROKES.map(function (o) { return ib('data-swv', o[0], (it.sw || 1.5) === o[0], o[1] + ' stroke', '<path d="M3 9h12" stroke="currentColor" stroke-width="' + (o[0] * 1.4) + '" stroke-linecap="round"/>'); }).join('') + '</span>';
+      if (closed) {
+        var fcur = it.fill === 'tint' || it.fill === 'solid' ? it.fill : 'none';
+        sh += '<span class="sty-l" style="margin-left:6px">Fill</span><span class="sibs">' + FILLS.map(function (o) { return ib('data-fillv', o[0], fcur === o[0], o[1], '<rect x="3.5" y="3.5" width="11" height="11" rx="1" fill="' + (o[0] === 'none' ? 'none' : 'currentColor') + '"' + (o[0] === 'tint' ? ' fill-opacity=".25"' : '') + ' stroke="currentColor" stroke-width="1.4"/>' + (o[0] === 'none' ? '<path d="M5 13L13 5" stroke="currentColor" stroke-width="1.2"/>' : '')); }).join('') + '</span>';
+      }
+      sh += '</div>';
+      if (!closed) sh += '<label class="sty"><span class="sty-l">Ends</span><select data-end="' + it.id + '">' + ENDS.map(function (o) { return '<option value="' + o[0] + '"' + (endStyle(it) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>';
       return sh;
     }
     var h = '<div class="sty"><button type="button" class="sw auto' + (!it.color ? ' on' : '') + '" data-color="" title="Default color" aria-label="Default color"></button>' +
@@ -2194,7 +2221,7 @@ details[open] > summary .sum { display: none; }
     var ix = M.snaps[M.page], snapInfo = M.src === 'image' ? 'Images have no lines to snap to.' : !ix ? '' : ix.pending ? 'Reading drawing lines…' : ix.failed ? 'Could not read lines from this PDF.' : (M.src === 'sample' ? 'Snaps to wall ends and along walls.' : num0(ix.count || 0) + ' lines found.');
     if (M.src !== 'none' && M.src !== 'blank') d += '<label class="chk"><input type="checkbox" id="snap-drawing"' + (M.snapDrawing ? ' checked' : '') + (M.src === 'image' ? ' disabled' : '') + '> Snap drawing lines</label><p class="hint" style="margin:0">' + snapInfo + ' Hold Alt to place a point without snapping.</p>';
     if (M.src !== 'none') d += '<label class="field">Length step<select id="round-sel">' + roundOpts() + '</select></label><p class="hint" style="margin:0">Points you click land on whole steps, so a line reads ' + (isMetric() ? '2,440 mm instead of 2,438.7 mm' : '96 1/4" instead of 96 3/16"') + '. Alt ignores it.</p>';
-    d += '<label class="field">Tags on drawing<select id="tags-sel"><option value="full"' + ((M.tags || 'full') === 'full' ? ' selected' : '') + '>Name and size</option><option value="size"' + (M.tags === 'size' ? ' selected' : '') + '>Size only</option><option value="off"' + (M.tags === 'off' ? ' selected' : '') + '>Selected only</option></select></label><p class="hint" style="margin:0">Crowded tags step aside with a leader line, drop their name, or shrink to a dot. Select one to bring it back.</p>';
+    d += '<label class="field">Dimensions on the drawing<select id="tags-sel"><option value="full"' + ((M.tags || 'full') === 'full' ? ' selected' : '') + '>Name and size</option><option value="size"' + (M.tags === 'size' ? ' selected' : '') + '>Size only</option><option value="off"' + (M.tags === 'off' ? ' selected' : '') + '>Selected only</option></select></label><p class="hint" style="margin:0">Crowded tags step aside with a leader line, drop their name, or shrink to a dot. Select one to bring it back.</p>';
     if (M.error) d += '<p class="err">' + esc(M.error) + '</p>';
     h += sec('drawing', 'Drawing', d);
     // Project
@@ -2269,7 +2296,7 @@ details[open] > summary .sum { display: none; }
     if (e.target.id === 'file') { openFile(e.target.files && e.target.files[0]); e.target.value = ''; return; }
     if (e.target.id === 'snap-drawing') { M.snapDrawing = e.target.checked; renderRight(); return; }
     if (e.target.id === 'round-sel') { M.round = e.target.value; renderRight(); return; }
-    if (e.target.id === 'tags-sel') { M.tags = e.target.value; try { localStorage.setItem('dim-tags', M.tags); } catch (err) {} renderOverlay(); return; }
+    if (e.target.id === 'tags-sel') { M.tags = e.target.value; try { localStorage.setItem('dim-tags', M.tags); } catch (err) {} renderOverlay(); renderFloat(); return; }
     if (/^blank-(w|h|grid|snap)$/.test(e.target.id) && M.src === 'blank') {
       var nb = Object.assign({}, M.blank), bv;
       if (e.target.id === 'blank-grid') nb.grid = e.target.checked;
@@ -2328,6 +2355,9 @@ details[open] > summary .sum { display: none; }
     var host = e.target.closest('[data-item]'), hit = host && itemById(Number(host.dataset.item));
     var sw = e.target.closest('[data-color]');
     if (sw && hit) { setItemColor(hit, sw.dataset.color); return; }
+    var swv = e.target.closest('[data-swv]'), fv = e.target.closest('[data-fillv]');
+    if (swv && hit) { hit.sw = Number(swv.dataset.swv); M.shapeStyle.sw = hit.sw; renderOverlay(); renderPanels(); return; }
+    if (fv && hit) { hit.fill = fv.dataset.fillv; M.shapeStyle.fill = hit.fill; renderOverlay(); renderPanels(); return; }
     var rb = e.target.closest('[data-rot]');
     if (rb && hit) { hit.rot = normRot((hit.rot || 0) + Number(rb.dataset.rot)); renderOverlay(); renderPanels(); return; }
     var row = e.target.closest('[data-item]');
@@ -2447,29 +2477,39 @@ details[open] > summary .sum { display: none; }
   // When the dock runs out of room, page names shorten (Film, Shop) and chips tighten up.
   // Still too wide: the units bar steps up a line so the dock gets the whole width.
   function fitDock() {
-    var el = $('dock'), row = el && el.parentNode; if (!el || el.hidden) return;
-    var over = function () { return el.scrollWidth > el.clientWidth + 1; };
-    el.classList.remove('tight'); row.classList.remove('stack');
-    if (over()) el.classList.add('tight');
+    var el = $('dock'), ch = $('dchips'), br = $('fbar-br'), row = el && el.parentNode; if (!el || el.hidden) return;
+    var over = function () {
+      var side = (row.clientWidth - el.offsetWidth - 16) / 2;
+      return el.scrollWidth > el.clientWidth + 1 || (!ch.hidden && ch.scrollWidth > side + 1) || br.offsetWidth > side + 1;
+    };
+    [el, ch].forEach(function (x) { x.classList.remove('tight'); }); row.classList.remove('stack');
+    if (over()) [el, ch].forEach(function (x) { x.classList.add('tight'); });
     if (over()) row.classList.add('stack');
     stage.classList.toggle('stack', row.classList.contains('stack'));
+    document.querySelector('.main').classList.toggle('dstack', row.classList.contains('stack'));
   }
   function renderDock() { renderDock0(); fitDock(); }
   function renderDock0() {
-    var el = $('dock'); if (!el) return;
-    if (!flOn()) { el.hidden = true; return; }
+    var el = $('dock'), ch = $('dchips'); if (!el) return;
+    if (!flOn()) { el.hidden = true; ch.hidden = true; return; }
     el.hidden = false;
-    var cp = curPage(), pages = '<span class="pages">' + PAGES.map(function (pg) { var on = cp === pg[0]; return '<button type="button" class="dchip pg' + (on ? ' on' : '') + '" data-page="' + pg[0] + '" aria-pressed="' + on + '" title="' + pg[1] + '">' + (pg[2] ? '<span class="lf">' + pg[1] + '</span><span class="ls">' + pg[2] + '</span>' : pg[1]) + '</button>'; }).join('') + '</span>';
+    var cp = curPage();
+    el.innerHTML = '<span class="pages">' + PAGES.map(function (pg) { var on = cp === pg[0]; return '<button type="button" class="dchip pg' + (on ? ' on' : '') + '" data-page="' + pg[0] + '" aria-pressed="' + on + '" title="' + pg[1] + '">' + (pg[2] ? '<span class="lf">' + pg[1] + '</span><span class="ls">' + pg[2] + '</span>' : pg[1]) + '</button>'; }).join('') + '</span>';
     var card = function (k, label) { var on = !!(UI[mode] && UI[mode][k]); return '<button type="button" class="dchip' + (on ? ' on' : '') + '" data-card="' + k + '" aria-pressed="' + on + '">' + label + '</button>'; };
-    el.classList.toggle('has-on', mode === 'measure' && isItemsView(M.dock));
-    if (mode === 'layout') { el.innerHTML = pages + '<span class="fsep"></span>' + card('l', LEFT_LABEL[cp] || 'Inputs') + card('r', 'Details'); return; }
-    if (mode === 'shop') { el.innerHTML = pages + '<span class="fsep"></span>' + card('l', 'On sheet') + card('r', 'Sheet'); return; }
-    if (mode !== 'measure') { el.innerHTML = pages; return; }
-    var mine = M.items.filter(function (it) { return it.page === M.page; });
-    var chip = function (d, n) { var on = M.dock === d[0] || M.panel === d[0]; return '<button type="button" class="dchip' + (on ? ' on' : '') + (n === 0 ? ' zero' : '') + '" data-dock="' + d[0] + '" aria-pressed="' + on + '">' + (n != null ? '<i style="background:' + d[2] + '"></i>' : '') + esc(d[1]) + (n ? '<span class="dn">' + n + '</span>' : '') + '</button>'; };
-    el.classList.toggle('has-on', isItemsView(M.dock));
-    // All and Shapes always show; a category chip shows once something uses it (or while its card is open).
-    el.innerHTML = pages + '<span class="fsep"></span>' + DOCK_ITEMS.map(function (d) { var n = mine.filter(function (it) { return inView(it, d[0]); }).length; return d[0] === 'all' || d[0] === 'shapes' || n || M.dock === d[0] ? chip(d, n) : ''; }).join('') + '<span class="fsep"></span>' + DOCK_SETS.filter(function (d) { return d[3]; }).map(function (d) { return chip(d, null); }).join('');
+    var h = '';
+    ch.classList.toggle('has-on', mode === 'measure' && isItemsView(M.dock));
+    if (mode === 'layout') {
+      // Layout: the job's inputs (left card), then each settings tab, the whole-job settings and Totals (right card).
+      var fc = UI.layout.r ? Lay.getFocus() : '';
+      h = card('l', LEFT_LABEL[cp] || 'Inputs') + '<span class="fsep"></span>' + Lay.chips().filter(function (c) { return c[0] !== 'export'; }).map(function (c) { var on = fc === c[0]; return '<button type="button" class="dchip' + (on ? ' on' : '') + '" data-lfocus="' + c[0] + '" aria-pressed="' + on + '">' + esc(c[1]) + '</button>'; }).join('');
+    } else if (mode === 'shop') h = card('l', 'On sheet') + card('r', 'Sheet');
+    else if (mode === 'measure') {
+      var mine = M.items.filter(function (it) { return it.page === M.page; });
+      var chip = function (d, n) { var on = M.dock === d[0] || M.panel === d[0]; return '<button type="button" class="dchip' + (on ? ' on' : '') + (n === 0 ? ' zero' : '') + '" data-dock="' + d[0] + '" aria-pressed="' + on + '">' + (n != null ? '<i style="background:' + d[2] + '"></i>' : '') + esc(d[1]) + (n ? '<span class="dn">' + n + '</span>' : '') + '</button>'; };
+      // All and Shapes always show; a category chip shows once something uses it (or while its card is open).
+      h = DOCK_ITEMS.map(function (d) { var n = mine.filter(function (it) { return inView(it, d[0]); }).length; return d[0] === 'all' || d[0] === 'shapes' || n || M.dock === d[0] ? chip(d, n) : ''; }).join('') + '<span class="fsep"></span>' + DOCK_SETS.filter(function (d) { return d[3]; }).map(function (d) { return chip(d, null); }).join('');
+    }
+    ch.hidden = !h; ch.innerHTML = h;
   }
   // Wide windows: no title bar; floating boxes over the canvas; Draw floats its cards, Layout and Shop drawing show theirs beside it.
   function applyDockLayout() {
@@ -2498,6 +2538,9 @@ details[open] > summary .sum { display: none; }
   document.addEventListener('click', function (e) {
     var pg = e.target.closest('[data-page]'); if (pg) { showPage(pg.dataset.page); return; }
     var cd = e.target.closest('[data-card]'); if (cd) { toggleCard(cd.dataset.card); return; }
+    var cc = e.target.closest('[data-cardclose]'); if (cc) { toggleCard(cc.dataset.cardclose, false); return; }
+    var lf = e.target.closest('[data-lfocus]');
+    if (lf && mode === 'layout') { var id = lf.dataset.lfocus; if (UI.layout.r && Lay.getFocus() === id) toggleCard('r', false); else { Lay.focus(id); toggleCard('r', true); rightEl.scrollTop = 0; } return; }
     if (mode !== 'measure') return;
     var d = e.target.closest('[data-dock]'); if (d) { setDock(d.dataset.dock); return; }
     var x = e.target.closest('[data-dkclose]'); if (x) setDock(x.dataset.dkclose);
@@ -2558,7 +2601,7 @@ details[open] > summary .sum { display: none; }
     grid: '<path d="M2.5 2.5h13v13h-13zM2.5 7h13M2.5 11h13M7 2.5v13M11 2.5v13" fill="none" stroke="currentColor" stroke-width="1.2"/>',
     magnet: '<path d="M4 3v6a5 5 0 0 0 10 0V3h-3.2v6a1.8 1.8 0 0 1-3.6 0V3z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M4 6h3.2M10.8 6H14" stroke="currentColor" stroke-width="1.4"/>',
     tag: '<rect x="2" y="5.5" width="14" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5 9h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>',
-    dims: '<rect x="4.5" y="6.5" width="9" height="7" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 3h9M4.5 1.8v2.4M13.5 1.8v2.4M16 6.5v7M14.8 6.5h2.4M14.8 13.5h2.4" fill="none" stroke="currentColor" stroke-width="1.1"/>',
+    dims: '<rect x="4.5" y="2.5" width="9" height="5.5" rx="1" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M6.8 5.25h4.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M2 11v5M16 11v5M2 13.5h14M2 13.5l2-1.6M2 13.5l2 1.6M16 13.5l-2-1.6M16 13.5l-2 1.6" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>',
     export: '<path d="M9 2.5v9M5.5 8L9 11.5 12.5 8M3 13v2.5h12V13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>',
     file: '<path d="M4 2h7l4 4v10H4z M11 2v4h4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
     new: '<path d="M4 2h7l4 4v10H4z M11 2v4h4M9.5 8.5v5M7 11h5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>',
@@ -2566,7 +2609,7 @@ details[open] > summary .sum { display: none; }
     save: '<path d="M3 3h10l2 2v10H3z M6 3v4h6V3 M6 15v-5h6v5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
     gear: '<g fill="currentColor"><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(0 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(45 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(90 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(135 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(180 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(225 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(270 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(315 9 9)"/></g><circle cx="9" cy="9" r="5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="9" cy="9" r="1.9" fill="none" stroke="currentColor" stroke-width="1.4"/>'
   };
-  var TAG_MODES = [['full', 'Name + size'], ['size', 'Size only'], ['off', 'Selected only']];
+  var TAG_MODES = [['full', 'name and size'], ['size', 'size only'], ['off', 'selected item only']];
   function ficon(k) { return '<svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true">' + FICON[k] + '</svg>'; }
   // Top right of the canvas: one small square per action (undo, redo; grid, snap, tags, shape sizes; settings), then Export.
   function renderFloat() {
@@ -2579,7 +2622,7 @@ details[open] > summary .sum { display: none; }
       // Layout and Shop drawing (wide windows): undo, settings and Export, which open the right-hand card.
       if (!flOn() || (mode !== 'layout' && mode !== 'shop')) { tr.hidden = true; return; }
       tr.hidden = false;
-      var rv = mode === 'layout' ? Lay.getView() : '', rOpen = !!UI[mode].r;
+      var rv = mode === 'layout' ? (Lay.getFocus() === 'export' ? 'export' : 'edit') : '', rOpen = !!UI[mode].r;
       tr.innerHTML = undo() + gap + sq('settings', 'gear', (mode === 'layout' ? 'Layout settings' : 'Sheet settings') + ' (,)', rOpen && rv !== 'export' && !(mode === 'shop' && shopExp)) +
         '<button type="button" class="sqx' + (rOpen && (rv === 'export' || (mode === 'shop' && shopExp)) ? ' on' : '') + '" data-fa="export" title="Export (.)">' + ficon('export') + 'Export</button>';
       return;
@@ -2589,8 +2632,7 @@ details[open] > summary .sum { display: none; }
     var h = undo() + gap;
     if (blank) h += sq('grid', 'grid', 'Show the grid', M.blank.grid) + sq('snap', 'magnet', 'Snap to the grid (hold Alt to place freely)', M.blank.snap);
     else h += sq('snapd', 'magnet', M.src === 'pdf' ? 'Snap to the drawing’s lines (hold Alt to place freely)' : 'Only PDFs have lines to snap to', M.snapDrawing && M.src === 'pdf', M.src === 'pdf' ? '' : ' disabled');
-    h += sq('tags', 'tag', 'Measurement tags: ' + tm[1] + ' (click to change)', M.tags !== 'off', '', M.tags === 'size' ? 'S' : M.tags === 'off' ? '' : 'N');
-    h += sq('ssize', 'dims', 'Shape sizes: show the size of each Draw shape', M.shapeSizes) + gap;
+    h += sq('tags', 'dims', 'Dimensions on the drawing: ' + tm[1] + ' (click to change)', M.tags !== 'off', '', M.tags === 'size' ? 'S' : M.tags === 'off' ? '' : 'N') + gap;
     h += sq('settings', 'gear', 'Drawing settings (,)', dockOn() && M.panel === 'drawing');
     h += '<button type="button" class="sqx' + (dockOn() && M.panel === 'export' ? ' on' : '') + '" data-fa="export" title="Export a marked-up PDF or JPG, the list or a CSV (.)">' + ficon('export') + 'Export</button>';
     tr.innerHTML = h;
@@ -2603,10 +2645,10 @@ details[open] > summary .sum { display: none; }
   var shopExp = false;   // Shop drawing: the right card was opened from Export (scrolled to it)
   function openPanel(v) {
     if (mode === 'layout' || mode === 'shop') {
-      var want = v === 'export' ? 'export' : 'edit', u = UI[mode];
-      var showing = mode === 'layout' ? Lay.getView() === want || (want === 'edit' && Lay.getView() === 'totals') : (want === 'export') === shopExp;
+      var u = UI[mode], fc = mode === 'layout' ? Lay.getFocus() : '', want = mode === 'layout' ? (v === 'export' ? 'export' : (Lay.chips()[0] || [''])[0]) : v === 'export' ? 'export' : 'edit';
+      var showing = mode === 'layout' ? (v === 'export' ? fc === 'export' : fc !== 'export') : (want === 'export') === shopExp;
       if (u.r && showing) { toggleCard('r', false); return; }
-      if (mode === 'layout') Lay.view(want);
+      if (mode === 'layout') Lay.focus(want);
       else { shopExp = want === 'export'; if (shopExp) { openSecs.sh_exp = true; Shop.enter(); } }
       toggleCard('r', true);
       if (mode === 'shop' && shopExp) { var dx = rightEl.querySelector('details[data-sec="sh_exp"]'); if (dx) dx.scrollIntoView({ block: 'start' }); } else rightEl.scrollTop = 0;
@@ -2628,7 +2670,6 @@ details[open] > summary .sum { display: none; }
     else if (a === 'snap') { setBlankOpt('snap', !M.blank.snap); renderRight(); }
     else if (a === 'snapd') { M.snapDrawing = !M.snapDrawing; renderRight(); }
     else if (a === 'tags') { var i = TAG_MODES.findIndex(function (t) { return t[0] === (M.tags || 'full'); }); M.tags = TAG_MODES[(i + 1) % TAG_MODES.length][0]; try { localStorage.setItem('dim-tags', M.tags); } catch (err) {} renderOverlay(); renderRight(); }
-    else if (a === 'ssize') { M.shapeSizes = !M.shapeSizes; renderOverlay(); }
     else if (a === 'settings') { openPanel('drawing'); return; }
     else if (a === 'export') { openPanel('export'); return; }
     renderFloat();
@@ -4399,6 +4440,7 @@ details[open] > summary .sum { display: none; }
             (on && fr ? spacingNote(ms) : '') + (warn.length ? '<div class="ed-out warn">' + warn.map(esc).join('<br>') + '</div>' : '') + '</div>';
         }).join('') + '</div><div class="row" style="margin-top:8px"><button type="button" class="btn" data-addrow="1">+ Add run</button>' + (fromMeasureCount() ? '<button type="button" class="btn" data-frommeasure="1">Add from Draw</button>' : '') + '</div></div>';
       }
+      if (flOn()) h = '<div class="dk-head"><b>' + esc(LEFT_LABEL[L.job] || 'Inputs') + '</b><span class="dk-sub">' + esc({ graphic: 'Graphic mockup', mural: 'Mural', film: 'Privacy film', markers: 'Distraction markers' }[L.job] || '') + '</span><button type="button" class="dk-x" data-cardclose="l" aria-label="Close">×</button></div>' + h;
       leftEl.innerHTML = h;
     }
     // The right panel: what is selected on top, its settings in tabs, the job's own settings folded below with a one-line summary,
@@ -4407,7 +4449,25 @@ details[open] > summary .sum { display: none; }
     try { tips = localStorage.getItem('dim.tips') === '1'; } catch (err) { tips = false; }
     var TIP_ICON = '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><circle cx="7" cy="7" r="6"/><path d="M7 6.2v4M7 3.8v.4" stroke-linecap="round"/></svg>';
     function scope(text, act) { return '<div class="for-row"><span>' + text + '</span>' + (act ? '<button type="button" class="linkish" data-lact="' + act + '">Use on all rows</button>' : '') + '</div>'; }
+    // Wide windows: each settings tab, the whole-job settings, Totals and Export are dock chips; the card shows the one picked.
+    var rfocus = '', lastChips = [];
+    function chipsOf(P) {
+      return P.tabs.filter(Boolean).map(function (t) { return ['tab:' + t[0], t[1]]; }).concat(P.job && P.job.length ? [['job', P.jobLabel || 'Whole job']] : []).concat(P.totals ? [['totals', 'Totals']] : []).concat(P.out ? [['export', 'Export']] : []);
+    }
+    function focusPanel(P) {
+      if (!lastChips.some(function (c) { return c[0] === rfocus; })) rfocus = lastChips[0] ? lastChips[0][0] : '';
+      var lab = (lastChips.find(function (c) { return c[0] === rfocus; }) || ['', ''])[1];
+      var h = '<div class="lp focus' + (tips ? ' tips' : '') + '"><div class="lp-top"><div class="lp-head"><div><div class="lp-title">' + esc(lab || P.title) + '</div><div class="lp-sub">' + esc(P.title + (P.sub ? ' · ' + P.sub : '')) + '</div></div>' +
+        '<button type="button" class="lp-tips" data-tips="1" aria-pressed="' + tips + '" title="' + (tips ? 'Hide tips' : 'Show tips') + '" aria-label="Tips">' + TIP_ICON + '</button><button type="button" class="dk-x" data-cardclose="r" aria-label="Close">×</button></div></div><div class="lp-body">';
+      if (rfocus.indexOf('tab:') === 0) { var id = rfocus.slice(4), t = P.tabs.filter(Boolean).find(function (x) { return x[0] === id; }); rtab[L.job] = id; h += '<div class="sec rtab-body">' + (t ? t[2] : '') + '</div>'; }
+      else if (rfocus === 'job') h += P.job.join('');
+      else if (rfocus === 'totals') h += P.totals;
+      else if (rfocus === 'export') h += P.out;
+      return h + '</div></div>';
+    }
     function panel(P) {
+      lastChips = chipsOf(P);
+      if (flOn()) return focusPanel(P);
       var views = [['edit', 'Settings']].concat(P.totals ? [['totals', 'Totals']] : []).concat([['export', 'Export']]);
       if (!views.some(function (v) { return v[0] === rview; })) rview = 'edit';
       var bar = '<div class="lp-bar">' + views.map(function (v) { return '<button type="button" data-rview="' + v[0] + '" aria-pressed="' + (v[0] === rview) + '">' + v[1] + '</button>'; }).join('') + '</div>';
@@ -4575,6 +4635,7 @@ details[open] > summary .sum { display: none; }
       }
       var keepTop = rightEl.scrollTop;
       rightEl.innerHTML = panel(P);
+      if (mode === 'layout') renderDock();
       rightEl.scrollTop = keepTop;
     }
     function status() {
@@ -5319,7 +5380,7 @@ details[open] > summary .sum { display: none; }
       enter: all, draw: draw, renderTo: renderTo, fmtIn: function (x) { return fmtIn(x); }, tools: tools, markerArt: function () { return L.markers.graphics || []; }, setMarkerArt: setMarkerArt, graphicArt: function () { return L.graphic.graphics || []; }, setGraphicArt: setGraphicArt,
       graphicRuns: function () { syncLens(L.graphic); return L.graphic.runs.map(function (r) { return r.name + ' · ' + fmtFt(elevLen(r)); }); }, left: left, right: right, status: status, getState: getState, setState: setState,
       getJob: function () { return L.job; }, setJob: function (j) { L.job = j; L.note = ''; }, job: function (j) { L.job = j; L.note = ''; all(); },
-      getView: function () { return rview; }, view: function (v) { rview = v; right(); },
+      chips: function () { return lastChips; }, getFocus: function () { return rfocus; }, focus: function (id) { rfocus = id; right(); },
       imageBlob: function () { return L.mural.imgBlob || null; }, imageName: function () { return L.mural.imgName || ''; } };
   })();
 
@@ -6474,6 +6535,36 @@ details[open] > summary .sum { display: none; }
     else if (k === 's') { e.preventDefault(); Project.save(); }
     else if (k === '0') { e.preventDefault(); if (mode === 'measure') fit(); else if (mode === 'layout') Lay.draw(); else if (mode === 'shop') Shop.paint(); }
   });
+  // ---- Clicks that stick ----
+  // Typing in a field and then pressing a dropdown or button saves the field as it loses focus, and that save redraws the
+  // card, which used to swap out the control mid-click (the dropdown didn't open, or its choice was lost). While a control
+  // is being pressed, redraws of the panel holding it wait; when the click or choice finishes, the panel redraws fresh.
+  var Hold = (function () {
+    var held = null, pending = [], timer = null, desc = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+    var boxes = [leftEl, rightEl, toolsEl, $('fbar-tl'), $('fbar-tr'), $('dock'), $('dchips'), $('fscale')];
+    boxes.forEach(function (el) {
+      Object.defineProperty(el, 'innerHTML', { configurable: true, get: function () { return desc.get.call(this); },
+        set: function (v) { if (held && this.contains(held)) { if (pending.indexOf(this) < 0) pending.push(this); return; } var i = pending.indexOf(this); if (i >= 0) pending.splice(i, 1); desc.set.call(this, v); } });
+    });
+    function fresh() {
+      if (!pending.length) return; pending = [];
+      if (mode === 'measure') renderPanels(); else if (mode === 'layout') Lay.enter(); else if (mode === 'shop') Shop.enter();
+      renderChrome();
+    }
+    // Let go before the control's own handlers run, so they draw normally; anything still waiting is redrawn just after.
+    function release() { if (!held) return; held = null; clearTimeout(timer); setTimeout(fresh, 0); }
+    document.addEventListener('pointerdown', function (e) {
+      release();
+      var c = e.target.closest && e.target.closest('select, button, label, input[type="checkbox"], input[type="radio"], input[type="color"], input[type="file"]');
+      if (!c || !boxes.some(function (b) { return b && b.contains(c); })) return;
+      held = c; clearTimeout(timer); timer = setTimeout(release, c.tagName === 'SELECT' ? 15000 : 1500);
+    }, true);
+    document.addEventListener('click', function (e) { if (held && held.tagName !== 'SELECT' && held.contains(e.target)) release(); }, true);
+    document.addEventListener('change', function (e) { if (held && held === e.target) release(); }, true);
+    document.addEventListener('focusout', function (e) { if (held && held === e.target && held.tagName === 'SELECT') release(); }, true);
+    document.addEventListener('keydown', function (e) { if (held && e.key === 'Escape') release(); }, true);
+    return { release: release };
+  })();
   $('undo').addEventListener('click', function () { History.undo(); });
   $('redo').addEventListener('click', function () { History.redo(); });
   setMode('measure');
