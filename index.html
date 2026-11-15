@@ -152,6 +152,8 @@ kbd { font-family: var(--ui); font-size: 10.5px; background: var(--b08); border:
 .sq.on { background: var(--strong); border-color: var(--strong); color: var(--strong-ink); }
 .sq .tk { position: absolute; right: 2px; bottom: 0; font-size: 8px; font-weight: 800; line-height: 1.2; }
 .sqgap { width: 6px; flex: none; }
+.sqsel { width: auto; height: 30px; padding: 0 4px 0 7px; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 35%, transparent); border-radius: 3px; box-shadow: 0 1px 2px rgb(0 0 0 / .1); font-size: 11px; font-weight: 600; color: var(--b00); flex: none; }
+.sqsel:hover { border-color: color-mix(in oklch, var(--line) 75%, transparent); }
 .sqx { height: 30px; display: inline-flex; align-items: center; gap: 6px; padding: 0 12px; margin-left: 4px; background: var(--strong); color: var(--strong-ink); border: 1px solid var(--strong); border-radius: 3px; font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; box-shadow: 0 1px 2px rgb(0 0 0 / .12); flex: none; }
 .sqx:hover, .sqx.on { background: var(--strong-hover); }
 /* Hovering a button that's on keeps its dark fill and light icon, so you can still see what it is */
@@ -195,7 +197,7 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .tight .dchip .lf { display: none; }
 .tight .dchip .ls { display: inline; }
 .fbar.bottom.stack .units button { padding: 0 7px; }
-.main.fl.draw .dk-tool { left: calc(var(--rail) + 32px + var(--tlw, 0px)); top: 18px; }
+.main.fl.draw .dk-tool { left: calc(var(--rail) + 32px + var(--tlw, 0px)); top: 18px; max-width: calc(100% - var(--rail) - 56px - var(--tlw, 0px)); }
 /* Layout and Shop drawing on wide windows: tools in a rail, their panels as cards the dock opens and closes */
 .main.pnl { --rail: 84px; grid-template-columns: var(--rail) auto minmax(0, 1fr) auto; }
 .main.pnl.lay { --rail: 0px; column-gap: 0; }
@@ -203,6 +205,8 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .main.pnl > .left { display: contents; }
 .main.pnl #tools { grid-column: 1; grid-row: 1; align-self: start; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; padding: 10px 8px; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 55%, transparent); border-radius: 4px; box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
 .main.pnl.lay #tools, .main.pnl #legend { display: none; }
+.main.pnl.shopm { --rail: 50px; }
+.main.pnl.shopm #tools { grid-template-columns: minmax(0, 1fr); padding: 8px 7px; }
 .main.pnl #left { grid-column: 2; grid-row: 1; width: 330px; min-height: 0; overflow: auto; display: none; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 45%, transparent); border-radius: 4px; box-shadow: 0 6px 22px rgb(0 0 0 / .12); }
 .main.pnl.lc #left { display: block; }
 .lp.focus .lp-head { align-items: flex-start; gap: 6px; }
@@ -250,7 +254,7 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .main.draw .dk-card, .main.draw.dk-right > .right { position: absolute; z-index: 8; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 45%, transparent); border-radius: 3px; box-shadow: 0 6px 22px rgb(0 0 0 / .16); overflow: auto; }
 /* Top left (dock layout): document box with its menu, the selection box, and tool panels dropping down under them */
 .main.draw .dk-tool { position: absolute; z-index: 9; top: 18px; left: calc(var(--rail) + 26px); display: grid; gap: 6px; justify-items: start; max-width: calc(100% - var(--rail) - 420px); }
-.dk-row { display: flex; gap: 4px; align-items: center; max-width: 100%; }
+.dk-row { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; max-width: 100%; }
 .tbox { position: relative; height: 30px; display: inline-flex; align-items: center; gap: 8px; padding: 0 10px; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 35%, transparent); border-radius: 3px; box-shadow: 0 1px 2px rgb(0 0 0 / .1); min-width: 0; }
 .tbox[hidden] { display: none; }
 .tbox.doc { padding: 0; }
@@ -281,6 +285,9 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .selbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .selgrp { display: inline-flex; gap: 2px; }
 .block .selbar .sq { box-shadow: none; }
+/* Next to the selection box, the arrange bar drops to its own row as a whole when the row runs out of room */
+.dk-row > .selbar { flex: 0 0 auto; max-width: 100%; }
+.dk-row.wrap > .selbar { flex-basis: 100%; }
 /* List rows: lock and hide toggles show on hover, and stay while on */
 .item.mrow { grid-template-columns: 14px minmax(0, 1fr) auto auto 18px; }
 .item.mrow > .rfs { grid-column: 4; display: none; gap: 1px; }
@@ -293,7 +300,10 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .main.draw .dk-card, .main.draw.dk-right > .right { left: calc(var(--rail) + 26px); top: 60px; bottom: 104px; width: 340px; display: flex; flex-direction: column; }
 .main.draw.dk-right > .right { left: auto; right: 22px; }
 .main.draw.dstack .dk-card, .main.draw.dstack.dk-right > .right { bottom: 142px; }
-.main.draw.dk-right > .right { display: block; }
+.main.draw.dk-right > .right { display: block; bottom: auto; max-height: calc(100% - 164px); }
+.main.rul-on.draw.dk-right > .right { max-height: calc(100% - 184px); }
+.main.draw.dstack.dk-right > .right { max-height: calc(100% - 202px); }
+.main.rul-on.draw.dstack.dk-right > .right { max-height: calc(100% - 222px); }
 .main.draw .dk-card > * { flex: none; }
 .dk-head { display: flex; align-items: center; gap: 8px; padding: 12px 12px 10px; border-bottom: 1px solid color-mix(in oklch, var(--line) 25%, transparent); position: sticky; top: 0; background: var(--b07); z-index: 1; }
 .dk-head b { font-size: 14px; font-weight: 700; }
@@ -379,6 +389,9 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .sty { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; flex: 1 1 100%; font-size: 11px; color: var(--b01); }
 .sty-l { width: 44px; flex: none; }
 .sty-s { width: 44px; flex: none; }
+/* Short labels that sit right against their buttons (Stroke, Fill); a later group keeps its distance */
+.sty-k { flex: none; margin-right: 3px; }
+.sty-k.gap { margin-left: 14px; }
 .sty select { flex: 1 1 0; min-width: 0; }
 .item .sw { width: 14px; height: 14px; border: 1px solid var(--line); border-radius: 2px; padding: 0; flex: none; }
 .item .sw.on { outline: 2px solid var(--line); outline-offset: 1px; }
@@ -2438,10 +2451,10 @@ details[open] > summary .sum { display: none; }
 
   // ---- Panels ----
   // Draw tools make plain shapes (click and drag); Measure tools make measurements. Each list: [icon, tool, title, key].
-  var DTOOLS = [['select', 'edit', 'Select and edit (V): drag points, lines or shapes', 'V'], ['hand', 'pan', 'Pan (H, or hold Space)', 'H'], ['sline', 'sline', 'Line (\\): click and drag', '\\'], ['box', 'srect', 'Rectangle (M): click and drag, Shift for a square', 'M'],
-    ['ellipse', 'sell', 'Ellipse (E): click and drag, Shift for a circle', 'E'], ['pen', 'spoly', 'Pen (P): click for corners, drag for curves; Enter to finish, or click the first point to close', 'P'], ['type', 'text', 'Text (T): click to type, in any font on this computer', 'T'], ['note', 'note', 'Note (N)', 'N']];
-  var KTOOLS = [['scale', 'scale', 'Scale (S): printed scale or known length', 'S'], ['resize', 'resize', 'Resize (Z): drag a corner or type a size', 'Z'], ['length', 'length', 'Length (L): click and drag', 'L'], ['run', 'run', 'Run (R): several segments', 'R'], ['trace', 'curve', 'Curve (K): 3 points make an arc', 'K'], ['dim', 'dim', 'Dimension (D): pull from an edge, or drag', 'D'],
-    ['area', 'area', 'Area (A)', 'A'], ['rect', 'rect', 'Rectangle area (B): click and drag', 'B'], ['circle', 'circle', 'Circle (O): drag from the center', 'O'], ['count', 'count', 'Count (C)', 'C'], ['angle', 'angle', 'Angle (G): corner in middle', 'G']];
+  var DTOOLS = [['select', 'edit', 'Select and edit (V): drag points, lines or shapes', 'V'], ['hand', 'pan', 'Pan (H, or hold Space)', 'H'], ['pen', 'spoly', 'Pen (P): click for corners, drag for curves; Enter to finish, or click the first point to close', 'P'], ['sline', 'sline', 'Line (\\): click and drag', '\\'],
+    ['box', 'srect', 'Rectangle (M): click and drag, Shift for a square', 'M'], ['ellipse', 'sell', 'Ellipse (E): click and drag, Shift for a circle', 'E'], ['type', 'text', 'Text (T): click to type, in any font on this computer', 'T'], ['note', 'note', 'Note (N)', 'N']];
+  var KTOOLS = [['scale', 'scale', 'Scale (S): printed scale or known length', 'S'], ['dim', 'dim', 'Dimension (D): pull from an edge, or drag', 'D'], ['resize', 'resize', 'Resize (Z): drag a corner or type a size', 'Z'], ['length', 'length', 'Length (L): click and drag', 'L'], ['trace', 'curve', 'Curve (K): 3 points make an arc', 'K'], ['run', 'run', 'Run (R): several segments', 'R'],
+    ['area', 'area', 'Area (A)', 'A'], ['rect', 'rect', 'Rectangle area (B): click and drag', 'B'], ['circle', 'circle', 'Circle (O): drag from the center', 'O'], ['angle', 'angle', 'Angle (G): corner in middle', 'G'], ['count', 'count', 'Count (C)', 'C']];
   var MTOOL_NAME = { sline: ['Line', '\\'], srect: ['Rectangle', 'M'], sell: ['Ellipse', 'E'], spoly: ['Pen', 'P'], text: ['Text', 'T'], pan: ['Pan', 'H'], edit: ['Select', 'V'], scale: ['Scale', 'S'], resize: ['Resize', 'Z'], length: ['Length', 'L'], run: ['Run', 'R'], curve: ['Curve', 'K'], dim: ['Dimension', 'D'], area: ['Area', 'A'], rect: ['Rectangle area', 'B'], circle: ['Circle', 'O'], count: ['Count', 'C'], angle: ['Angle', 'G'], note: ['Note', 'N'] };
   var DRAW_TOOLS = /^(length|run|curve|dim|area|rect|circle|count|angle|note|sline|srect|sell|spoly)$/;
   function renderTools() {
@@ -2561,10 +2574,19 @@ details[open] > summary .sum { display: none; }
     var el = $('readout'), lb = $('readout-label'), blk = $('readout-block'), tip = $('tip'); if (!el || M.sizeEdit) return;
     var li = liveInfo();
     blk.hidden = !li; if (tip) tip.classList.toggle('big', !li);
-    if (!li) return;
+    if (!li) { fitSelRow(); return; }
     el.textContent = li.text; lb.textContent = dockOn() && li.label.slice(-(li.text.length + 3)) === ' · ' + li.text ? li.label.slice(0, -(li.text.length + 3)) : li.label; el.classList.toggle('dim', !!li.dim || (!li.live && /set scale/.test(li.text)));
     el.classList.toggle('small', li.text.length > 14);
     var ed = !li.live && !li.multi && M.tool !== 'scale' && !!sizeFields(readoutPick()); el.classList.toggle('editable', ed); el.title = ed ? 'Click to change size' : '';
+    fitSelRow();
+  }
+  // The arrange bar sits right of the selection box while there's room before the boxes at the top right;
+  // otherwise it takes a row of its own under the selection box.
+  function fitSelRow() {
+    var row = dockOn() && leftEl.querySelector('.dk-row'), sb = row && row.querySelector('.selbar'); if (!sb) return;
+    row.classList.remove('wrap');
+    var r = sb.getBoundingClientRect(), r0 = row.getBoundingClientRect(), tr = $('fbar-tr').getBoundingClientRect();
+    if (r.top > r0.top + 2 || (r.right > tr.left - 8 && r.top < tr.bottom)) row.classList.add('wrap');
   }
   function scaleOptions(s) {
     var groups = {}, o = '<option value="">Choose…</option>';
@@ -2623,7 +2645,7 @@ details[open] > summary .sum { display: none; }
   // Top left of the canvas (dock layout): the document box with its menu, then the selection box (live size, click to type one).
   // Scale and Resize panels, and short notes, drop down under them.
   function topLeftBoxes() {
-    var h = '<div class="dk-tool"><div class="dk-row"><div class="tbox sel" id="readout-block" hidden><span class="label" id="readout-label"></span><span class="readout" id="readout"></span></div></div>' + selBar();
+    var h = '<div class="dk-tool"><div class="dk-row"><div class="tbox sel" id="readout-block" hidden><span class="label" id="readout-label"></span><span class="readout" id="readout"></span></div>' + selBar() + '</div>';
     var drop = '';
     if (M.tool === 'scale') drop += scalePanel();
     if (M.tool === 'resize') drop += resizePanel();
@@ -2666,10 +2688,10 @@ details[open] > summary .sum { display: none; }
         '<input type="color" class="swpick" data-colorpick="' + it.id + '" value="' + sc3 + '" title="Any color" aria-label="Pick any color"></div>';
       // Stroke weight and fill as small icon buttons.
       var ib = function (attr, v, on, title, svg) { return '<button type="button" class="sib' + (on ? ' on' : '') + '" ' + attr + '="' + v + '" title="' + title + '" aria-label="' + title + '" aria-pressed="' + on + '"><svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">' + svg + '</svg></button>'; };
-      sh += '<div class="sty"><span class="sty-l">Stroke</span><span class="sibs">' + STROKES.map(function (o) { return ib('data-swv', o[0], (it.sw || 1.5) === o[0], o[1] + ' stroke', '<path d="M3 9h12" stroke="currentColor" stroke-width="' + (o[0] * 1.4) + '" stroke-linecap="round"/>'); }).join('') + '</span>';
+      sh += '<div class="sty"><span class="sty-k">Stroke</span><span class="sibs">' + STROKES.map(function (o) { return ib('data-swv', o[0], (it.sw || 1.5) === o[0], o[1] + ' stroke', '<path d="M3 9h12" stroke="currentColor" stroke-width="' + (o[0] * 1.4) + '" stroke-linecap="round"/>'); }).join('') + '</span>';
       if (closed) {
         var fcur = it.fill === 'tint' || it.fill === 'solid' ? it.fill : 'none';
-        sh += '<span class="sty-l" style="margin-left:6px">Fill</span><span class="sibs">' + FILLS.map(function (o) { return ib('data-fillv', o[0], fcur === o[0], o[1], '<rect x="3.5" y="3.5" width="11" height="11" rx="1" fill="' + (o[0] === 'none' ? 'none' : 'currentColor') + '"' + (o[0] === 'tint' ? ' fill-opacity=".25"' : '') + ' stroke="currentColor" stroke-width="1.4"/>' + (o[0] === 'none' ? '<path d="M5 13L13 5" stroke="currentColor" stroke-width="1.2"/>' : '')); }).join('') + '</span>';
+        sh += '<span class="sty-k gap">Fill</span><span class="sibs">' + FILLS.map(function (o) { return ib('data-fillv', o[0], fcur === o[0], o[1], '<rect x="3.5" y="3.5" width="11" height="11" rx="1" fill="' + (o[0] === 'none' ? 'none' : 'currentColor') + '"' + (o[0] === 'tint' ? ' fill-opacity=".25"' : '') + ' stroke="currentColor" stroke-width="1.4"/>' + (o[0] === 'none' ? '<path d="M5 13L13 5" stroke="currentColor" stroke-width="1.2"/>' : '')); }).join('') + '</span>';
       }
       sh += '</div>';
       if (!closed) sh += '<label class="sty"><span class="sty-l">Ends</span><select data-end="' + it.id + '">' + ENDS.map(function (o) { return '<option value="' + o[0] + '"' + (endStyle(it) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></label>';
@@ -2707,26 +2729,31 @@ details[open] > summary .sum { display: none; }
   function renderRight() {
     if (mode !== 'measure') return;
     var s = scaleNow(), h = '';
-    // Drawing. A blank canvas leads with its size.
-    var d = '';
-    if (M.src === 'blank') d += '<div class="row2"><label class="field">Canvas width<input type="text" id="blank-w" value="' + esc(fmtLen(M.blank.w)) + '"></label><label class="field">Canvas height<input type="text" id="blank-h" value="' + esc(fmtLen(M.blank.h)) + '"></label></div><label class="chk"><input type="checkbox" id="blank-grid"' + (M.blank.grid ? ' checked' : '') + '> Show grid</label><label class="chk"><input type="checkbox" id="blank-snap"' + (M.blank.snap ? ' checked' : '') + '> Snap to grid (' + gridLabel(M.blank.step) + ')</label>';
-    d += M.src === 'none' ? '<p class="hint" style="margin:0">No drawing open.</p>' : M.src === 'blank' ? '' : '<p>' + esc(M.name) + '</p><p class="hint" style="margin:0">' + sizeText() + (M.pages > 1 ? ' · page ' + M.page + ' of ' + M.pages : '') + '</p>';
-    d += '<div class="row"><label class="btn strong" for="file">Open file</label><input type="file" id="file" accept="application/pdf,image/*,.dim,.json" hidden>';
-    if (M.src !== 'blank') d += '<button type="button" class="btn" data-act="blank">Blank canvas</button>';
-    if (M.src !== 'sample') d += '<button type="button" class="btn" data-act="sample">Sample plan</button>';
-    d += '</div><p class="hint" style="margin:0">PDF, JPG, PNG, GIF, WebP or .dim project. Or drop a file on canvas.</p>';
-    if (M.src !== 'none') d += '<div class="row"><button type="button" class="btn" data-act="reset"' + (M.items.length ? '' : ' disabled') + '>' + (M.src === 'blank' ? 'Reset canvas' : 'Clear measurements') + '</button></div><p class="hint" style="margin:0">' + (M.src === 'blank' ? 'Removes everything drawn on canvas.' : 'Removes every measurement and note, on every page. Drawing and scale stay.') + ' Undo (⌘Z) brings them back.</p>';
-    if (M.pages > 1) d += '<div class="row"><button type="button" class="btn" data-act="prev"' + (M.page === 1 ? ' disabled' : '') + '>‹ Prev page</button><button type="button" class="btn" data-act="next"' + (M.page === M.pages ? ' disabled' : '') + '>Next page ›</button></div>';
-    var ix = M.snaps[M.page], snapInfo = M.src === 'image' ? 'Images have no lines to snap to.' : !ix ? '' : ix.pending ? 'Reading drawing lines…' : ix.failed ? 'Could not read lines from this PDF.' : (M.src === 'sample' ? 'Snaps to wall ends and along walls.' : num0(ix.count || 0) + ' lines found.');
-    if (M.src !== 'none' && M.src !== 'blank') d += '<label class="chk"><input type="checkbox" id="snap-drawing"' + (M.snapDrawing ? ' checked' : '') + (M.src === 'image' ? ' disabled' : '') + '> Snap drawing lines</label><p class="hint" style="margin:0">' + snapInfo + ' Hold Alt to place a point without snapping.</p>';
+    // Drawing: its name, then a blank canvas's size or the file's size and pages, Length step and Reset. Grid, snap and
+    // dimensions on the drawing are buttons at the top right. Wide windows have Open and Save as boxes at the top left,
+    // so only narrow windows list them here.
+    var wide = dockOn(), d = '';
+    if (M.src !== 'none') d += '<label class="field">Name<input type="text" id="draw-name" value="' + esc(docTitle()) + '" spellcheck="false" aria-label="Drawing name"></label>';
+    if (M.src === 'blank') d += '<div class="row2"><label class="field">Canvas width<input type="text" id="blank-w" value="' + esc(fmtLen(M.blank.w)) + '"></label><label class="field">Canvas height<input type="text" id="blank-h" value="' + esc(fmtLen(M.blank.h)) + '"></label></div>';
+    var ix = M.snaps[M.page], snapInfo = M.src === 'image' ? 'Images have no lines to snap to.' : !ix ? '' : ix.pending ? 'Reading drawing lines…' : ix.failed ? 'Could not read lines from this PDF.' : (M.src === 'sample' ? 'Snaps to wall ends and along walls.' : num0(ix.count || 0) + ' lines found to snap to.');
+    if (M.src === 'none') d += '<p class="hint" style="margin:0">No drawing open.</p>';
+    else if (M.src !== 'blank') d += '<p class="hint" style="margin:0">' + sizeText() + (M.pages > 1 ? ' · page ' + M.page + ' of ' + M.pages : '') + (snapInfo ? '. ' + snapInfo : '') + '</p>';
+    if (!wide) {
+      d += '<div class="row"><label class="btn strong" for="file">Open file</label><input type="file" id="file" accept="application/pdf,image/*,.dim,.json" hidden>';
+      if (M.src !== 'blank') d += '<button type="button" class="btn" data-act="blank">Blank canvas</button>';
+      d += '</div><p class="hint" style="margin:0">PDF, JPG, PNG, GIF, WebP or .dim project. Or drop a file on canvas.</p>';
+      if (M.pages > 1) d += '<div class="row"><button type="button" class="btn" data-act="prev"' + (M.page === 1 ? ' disabled' : '') + '>‹ Prev page</button><button type="button" class="btn" data-act="next"' + (M.page === M.pages ? ' disabled' : '') + '>Next page ›</button></div>';
+    }
     if (M.src !== 'none') d += '<label class="field">Length step<select id="round-sel">' + roundOpts() + '</select></label><p class="hint" style="margin:0">Points you click land on whole steps, so a line reads ' + (isMetric() ? '2,440 mm instead of 2,438.7 mm' : '96 1/4" instead of 96 3/16"') + '. Alt ignores it.</p>';
-    d += '<label class="field">Dimensions on the drawing<select id="tags-sel"><option value="full"' + ((M.tags || 'full') === 'full' ? ' selected' : '') + '>Name and size</option><option value="size"' + (M.tags === 'size' ? ' selected' : '') + '>Size only</option><option value="off"' + (M.tags === 'off' ? ' selected' : '') + '>Selected only</option></select></label><p class="hint" style="margin:0">Crowded tags step aside with a leader line, drop their name, or shrink to a dot. Select one to bring it back.</p>';
+    if (M.src !== 'none') d += '<div class="row"><button type="button" class="btn" data-act="reset"' + (M.items.length ? '' : ' disabled') + '>' + (M.src === 'blank' ? 'Reset canvas' : 'Clear measurements') + '</button></div><p class="hint" style="margin:0">' + (M.src === 'blank' ? 'Removes everything drawn on canvas.' : 'Removes every measurement and note, on every page. Drawing and scale stay.') + ' Undo (⌘Z) brings them back.</p>';
     if (M.error) d += '<p class="err">' + esc(M.error) + '</p>';
     h += sec('drawing', 'Drawing', d);
-    // Project
-    var pr = '<div class="row"><button type="button" class="btn strong" data-act="save" data-dl>Save project (.dim)</button></div><p class="hint" style="margin:0">A .dim file keeps drawing, scales, measurements and Layout settings in one file to send a coworker. Open it with Open file.</p>';
-    pr += '<p class="hint" style="margin:0">' + (Autosave.status || 'Work is also kept in this browser, so a refresh or closed tab picks up where you left off.') + '</p>';
-    h += sec('project', 'Project', pr);
+    // Project (narrow windows; wide windows save from the box at the top left)
+    if (!wide) {
+      var pr = '<div class="row"><button type="button" class="btn strong" data-act="save" data-dl>Save project (.dim)</button></div><p class="hint" style="margin:0">A .dim file keeps drawing, scales, measurements and Layout settings in one file to send a coworker. Open it with Open file.</p>';
+      pr += '<p class="hint" style="margin:0">' + (Autosave.status || 'Work is also kept in this browser, so a refresh or closed tab picks up where you left off.') + '</p>';
+      h += sec('project', 'Project', pr);
+    }
     // Totals
     var mine = M.items.filter(function (it) { return it.page === M.page; }), t = totalsFor(mine);
     var tt = '<dl class="kv"><dt>Length + runs</dt><dd>' + (t.lin ? fmtLin(t.lin) : '—') + '</dd><dt>Area</dt><dd>' + (t.area ? fmtSqft(t.area) : '—') + '</dd>';
@@ -2746,8 +2773,8 @@ details[open] > summary .sum { display: none; }
     h += aboutSec();
     rightEl.innerHTML = h;
     if (dockOn() && M.panel) {
-      var ds = dockSpec(M.panel), only = ds[2];
-      rightEl.querySelectorAll('details[data-sec]').forEach(function (dt) { var keep = only.indexOf(dt.dataset.sec) >= 0; dt.hidden = !keep; if (keep) dt.open = true; dt.classList.toggle('solo', keep && only.length === 1); });
+      var ds = dockSpec(M.panel), only = ds[2], shown = only.filter(function (k) { return rightEl.querySelector('details[data-sec="' + k + '"]'); });
+      rightEl.querySelectorAll('details[data-sec]').forEach(function (dt) { var keep = only.indexOf(dt.dataset.sec) >= 0; dt.hidden = !keep; if (keep) dt.open = true; dt.classList.toggle('solo', keep && shown.length === 1); });
       rightEl.insertAdjacentHTML('afterbegin', '<div class="dk-head"><b>' + esc(ds[1]) + '</b><span class="dk-sub"></span><button type="button" class="dk-x" data-dkclose="' + M.panel + '" aria-label="Close">×</button></div>');
     }
   }
@@ -2793,14 +2820,11 @@ details[open] > summary .sum { display: none; }
 
   rightEl.addEventListener('change', function (e) {
     if (e.target.id === 'file') { openFile(e.target.files && e.target.files[0]); e.target.value = ''; return; }
-    if (e.target.id === 'snap-drawing') { M.snapDrawing = e.target.checked; renderRight(); return; }
+    if (e.target.id === 'draw-name') { if (!renameDoc(e.target.value)) e.target.value = docTitle(); renderTopLeft(); renderLeft(); return; }
     if (e.target.id === 'round-sel') { M.round = e.target.value; renderRight(); return; }
-    if (e.target.id === 'tags-sel') { M.tags = e.target.value; try { localStorage.setItem('dim-tags', M.tags); } catch (err) {} renderOverlay(); renderFloat(); return; }
-    if (/^blank-(w|h|grid|snap)$/.test(e.target.id) && M.src === 'blank') {
-      var nb = Object.assign({}, M.blank), bv;
-      if (e.target.id === 'blank-grid') nb.grid = e.target.checked;
-      else if (e.target.id === 'blank-snap') nb.snap = e.target.checked;
-      else { bv = parseSize(e.target.value); if (bv >= 1) nb[e.target.id === 'blank-w' ? 'w' : 'h'] = bv; }
+    if (/^blank-(w|h)$/.test(e.target.id) && M.src === 'blank') {
+      var nb = Object.assign({}, M.blank), bv = parseSize(e.target.value);
+      if (bv >= 1) nb[e.target.id === 'blank-w' ? 'w' : 'h'] = bv;
       setBlank(nb); buildPage(); fit(); renderAll(); return;
     }
   });
@@ -3095,7 +3119,7 @@ details[open] > summary .sum { display: none; }
     if (!flOn()) { tl.hidden = true; return; }
     tl.hidden = false;
     if (renaming) return;
-    var nm = M.src === 'none' ? 'Untitled' : M.name ? M.name.replace(/\.(pdf|png|jpe?g|gif|webp|heic|dim|json)$/i, '') : 'Untitled';
+    var nm = docTitle();
     var sq = function (act, icon, title) { return '<button type="button" class="sq" data-tl="' + act + '" title="' + title + '" aria-label="' + title + '">' + ficon(icon) + '</button>'; };
     var h = '<span class="tbox brand"><button type="button" class="tbtn logo" data-tl="home" title="Home">DIM</button><button type="button" class="tbtn ic" data-tl="theme" title="Light or dark theme" aria-label="Light or dark theme">' + HALF.replace('width="18" height="18"', 'width="15" height="15"') + '</button></span>';
     h += '<span class="tbox doc"><button type="button" class="tbtn" data-tl="rename" title="Rename">' + ficon('file') + '<span class="dname">' + esc(nm) + '</span></button></span>';
@@ -3103,6 +3127,15 @@ details[open] > summary .sum { display: none; }
     if (mode === 'measure' && M.pages > 1) h += '<span class="sqgap"></span><span class="tbox pager"><button type="button" class="tbtn ic" data-tl="prev" aria-label="Previous page"' + (M.page === 1 ? ' disabled' : '') + '>‹</button><span>' + M.page + ' / ' + M.pages + '</span><button type="button" class="tbtn ic" data-tl="next" aria-label="Next page"' + (M.page === M.pages ? ' disabled' : '') + '>›</button></span>';
     tl.innerHTML = h;
     document.querySelector('.main').style.setProperty('--tlw', tl.offsetWidth + 'px');
+  }
+  // The drawing's name without its file extension, as the top left and the Drawing menu show it.
+  function docTitle() { return M.src === 'none' ? 'Untitled' : M.name ? M.name.replace(/\.(pdf|png|jpe?g|gif|webp|heic|dim|json)$/i, '') : 'Untitled'; }
+  // Rename from the box at the top left or the Drawing menu; an empty name keeps the old one.
+  function renameDoc(v) {
+    v = String(v || '').trim(); if (!v) return false;
+    M.name = v; $('doc-name').textContent = v; document.title = v + ' · DIM';
+    try { Autosave.schedule(); } catch (err) {}
+    return true;
   }
   function startRename() {
     var box = $('fbar-tl').querySelector('.tbox.doc'); if (!box) return;
@@ -3114,7 +3147,7 @@ details[open] > summary .sum { display: none; }
     if (!renaming) return;
     var inp = $('tl-name'), v = inp ? inp.value.trim() : '';
     renaming = false;
-    if (keep && v) { M.name = v; $('doc-name').textContent = v; document.title = v + ' · DIM'; try { Autosave.schedule(); } catch (err) {} }
+    if (keep) renameDoc(v);
     renderTopLeft(); if (mode === 'measure') { renderLeft(); renderRight(); }
   }
   $('fbar-tl').addEventListener('click', function (e) {
@@ -3171,17 +3204,16 @@ details[open] > summary .sum { display: none; }
     tr.hidden = false;
     var tm = TAG_MODES.find(function (t) { return t[0] === (M.tags || 'full'); }) || TAG_MODES[0];
     var h = undo() + gap;
-    if (blank) h += sq('grid', 'grid', 'Show the grid', M.blank.grid) + sq('snap', 'magnet', 'Snap to the grid (hold Alt to place freely)', M.blank.snap);
+    if (blank) h += sq('grid', 'grid', 'Show the grid', M.blank.grid) + '<select class="sqsel" id="f-gstep" title="Grid size" aria-label="Grid size">' + gridSteps().map(function (g) { return '<option value="' + g[0] + '"' + (g[0] === M.blank.step ? ' selected' : '') + '>' + g[1] + '</option>'; }).join('') + '</select>' + sq('snap', 'magnet', 'Snap to the grid (hold Alt to place freely)', M.blank.snap);
     else h += sq('snapd', 'magnet', M.src === 'pdf' ? 'Snap to the drawing’s lines (hold Alt to place freely)' : 'Only PDFs have lines to snap to', M.snapDrawing && M.src === 'pdf', M.src === 'pdf' ? '' : ' disabled');
     h += sq('rulers', 'ruler', 'Rulers (Shift+R)', rulersOn && M.src !== 'none', M.src === 'none' ? ' disabled' : '');
     h += sq('tags', 'dims', 'Dimensions on the drawing: ' + tm[1] + ' (click to change)', M.tags !== 'off', '', M.tags === 'size' ? 'S' : M.tags === 'off' ? '' : 'N') + gap;
     h += sq('settings', 'gear', 'Drawing settings (,)', dockOn() && M.panel === 'drawing');
     h += '<button type="button" class="sqx' + (dockOn() && M.panel === 'export' ? ' on' : '') + '" data-fa="export" title="Export a marked-up PDF or JPG, the list or a CSV (.)">' + ficon('export') + 'Export</button>';
     tr.innerHTML = h;
-    // Bottom right: the snap grid on a blank canvas, the drawing's scale otherwise.
-    sc.hidden = M.src === 'none';
-    if (blank) sc.innerHTML = '<span class="flab">Grid</span><select id="f-gstep" aria-label="Snap grid size">' + gridSteps().map(function (g) { return '<option value="' + g[0] + '"' + (g[0] === M.blank.step ? ' selected' : '') + '>' + g[1] + '</option>'; }).join('') + '</select>';
-    else { var s0 = scaleNow(); sc.innerHTML = '<button type="button" class="fbtn" data-fa="scale" title="Set the scale (S)">Scale <em>' + esc(s0 ? scaleLabel(s0) : 'not set') + '</em></button>'; }
+    // Bottom right: the drawing's scale (a blank canvas sets its grid size at the top right instead).
+    sc.hidden = M.src === 'none' || blank;
+    if (!blank) { var s0 = scaleNow(); sc.innerHTML = '<button type="button" class="fbtn" data-fa="scale" title="Set the scale (S)">Scale <em>' + esc(s0 ? scaleLabel(s0) : 'not set') + '</em></button>'; }
   }
   // Settings and Export open as a card in the dock layout, or open their section of the side panel on narrow windows.
   function openPanel(v) {
@@ -3220,7 +3252,7 @@ details[open] > summary .sum { display: none; }
     if ((mode !== 'layout' && mode !== 'shop') || typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.key === ',') { e.preventDefault(); openPanel('drawing'); } else if (e.key === '.') { e.preventDefault(); openPanel('export'); }
   });
-  $('fbar-br').addEventListener('change', function (e) { if (e.target.id === 'f-gstep') { setBlankOpt('step', Number(e.target.value)); paintGrid(); renderRight(); renderOverlay(); } });
+  $('fbar-tr').addEventListener('change', function (e) { if (e.target.id === 'f-gstep') { setBlankOpt('step', Number(e.target.value)); paintGrid(); renderRight(); renderOverlay(); } });
   $('fbar-br').addEventListener('click', function (e) { var b = e.target.closest('[data-fa="scale"]'); if (b && mode === 'measure') setTool('scale'); });
 
   // ---------- Undo / redo: snapshots of everything you can change ----------
@@ -5943,10 +5975,10 @@ details[open] > summary .sum { display: none; }
   // ---------- Shop drawing: sheets (one per tab), each with the drawing (from Measure or Layout), a title block, logo, scale bar, and your own text and shapes ----------
   // Everything on the sheet is in points (1/72"), y down. The same list of shapes draws the editor (SVG) and the PDF, so they match.
   var Shop = (function () {
-    var PAPERS = { letter: [11, 8.5, 'Letter, 8.5 × 11'], tabloid: [17, 11, 'Tabloid, 11 × 17'], archc: [24, 18, 'Arch C, 18 × 24'], archd: [36, 24, 'Arch D, 24 × 36'] };
+    var PAPERS = { letter: [11, 8.5, 'Letter, 8.5 × 11'], legal: [14, 8.5, 'Legal, 8.5 × 14'], tabloid: [17, 11, 'Tabloid, 11 × 17'], archc: [24, 18, 'Arch C, 18 × 24'], archd: [36, 24, 'Arch D, 24 × 36'] };
     var SOURCES = { graphic: 'Graphic mockup', mural: 'Mural layout', film: 'Privacy film layout', markers: 'Distraction marker layout' };
     var KIND = { text: 'Text', rect: 'Rectangle', ellipse: 'Ellipse', line: 'Line', arrow: 'Arrow', figure: 'Person', pic: 'Image', dim: 'Dimension', view: 'Drawing' };
-    var TOOLS = [['select', 'select', 'Select and move (V)'], ['hand', 'hand', 'Slide the drawing in its frame (H)'], ['text', 'text', 'Text box (T)'], ['rect', 'box', 'Rectangle (R)'], ['ellipse', 'ellipse', 'Ellipse (E)'], ['line', 'length', 'Line (L)'], ['arrow', 'arrow', 'Arrow (A)'], ['dim', 'dim', 'Dimension (D): click two points, then where the line goes'], ['figure', 'person', 'Person for scale: click where their feet go (P)']];
+    var TOOLS = [['select', 'select', 'Select and move (V)'], ['hand', 'hand', 'Slide the drawing in its frame (H)'], ['dim', 'dim', 'Dimension (D): click two points, then where the line goes'], ['text', 'text', 'Text box (T)'], ['rect', 'box', 'Rectangle (R)'], ['ellipse', 'ellipse', 'Ellipse (E)'], ['line', 'length', 'Line (L)'], ['arrow', 'arrow', 'Arrow (A)'], ['figure', 'person', 'Person for scale: click where their feet go (P)']];
     var KEYS = { v: 'select', h: 'hand', t: 'text', r: 'rect', e: 'ellipse', l: 'line', a: 'arrow', d: 'dim', p: 'figure' };
     var TOOL_INFO = { select: ['Select', 'V', 'Click to select, Shift+click to select more, drag to move, drag a corner to resize. Arrows nudge, Delete removes.'], hand: ['Hand', 'H', 'Drag to slide drawing in its frame.'],
       text: ['Text', 'T', 'Drag a box on sheet, or click for a default size, then type in panel.'], rect: ['Rectangle', 'R', 'Drag on sheet, or click for a default size.'], ellipse: ['Ellipse', 'E', 'Drag on sheet, or click for a default size.'],
@@ -7082,7 +7114,7 @@ details[open] > summary .sum { display: none; }
     paintTheme(); paintRulers(); if (mode === 'layout') Lay.draw();
   });
   paintTheme();
-  if (window.ResizeObserver) new ResizeObserver(function () { fitDock(); paintRulersSoon(); if (mode === 'measure' && M.autoFit) fit(); else if (mode === 'layout') Lay.draw(); else if (mode === 'shop') Shop.paint(); }).observe(stage);
+  if (window.ResizeObserver) new ResizeObserver(function () { fitDock(); fitSelRow(); paintRulersSoon(); if (mode === 'measure' && M.autoFit) fit(); else if (mode === 'layout') Lay.draw(); else if (mode === 'shop') Shop.paint(); }).observe(stage);
   window.addEventListener('beforeunload', function (e) { if (M.src !== 'sample' && M.items.length) { e.preventDefault(); e.returnValue = ''; } });
   document.addEventListener('keydown', function (e) {
     // ⌘+ and ⌘− zoom the drawing instead of the browser page (⌘1: actual size).
