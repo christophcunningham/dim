@@ -197,7 +197,7 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .tight .dchip .lf { display: none; }
 .tight .dchip .ls { display: inline; }
 .fbar.bottom.stack .units button { padding: 0 7px; }
-.main.fl.draw .dk-tool { left: calc(var(--rail) + 32px + var(--tlw, 0px)); top: 18px; max-width: calc(100% - var(--rail) - 56px - var(--tlw, 0px)); }
+.main.fl.draw .dk-tool { left: calc(var(--rail) + 32px + var(--lyw, 0px) + var(--tlw, 0px)); top: 18px; max-width: calc(100% - var(--rail) - 56px - var(--lyw, 0px) - var(--rcw, 0px) - var(--tlw, 0px)); }
 /* Layout and Shop drawing on wide windows: tools in a rail, their panels as cards the dock opens and closes */
 .main.pnl { --rail: 84px; grid-template-columns: var(--rail) auto minmax(0, 1fr) auto; }
 .main.pnl.lay { --rail: 0px; column-gap: 0; }
@@ -243,15 +243,49 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .dchip.on .dn { color: inherit; opacity: .7; }
 .dchips .flab { padding-left: 4px; }
 
-/* Draw on wide windows: a tool rail, the canvas, and floating cards instead of side panels */
-.main.draw { position: relative; --rail: 84px; grid-template-columns: var(--rail) minmax(0, 1fr); }
+/* Draw on wide windows: a tool rail, the canvas, then a column on the right with Settings (or Export, or Help) on top and
+   Layers under it. Panels push the canvas over. Layers can sit left of the canvas instead (Settings, Layers on the left). */
+.main.draw { position: relative; --rail: 84px; grid-template-columns: var(--rail) minmax(0, 1fr); grid-template-rows: fit-content(62%) minmax(0, 1fr); }
+.main.draw.rcol { --rcw: 338px; grid-template-columns: var(--rail) minmax(0, 1fr) 330px; }
+.main.draw.ly-left { --lyw: 338px; grid-template-columns: var(--rail) 330px minmax(0, 1fr); }
+.main.draw.ly-left.rcol { grid-template-columns: var(--rail) 330px minmax(0, 1fr) 330px; }
+.main.draw > .left { grid-column: 1; grid-row: 1 / -1; overflow: visible; }
+.main.draw > .center { grid-column: 2; grid-row: 1 / -1; }
+.main.draw.ly-left > .center { grid-column: 3; }
 .main.draw > .right { display: none; }
-.main.draw > .left { overflow: visible; }
+.main > .layers { display: none; }
+.main.draw.dk-right > .right, .main.draw.ly-on > .layers { background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 45%, transparent); border-radius: 4px; box-shadow: 0 6px 22px rgb(0 0 0 / .12); min-height: 0; }
+.main.draw.dk-right > .right { display: block; grid-column: -2 / -1; grid-row: 1 / -1; align-self: start; max-height: 100%; overflow: auto; }
+.main.draw.dk-right.ly-on:not(.ly-left) > .right { grid-row: 1; align-self: stretch; }
+.main.draw.ly-on > .layers { display: flex; flex-direction: column; grid-column: -2 / -1; grid-row: 1 / -1; overflow: hidden; }
+.main.draw.ly-on.dk-right:not(.ly-left) > .layers { grid-row: 2; }
+.main.draw.ly-left > .layers { grid-column: 2; }
+.layers > * { flex: none; }
+.layers > .dk-list { flex: 1 1 auto; min-height: 0; overflow: auto; margin: 0; padding: 0 12px 12px; align-content: start; }
+.ly-top { padding-bottom: 10px; border-bottom: 1px solid color-mix(in oklch, var(--line) 18%, transparent); margin-bottom: 10px; }
+.ly-top .dk-line { margin: 6px 12px 0; }
+.ly-pills { display: flex; flex-wrap: wrap; gap: 4px; margin: 10px 12px 0; }
+.ly-pill { height: 24px; display: inline-flex; align-items: center; gap: 5px; padding: 0 8px; background: var(--b08); border: 0; border-radius: 2px; color: var(--b00); font-size: 11px; font-weight: 600; white-space: nowrap; }
+.ly-pill i { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+.ly-pill .dn { font-size: 10px; color: var(--b02); }
+.ly-pill:hover { background: color-mix(in oklch, var(--b08), var(--b00) 8%); }
+.ly-pill.zero { color: var(--b02); }
+.ly-pill.on { background: var(--strong); color: var(--strong-ink); }
+.ly-pill.on .dn { color: inherit; opacity: .7; }
+/* Settings showing the selection: a way back to the drawing, then the item's controls */
+.dk-back { background: none; border: 0; padding: 0; color: var(--b02); font-size: 12px; white-space: nowrap; }
+.dk-back:hover { color: var(--b00); text-decoration: underline; }
+.isec { display: grid; gap: 10px; padding: 12px; }
+.isec .item-more { display: grid; gap: 8px; margin: 0; padding: 0; }
+.isec .sty .sw { width: 18px; height: 18px; }
+.isec .swpick { width: 26px; height: 20px; }
+.isec .row { margin: 0; }
+.ly-opt { margin-top: 4px; }
+.sq.qm { font-size: 14px; font-weight: 700; }
 .main.draw .tools.tsets { padding: 10px 8px; border-bottom: 0; gap: 12px; }
 .main.draw .tset-l { text-align: center; }
 .main.draw .tset-g { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .main.draw #legend { display: none; }
-.main.draw .dk-card, .main.draw.dk-right > .right { position: absolute; z-index: 8; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 45%, transparent); border-radius: 3px; box-shadow: 0 6px 22px rgb(0 0 0 / .16); overflow: auto; }
 /* Top left (dock layout): document box with its menu, the selection box, and tool panels dropping down under them */
 .main.draw .dk-tool { position: absolute; z-index: 9; top: 18px; left: calc(var(--rail) + 26px); display: grid; gap: 6px; justify-items: start; max-width: calc(100% - var(--rail) - 420px); }
 .dk-row { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; max-width: 100%; }
@@ -288,8 +322,6 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .main.rul-on .stage-wrap > .fbar.tl, .main.rul-on .stage-wrap > .fbar.tr { top: 30px; }
 .main.rul-on .stage-wrap > .fbar.tl, .main.rul-on .stage-wrap > .fbar.bottom { left: 30px; }
 .main.rul-on.draw .dk-tool { top: 38px; margin-left: 20px; }
-.main.rul-on.draw .dk-card { top: 80px; margin-left: 20px; }
-.main.rul-on.draw.dk-right > .right { top: 80px; }
 /* Arrange: align, space evenly, group, lock, hide */
 .selbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .selgrp { display: inline-flex; gap: 2px; }
@@ -306,22 +338,12 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .item .rf:hover { color: var(--b00); background: var(--b07); }
 .item .rf.on { color: var(--b00); }
 .item.hid > input, .item.hid > b, .item.hid > .chip { opacity: .45; }
-.main.draw .dk-card, .main.draw.dk-right > .right { left: calc(var(--rail) + 26px); top: 60px; bottom: 104px; width: 340px; display: flex; flex-direction: column; }
-.main.draw.dk-right > .right { left: auto; right: 22px; }
-.main.draw.dstack .dk-card, .main.draw.dstack.dk-right > .right { bottom: 142px; }
-.main.draw.dk-right > .right { display: block; bottom: auto; max-height: calc(100% - 164px); }
-.main.rul-on.draw.dk-right > .right { max-height: calc(100% - 184px); }
-.main.draw.dstack.dk-right > .right { max-height: calc(100% - 202px); }
-.main.rul-on.draw.dstack.dk-right > .right { max-height: calc(100% - 222px); }
-.main.draw .dk-card > * { flex: none; }
 .dk-head { display: flex; align-items: center; gap: 8px; padding: 12px 12px 10px; border-bottom: 1px solid color-mix(in oklch, var(--line) 25%, transparent); position: sticky; top: 0; background: var(--b07); z-index: 1; }
 .dk-head b { font-size: 14px; font-weight: 700; }
 .dk-sub { flex: 1; min-width: 0; color: var(--b02); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dk-ic { width: 14px; height: 14px; border-radius: 2px; flex: none; }
 .dk-x { background: none; border: 0; border-radius: 2px; width: 24px; height: 24px; font-size: 17px; line-height: 1; color: var(--b01); }
 .dk-x:hover { background: var(--b08); color: var(--b00); }
-.dk-hero { margin: 12px 12px 0; padding: 12px; border: 1px solid color-mix(in oklch, var(--line) 30%, transparent); border-radius: 2px; }
-.dk-big { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
 .dk-line { margin-top: 4px; color: var(--b02); font-size: 11px; }
 .dk-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 8px 12px 0; }
 .dk-tile { border: 1px solid color-mix(in oklch, var(--line) 30%, transparent); border-radius: 2px; padding: 7px 8px; min-width: 0; }
@@ -402,17 +424,17 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .sty-k { flex: none; margin-right: 3px; }
 .sty-k.gap { margin-left: 14px; }
 .sty select { flex: 1 1 0; min-width: 0; }
-.item .sw { width: 14px; height: 14px; border: 1px solid var(--line); border-radius: 2px; padding: 0; flex: none; }
-.item .sw.on { outline: 2px solid var(--line); outline-offset: 1px; }
+:is(.item, .isec) .sw { width: 14px; height: 14px; border: 1px solid var(--line); border-radius: 2px; padding: 0; flex: none; }
+:is(.item, .isec) .sw.on { outline: 2px solid var(--line); outline-offset: 1px; }
 .sibs { display: inline-flex; gap: 2px; }
-.item .sib { width: 26px; height: 24px; display: inline-grid; place-items: center; padding: 0; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 35%, transparent); border-radius: 2px; color: var(--b01); }
-.item .sib:hover { border-color: color-mix(in oklch, var(--line) 75%, transparent); color: var(--b00); }
-.item .sib.on, .item .sib.on:hover { background: var(--strong); border-color: var(--strong); color: var(--strong-ink); }
-.item .sw.auto { background: linear-gradient(135deg, var(--green) 0 33%, var(--blue) 33% 66%, var(--purple) 66%); }
+:is(.item, .isec) .sib { width: 26px; height: 24px; display: inline-grid; place-items: center; padding: 0; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 35%, transparent); border-radius: 2px; color: var(--b01); }
+:is(.item, .isec) .sib:hover { border-color: color-mix(in oklch, var(--line) 75%, transparent); color: var(--b00); }
+:is(.item, .isec) .sib.on, .item .sib.on:hover { background: var(--strong); border-color: var(--strong); color: var(--strong-ink); }
+:is(.item, .isec) .sw.auto { background: linear-gradient(135deg, var(--green) 0 33%, var(--blue) 33% 66%, var(--purple) 66%); }
 .sty { position: relative; }
-.item .sw.cust { background: conic-gradient(#e5484d, #f5d90a, #30a46c, #3e7bfa, #8e4ec6, #e93d82, #e5484d); position: relative; }
-.item .sw.cust[style*="--cc"] { background: var(--cc); }
-.item .sw.cust::after { content: "+"; position: absolute; inset: 0; display: grid; place-items: center; font: 700 10px/1 system-ui, sans-serif; color: #fff; text-shadow: 0 0 2px rgb(0 0 0 / .8); }
+:is(.item, .isec) .sw.cust { background: conic-gradient(#e5484d, #f5d90a, #30a46c, #3e7bfa, #8e4ec6, #e93d82, #e5484d); position: relative; }
+:is(.item, .isec) .sw.cust[style*="--cc"] { background: var(--cc); }
+:is(.item, .isec) .sw.cust::after { content: "+"; position: absolute; inset: 0; display: grid; place-items: center; font: 700 10px/1 system-ui, sans-serif; color: #fff; text-shadow: 0 0 2px rgb(0 0 0 / .8); }
 .cpop { position: absolute; z-index: 20; top: calc(100% + 4px); right: 0; width: 196px; max-width: 100%; box-sizing: border-box; display: grid; gap: 8px; padding: 8px; background: var(--b07); border: 1px solid var(--line); border-radius: 2px; box-shadow: 0 6px 18px rgb(0 0 0 / .18); }
 .cpop .cgrid { display: grid; grid-template-columns: repeat(8, 18px); gap: 4px; }
 .cpop .sw { width: 18px; height: 18px; }
@@ -480,12 +502,15 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 /* Draw's page tabs sit under the boxes at the top left, as wide as they are */
 .page-tabs { z-index: 6; top: 46px; left: 10px; right: auto; max-width: var(--tlw, 320px); }
 .page-tabs[hidden] { display: none; }
+.stage-wrap.tr-low > .fbar.tr { top: 42px; }
+.main.rul-on .stage-wrap.tr-low > .fbar.tr { top: 62px; }
+.main.fl.draw.trlow .dk-tool { left: calc(var(--rail) + 32px + var(--lyw, 0px)); top: 86px; max-width: calc(100% - var(--rail) - 56px - var(--lyw, 0px) - var(--rcw, 0px)); }
+.main.rul-on.draw.trlow .dk-tool { top: 106px; }
+.stage-wrap.tr-low > .page-tabs { max-width: min(var(--tlw, 320px), calc(100% - var(--trw, 0px) - 60px)); }
 .main.rul-on .page-tabs { top: 66px; left: 30px; }
 .page-tabs .ptab-in { flex: none; width: 130px; height: 22px; padding: 0 6px; font-size: 11.5px; }
 .main.ptabs .stage.flpad { padding-top: 80px; }
 .main.rul-on.ptabs .stage.flpad { padding-top: 100px; }
-.main.ptabs.draw .dk-card { top: 84px; }
-.main.rul-on.ptabs.draw .dk-card { top: 104px; }
 /* Drawing menu: the page list */
 .pglist { display: grid; gap: 2px; max-height: 232px; overflow: auto; }
 .pgrow { display: flex; align-items: baseline; gap: 8px; width: 100%; padding: 6px 8px; text-align: left; background: var(--b08); border: 1px solid transparent; border-radius: 2px; color: var(--b00); font-size: 12px; }
@@ -495,7 +520,7 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .pgrow.on { background: var(--yellow); color: var(--on-yellow); }
 .pgrow.on span { color: inherit; opacity: .75; }
 .sheet { display: block; margin: auto; flex: none; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25), 0 6px 18px rgba(0,0,0,.18); touch-action: none; user-select: none; }
-.item .sw.none { background: linear-gradient(135deg, #fff 0 45%, var(--red) 45% 55%, #fff 55%); }
+:is(.item, .isec) .sw.none { background: linear-gradient(135deg, #fff 0 45%, var(--red) 45% 55%, #fff 55%); }
 textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1px solid var(--line); border-radius: 2px; padding: 4px 6px; font: inherit; color: var(--b00); resize: vertical; }
 .tool.txt { flex: 1 1 auto; width: auto; min-width: 0; padding: 0 8px; font-size: 12px; font-weight: 500; white-space: nowrap; }
 .item.ro { grid-template-columns: 14px minmax(0, 1fr) auto 0; padding: 4px; }
@@ -693,6 +718,7 @@ details[open] > summary .sum { display: none; }
     </section>
 
     <aside class="panel right" id="right" aria-label="Inspector"></aside>
+    <aside class="panel layers" id="layers" aria-label="Layers"></aside>
   </main>
 </div>
 
@@ -700,7 +726,7 @@ details[open] > summary .sum { display: none; }
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  var stage = $('stage'), toolsEl = $('tools'), leftEl = $('left'), rightEl = $('right'), statusEl = $('status'), zoomEl = $('zoom');
+  var stage = $('stage'), toolsEl = $('tools'), leftEl = $('left'), rightEl = $('right'), layersEl = $('layers'), statusEl = $('status'), zoomEl = $('zoom');
   var mode = 'measure';
   var openSecs = { drawing: true, scale: true, totals: true, export: false, keys: false, about: false, sh_sheet: true, sh_view: true, sh_tb: true, sh_exp: true };
 
@@ -2388,7 +2414,7 @@ details[open] > summary .sum { display: none; }
       M.draft.push(p);
       if (M.draft.length === 2) {
         var d0 = M.draft[0], d1 = M.draft[1]; M.draft = [];
-        if (dist(d0, d1) * M.zoom > 3) { var dm = addItem('dim', [d0, d1]); M.sel = { item: dm.id, pt: null }; renderOverlay(); renderPanels(); var vi = leftEl.querySelector('[data-val="' + dm.id + '"]'); if (vi) vi.focus(); return; }
+        if (dist(d0, d1) * M.zoom > 3) { var dm = addItem('dim', [d0, d1]); M.sel = { item: dm.id, pt: null }; renderOverlay(); renderPanels(); var vi = panelQ('[data-val="' + dm.id + '"]'); if (vi) vi.focus(); return; }
       }
       renderOverlay(); return;
     }
@@ -2418,7 +2444,7 @@ details[open] > summary .sum { display: none; }
     if (M.tool === 'note') {
       var nt = addItem('note', [p], { lab: { x: p.x + 30 / M.zoom, y: p.y - 48 / M.zoom } }); M.sel = { item: nt.id, pt: null };
       renderOverlay(); renderPanels();
-      var ni = leftEl.querySelector('[data-name="' + nt.id + '"]'); if (ni) { ni.focus(); ni.select(); }
+      var ni = panelQ('[data-name="' + nt.id + '"]'); if (ni) { ni.focus(); ni.select(); }
       return;
     }
     if (M.tool === 'area' && M.draft.length >= 3 && dist(p, M.draft[0]) < 9 / M.zoom) { commit('area'); return; }
@@ -2610,7 +2636,7 @@ details[open] > summary .sum { display: none; }
         var dpl = M.drag; M.drag = null; M.dimEdge = null;
         var dm2 = addItem('dim', [dpl.a, dpl.b], { off: dpl.moved ? dpl.off : dpl.side * 24 / M.zoom }); M.sel = { item: dm2.id, pt: null };
         renderOverlay(); renderPanels();
-        if (!scaleFor(M.page)) { var vi2 = leftEl.querySelector('[data-val="' + dm2.id + '"]'); if (vi2) vi2.focus(); }
+        if (!scaleFor(M.page)) { var vi2 = panelQ('[data-val="' + dm2.id + '"]'); if (vi2) vi2.focus(); }
         return;
       }
       if (M.drag && M.drag.marquee) { M.drag = null; renderOverlay(); renderPanels(); return; }
@@ -2694,6 +2720,8 @@ details[open] > summary .sum { display: none; }
     var b = e.target.closest('[data-z]'); if (!b) return;
     if (b.dataset.z === 'in') zoomAt(1.25); else if (b.dataset.z === 'out') zoomAt(0.8); else fit();
   });
+  // A field in Settings, Layers or the left panel, wherever the selected item's controls are showing.
+  function panelQ(q) { return rightEl.querySelector(q) || layersEl.querySelector(q) || leftEl.querySelector(q); }
   function typing(e) { return /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName); }
   var HOTKEYS = { '\\': 'sline', m: 'srect', e: 'sell', p: 'spoly', o: 'circle', h: 'pan', s: 'scale', z: 'resize', l: 'length', r: 'run', k: 'curve', a: 'area', v: 'edit', b: 'rect', c: 'count', g: 'angle', t: 'text', n: 'note', d: 'dim' };
   var ARROWS = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
@@ -2702,9 +2730,11 @@ details[open] > summary .sum { display: none; }
     var key = e.key.toLowerCase();
     if (e.key === ' ') { spaceHeld = true; if (pageEl) pageEl.classList.add('pan'); e.preventDefault(); }
     else if (e.key === 'Enter') { if (e.target.tagName === 'BUTTON') e.preventDefault(); finish(); }
-    else if (e.key === ',') { openPanel('drawing'); }
-    else if (e.key === '.') { openPanel('export'); }
-    else if (e.key === 'Escape') { if (!M.draft.length && !M.calib.length && !M.sel && (M.panel || M.dock)) { setDock(M.panel || M.dock); return; } M.draft = []; M.calib = []; M.sel = null; M.selGuide = null; renderOverlay(); renderPanels(); }
+    else if (e.key === ',') { toggleLayers(); }
+    else if (e.key === '.') { openPanel('drawing'); }
+    else if (e.key === '/') { e.preventDefault(); openPanel('export'); }
+    else if (e.key === '?') { e.preventDefault(); openPanel('help'); }
+    else if (e.key === 'Escape') { if (!M.draft.length && !M.calib.length && !M.sel && M.panel) { setDock(M.panel); return; } M.draft = []; M.calib = []; M.sel = null; M.selGuide = null; renderOverlay(); renderPanels(); }
     else if ((e.key === 'Backspace' || e.key === 'Delete') && M.draft.length) { M.draft.pop(); renderOverlay(); e.preventDefault(); }
     else if ((e.key === 'Backspace' || e.key === 'Delete') && M.sel) { deleteSelection(); e.preventDefault(); }
     else if ((e.key === 'Backspace' || e.key === 'Delete') && M.selGuide != null) { removeDrawGuide(M.selGuide); e.preventDefault(); }
@@ -2854,10 +2884,19 @@ details[open] > summary .sum { display: none; }
   // The arrange bar sits right of the selection box while there's room before the boxes at the top right;
   // otherwise it takes a row of its own under the selection box.
   function fitSelRow() {
+    fitTopBars();
     var row = dockOn() && leftEl.querySelector('.dk-row'), sb = row && row.querySelector('.selbar'); if (!sb) return;
     row.classList.remove('wrap');
     var r = sb.getBoundingClientRect(), r0 = row.getBoundingClientRect(), tr = $('fbar-tr').getBoundingClientRect();
-    if (r.top > r0.top + 2 || (r.right > tr.left - 8 && r.top < tr.bottom)) row.classList.add('wrap');
+    if (r.top > r0.top + 2 || (r.right > tr.left - 8 && r.top < tr.bottom && r.bottom > tr.top)) row.classList.add('wrap');
+  }
+  // When panels leave the canvas too narrow for both top bars, the top-right one steps down beside the page tabs.
+  function fitTopBars() {
+    var wrap = stage.parentNode, tl = $('fbar-tl'), tr = $('fbar-tr'), mainEl = document.querySelector('.main');
+    wrap.classList.remove('tr-low'); mainEl.classList.remove('trlow');
+    if (mode !== 'measure' || tl.hidden || tr.hidden || !flOn()) return;
+    // The selection box then gets a row of its own under them.
+    if (tl.getBoundingClientRect().right + 12 > tr.getBoundingClientRect().left) { wrap.classList.add('tr-low'); mainEl.classList.add('trlow'); wrap.style.setProperty('--trw', tr.offsetWidth + 'px'); }
   }
   function scaleOptions(s) {
     var groups = {}, o = '<option value="">Choose…</option>';
@@ -2889,11 +2928,13 @@ details[open] > summary .sum { display: none; }
     if (M.tool === 'scale') h += scalePanel();
     if (M.tool === 'resize') h += resizePanel();
     if (M.note) h += '<div class="block"><p class="hint" style="color:var(--b00);margin:0">' + esc(M.note) + '</p></div>';
-    // Dock layout: the tool box floats top right, and the list lives in the card a dock chip opens.
+    // Wide windows: the selection box floats at the top left of the canvas, and the list lives in Layers.
     if (dockOn()) {
-      leftEl.innerHTML = topLeftBoxes() + (isItemsView(M.dock) ? '<div class="dk-card" role="dialog" aria-label="' + esc(dockSpec(M.dock)[1]) + '">' + itemsCard(M.dock, mine) + '</div>' : '');
+      leftEl.innerHTML = topLeftBoxes();
+      layersEl.innerHTML = layersOpen ? layersCard(mine) : '';
       updateLive(); updateStatus(); return;
     }
+    layersEl.innerHTML = '';
     if (!mine.length) { leftEl.innerHTML = h; updateLive(); updateStatus(); return; }
     h += '<div class="block"><div class="label">' + (mine.some(function (x) { return x.shape; }) ? 'On the canvas' : 'Measurements') + (M.pages > 1 ? ' · ' + esc(pageName()) : '') + '</div>';
     h += '<div class="list">' + mine.map(itemRow).join('') + '</div>';
@@ -2926,17 +2967,32 @@ details[open] > summary .sum { display: none; }
   }
   // One measurement or shape in a list; the selected one opens its controls.
   function itemRow(it) {
-      var on = M.sel && M.sel.item === it.id, chip = itemCol(it);
+      var on = M.sel && M.sel.item === it.id, chip = itemCol(it), open = on && !setShowsItem();
       var row = '<div class="item mrow' + (on || isSelected(it.id) ? ' sel' : '') + (it.hidden ? ' hid' : '') + '" data-item="' + it.id + '"><span class="chip' + (it.type === 'count' ? ' round' : '') + '" style="background:' + chip + '" title="' + (it.shape ? SHAPE_NAME[it.shape] : TYPE_NAME[it.type]) + '"></span><input type="text" value="' + esc(it.name) + '" data-name="' + it.id + '" aria-label="' + (it.type === 'note' ? 'Note text' : 'Name of ' + esc(it.name)) + '"><b>' + itemValue(it) + '</b>' + rowFlags(it) + '<button type="button" data-del="' + it.id + '" aria-label="Delete ' + esc(it.name) + '">×</button>';
-      if (on && it.shape) row += '<div class="item-more">' + styleControls(it) + '</div>';
-      else if (on) {
-        var ph = it.type === 'note' || it.type === 'angle' ? '' : it.type === 'dim' ? (isMetric() ? 'Size, ' + egLen() : 'Size, e.g. 48 or 8\'-2 1/2&quot;') : it.type === 'area' ? (isMetric() ? 'Label instead, e.g. 1200 × 2400' : 'Label instead, e.g. 48&quot; × 96&quot;') : it.type === 'count' ? '' : 'Typed size (instead of measured)';
-        row += '<div class="item-more">' + (ph ? '<input type="text" class="valin" data-val="' + it.id + '" value="' + esc(it.manual || '') + '" placeholder="' + ph + '" aria-label="Typed size">' : '');
-        if (it.type !== 'note' && it.type !== 'angle') row += '<select data-cat="' + it.id + '" aria-label="Category">' + CATS.map(function (c2) { return '<option value="' + c2[0] + '"' + ((it.cat || '') === c2[0] ? ' selected' : '') + '>' + c2[1] + '</option>'; }).join('') + '</select>';
-        if (it.type === 'area') row += '<label class="chk"><input type="checkbox" data-deduct="' + it.id + '"' + (it.deduct ? ' checked' : '') + '> Deduct</label>';
-        row += styleControls(it) + '</div>';
-      } else if (it.cat || it.g) row += '<div class="item-tag">' + [it.cat ? esc(CATS.find(function (c3) { return c3[0] === it.cat; })[1]) : '', it.g ? 'Group ' + it.g : ''].filter(Boolean).join(' · ') + '</div>';
+      if (open) row += '<div class="item-more">' + itemMore(it) + '</div>';
+      else if (it.cat || it.g) row += '<div class="item-tag">' + [it.cat ? esc(CATS.find(function (c3) { return c3[0] === it.cat; })[1]) : '', it.g ? 'Group ' + it.g : ''].filter(Boolean).join(' · ') + '</div>';
       return row + '</div>';
+  }
+  // A selected item's controls: typed size, category, deduct, then color and style. In its list row, or in Settings.
+  function itemMore(it) {
+    if (it.shape) return styleControls(it);
+    var ph = it.type === 'note' || it.type === 'angle' ? '' : it.type === 'dim' ? (isMetric() ? 'Size, ' + egLen() : 'Size, e.g. 48 or 8\'-2 1/2&quot;') : it.type === 'area' ? (isMetric() ? 'Label instead, e.g. 1200 × 2400' : 'Label instead, e.g. 48&quot; × 96&quot;') : it.type === 'count' ? '' : 'Typed size (instead of measured)';
+    var h = ph ? '<input type="text" class="valin" data-val="' + it.id + '" value="' + esc(it.manual || '') + '" placeholder="' + ph + '" aria-label="Typed size">' : '';
+    if (it.type !== 'note' && it.type !== 'angle') h += '<select data-cat="' + it.id + '" aria-label="Category">' + CATS.map(function (c2) { return '<option value="' + c2[0] + '"' + ((it.cat || '') === c2[0] ? ' selected' : '') + '>' + c2[1] + '</option>'; }).join('') + '</select>';
+    if (it.type === 'area') h += '<label class="chk"><input type="checkbox" data-deduct="' + it.id + '"' + (it.deduct ? ' checked' : '') + '> Deduct</label>';
+    return h + styleControls(it);
+  }
+  // Settings shows the selection instead of the drawing while something is selected (wide windows).
+  function setShowsItem() { return dockOn() && M.panel === 'drawing' && !!(M.sel && itemById(M.sel.item)); }
+  function itemSettings() {
+    var ids = selIds(), it = itemById(M.sel.item), multi = ids.length > 1;
+    var h = '<div class="dk-head"><button type="button" class="dk-back" data-act="desel" title="Back to the drawing’s settings (Esc)">Drawing ›</button><b>' + (multi ? ids.length + ' selected' : esc(it.shape ? SHAPE_NAME[it.shape] : TYPE_NAME[it.type])) + '</b><span class="dk-sub"' + (multi ? '>' : ' data-ival>' + itemValue(it)) + '</span><button type="button" class="dk-x" data-dkclose="drawing" title="Close Settings (.)" aria-label="Close Settings">×</button></div>';
+    if (multi) return h + '<div class="isec"><p class="hint" style="margin:0">Align, space evenly, group, lock or hide them from the bar at the top left. Shift+click on the canvas or in Layers adds an item or takes it out.</p><div class="row"><button type="button" class="btn" data-act="delsel">Delete ' + ids.length + ' items</button></div></div>';
+    h += '<div class="isec" data-item="' + it.id + '"><label class="field">' + (it.type === 'note' ? 'Note text' : it.type === 'text' ? 'Text' : 'Name') + '<input type="text" value="' + esc(it.name) + '" data-name="' + it.id + '" spellcheck="false"></label>';
+    var more = itemMore(it); if (more) h += '<div class="item-more">' + more + '</div>';
+    h += '<div class="row"><button type="button" class="btn" data-lock="' + it.id + '" aria-pressed="' + !!it.lock + '">' + (it.lock ? 'Unlock' : 'Lock') + '</button><button type="button" class="btn" data-hide="' + it.id + '" aria-pressed="' + !!it.hidden + '">' + (it.hidden ? 'Show' : 'Hide') + '</button><button type="button" class="btn" data-del="' + it.id + '">Delete</button></div>';
+    h += '<p class="hint" style="margin:0">Esc or Drawing › goes back to the drawing’s settings.</p></div>';
+    return h;
   }
   function styleControls(it) {
     if (it.type === 'text') {
@@ -2999,6 +3055,7 @@ details[open] > summary .sum { display: none; }
   }
   function renderRight() {
     if (mode !== 'measure') return;
+    if (setShowsItem()) { rightEl.innerHTML = itemSettings(); return; }
     var s = scaleNow(), h = '';
     // Drawing: its name and pages, then the open page's name and size (or the file's), Length step and Clear page. Grid,
     // snap and dimensions on the drawing are buttons at the top right. Wide windows have Open and Save as boxes at the
@@ -3020,6 +3077,7 @@ details[open] > summary .sum { display: none; }
     if (open) d += '<label class="field">Length step<select id="round-sel">' + roundOpts() + '</select></label><p class="hint" style="margin:0">Points you click land on whole steps, so a line reads ' + (isMetric() ? '2,440 mm instead of 2,438.7 mm' : '96 1/4" instead of 96 3/16"') + '. Alt ignores it.</p>';
     if (open) d += '<div class="row"><button type="button" class="btn" data-act="reset"' + (M.items.some(function (it) { return it.page === M.page; }) ? '' : ' disabled') + '>Clear page</button></div><p class="hint" style="margin:0">Removes everything drawn on this page' + (M.src === 'blank' ? '' : '; the drawing and its scale stay') + '. Undo (⌘Z) brings it back.</p>';
     if (M.error) d += '<p class="err">' + esc(M.error) + '</p>';
+    if (wide) d += '<label class="chk ly-opt"><input type="checkbox" id="layers-left"' + (layersLeft ? ' checked' : '') + '> Layers on the left</label><p class="hint" style="margin:0">Puts Layers left of the canvas instead of under Settings. Remembered in this browser.</p>';
     h += sec('drawing', 'Drawing', d);
     // Project (narrow windows; wide windows save from the box at the top left)
     if (!wide) {
@@ -3042,13 +3100,14 @@ details[open] > summary .sum { display: none; }
     ex += '<textarea id="copybox" hidden readonly class="copybox"></textarea>';
     h += sec('export', 'Export', ex);
     // Shortcuts
-    h += sec('keys', 'Shortcuts', '<div class="keys"><kbd>⌘Z</kbd><span>Undo (Shift for redo)</span><kbd>⌘S</kbd><span>Save project</span><kbd>⌘+ / ⌘−</kbd><span>Zoom in and out</span><kbd>⌘0</kbd><span>Fit page</span><kbd>⌘1</kbd><span>Actual size (100%)</span><kbd>V</kbd><span>Edit: drag points or whole lines; drag a curve to bend it (Shift+drag moves it)</span><kbd>Right-click</kbd><span>Remove a point (or the last one while drawing)</span><kbd>Delete</kbd><span>Remove the selected point or measurement</span><kbd>Dbl-click</kbd><span>On an edge in Edit: add a point</span><kbd>Arrows</kbd><span>Nudge the selection (Shift ×10)</span><kbd>Shift-click</kbd><span>Add to or take from the selection; drag on empty canvas to select with a box</span><kbd>⌘A</kbd><span>Select everything on this page</span><kbd>⌘G</kbd><span>Group the selection (Shift: ungroup); ⌘-click picks one item out of a group</span><kbd>⇧⌘L</kbd><span>Lock or unlock the selection</span><kbd>⇧⌘H</kbd><span>Hide or show the selection</span><kbd>Shift+R</kbd><span>Show or hide the rulers</span><kbd>H</kbd><span>Pan, or hold Space</span><kbd>S</kbd><span>Set the drawing scale</span><kbd>Z</kbd><span>Resize a measurement</span><kbd>L</kbd><span>Length</span><kbd>R</kbd><span>Run</span><kbd>K</kbd><span>Curve (3 points make an arc)</span><kbd>A</kbd><span>Area</span><kbd>B</kbd><span>Rectangle area</span><kbd>O</kbd><span>Circle: center, then edge</span><kbd>C</kbd><span>Count (Enter starts a new count)</span><kbd>G</kbd><span>Angle</span><kbd>N</kbd><span>Note</span><kbd>T</kbd><span>Text: click to type; Esc to finish; double-click text to edit it</span><kbd>P</kbd><span>Pen: click for corners, drag for curves; double-click a point in Select to make it smooth or a corner</span><kbd>D</kbd><span>Dimension: hover an edge, click and pull away (or click two points)</span><kbd>F</kbd><span>Fit page</span><kbd>Shift</kbd><span>Straight lines</span><kbd>Alt</kbd><span>Place without snapping</span><kbd>Enter</kbd><span>Finish run, curve, area or count</span><kbd>Esc</kbd><span>Cancel</span><kbd>⌘</kbd><span>+ scroll to zoom</span></div>');
+    h += sec('keys', 'Shortcuts', '<div class="keys"><kbd>,</kbd><span>Show or hide Layers</span><kbd>.</kbd><span>Show or hide Settings</span><kbd>/</kbd><span>Export</span><kbd>?</kbd><span>Help and shortcuts</span><kbd>⌘Z</kbd><span>Undo (Shift for redo)</span><kbd>⌘S</kbd><span>Save project</span><kbd>⌘+ / ⌘−</kbd><span>Zoom in and out</span><kbd>⌘0</kbd><span>Fit page</span><kbd>⌘1</kbd><span>Actual size (100%)</span><kbd>V</kbd><span>Edit: drag points or whole lines; drag a curve to bend it (Shift+drag moves it)</span><kbd>Right-click</kbd><span>Remove a point (or the last one while drawing)</span><kbd>Delete</kbd><span>Remove the selected point or measurement</span><kbd>Dbl-click</kbd><span>On an edge in Edit: add a point</span><kbd>Arrows</kbd><span>Nudge the selection (Shift ×10)</span><kbd>Shift-click</kbd><span>Add to or take from the selection; drag on empty canvas to select with a box</span><kbd>⌘A</kbd><span>Select everything on this page</span><kbd>⌘G</kbd><span>Group the selection (Shift: ungroup); ⌘-click picks one item out of a group</span><kbd>⇧⌘L</kbd><span>Lock or unlock the selection</span><kbd>⇧⌘H</kbd><span>Hide or show the selection</span><kbd>Shift+R</kbd><span>Show or hide the rulers</span><kbd>H</kbd><span>Pan, or hold Space</span><kbd>S</kbd><span>Set the drawing scale</span><kbd>Z</kbd><span>Resize a measurement</span><kbd>L</kbd><span>Length</span><kbd>R</kbd><span>Run</span><kbd>K</kbd><span>Curve (3 points make an arc)</span><kbd>A</kbd><span>Area</span><kbd>B</kbd><span>Rectangle area</span><kbd>O</kbd><span>Circle: center, then edge</span><kbd>C</kbd><span>Count (Enter starts a new count)</span><kbd>G</kbd><span>Angle</span><kbd>N</kbd><span>Note</span><kbd>T</kbd><span>Text: click to type; Esc to finish; double-click text to edit it</span><kbd>P</kbd><span>Pen: click for corners, drag for curves; double-click a point in Select to make it smooth or a corner</span><kbd>D</kbd><span>Dimension: hover an edge, click and pull away (or click two points)</span><kbd>F</kbd><span>Fit page</span><kbd>Shift</kbd><span>Straight lines</span><kbd>Alt</kbd><span>Place without snapping</span><kbd>Enter</kbd><span>Finish run, curve, area or count</span><kbd>Esc</kbd><span>Cancel</span><kbd>⌘</kbd><span>+ scroll to zoom</span></div>');
     h += aboutSec();
     rightEl.innerHTML = h;
     if (dockOn() && M.panel) {
       var ds = dockSpec(M.panel), only = ds[2], shown = only.filter(function (k) { return rightEl.querySelector('details[data-sec="' + k + '"]'); });
       rightEl.querySelectorAll('details[data-sec]').forEach(function (dt) { var keep = only.indexOf(dt.dataset.sec) >= 0; dt.hidden = !keep; if (keep) dt.open = true; dt.classList.toggle('solo', keep && shown.length === 1); });
-      rightEl.insertAdjacentHTML('afterbegin', '<div class="dk-head"><b>' + esc(ds[1]) + '</b><span class="dk-sub"></span><button type="button" class="dk-x" data-dkclose="' + M.panel + '" aria-label="Close">×</button></div>');
+      var key = { drawing: 'Settings (.)', export: 'Export (/)', help: 'Help (?)' }[M.panel] || '';
+      rightEl.insertAdjacentHTML('afterbegin', '<div class="dk-head"><b>' + esc(ds[1]) + '</b><span class="dk-sub"></span><button type="button" class="dk-x" data-dkclose="' + M.panel + '" title="Close ' + key + '" aria-label="Close">×</button></div>');
     }
   }
   function num0(n) { return Number(n).toLocaleString(); }
@@ -3096,23 +3155,27 @@ details[open] > summary .sum { display: none; }
     if (e.target.id === 'page-name') { if (!renamePage(M.page, e.target.value)) e.target.value = pageName(); return; }
     if (e.target.id === 'draw-name') { if (!renameDoc(e.target.value)) e.target.value = docTitle(); renderTopLeft(); renderLeft(); return; }
     if (e.target.id === 'round-sel') { M.round = e.target.value; renderRight(); return; }
+    if (e.target.id === 'layers-left') { setLayersLeft(e.target.checked); return; }
     if (/^blank-(w|h)$/.test(e.target.id) && M.src === 'blank') {
       var nb = Object.assign({}, M.blank), bv = parseSize(e.target.value);
       if (bv >= 1) nb[e.target.id === 'blank-w' ? 'w' : 'h'] = bv;
       setBlank(nb); buildPage(); fit(); renderAll(); return;
     }
   });
-  leftEl.addEventListener('input', function (e) {
+  // Item controls live in list rows (left panel, Layers) and in Settings, so the same handlers listen on all three.
+  var itemBoxes = [leftEl, layersEl, rightEl];
+  itemBoxes.forEach(function (box) { box.addEventListener('input', function (e) {
+    if (mode !== 'measure') return;
     var cp = e.target.dataset && e.target.dataset.colorpick;
     if (cp) { var cit = itemById(Number(cp)); if (cit) { cit.color = e.target.value; renderOverlay(); } return; }
     var vid = e.target.dataset && e.target.dataset.val;
-    if (vid) { var vit = itemById(Number(vid)); if (vit) { setManual(vit, e.target.value); renderOverlay(); var bb = e.target.closest('.item').querySelector('b'); if (bb) bb.textContent = itemValue(vit); } return; }
+    if (vid) { var vit = itemById(Number(vid)); if (vit) { setManual(vit, e.target.value); renderOverlay(); var vr = e.target.closest('.item'), bb = vr ? vr.querySelector('b') : rightEl.querySelector('[data-ival]'); if (bb) bb.textContent = itemValue(vit); } return; }
     var id = e.target.dataset && e.target.dataset.name;
     if (!id) return;
     var it = M.items.find(function (x) { return x.id === Number(id); });
     if (it) { if (it.type === 'text') { if (String(it.text).indexOf('\n') < 0 && e.target.value) it.text = e.target.value; it.name = e.target.value || 'Text'; } else it.name = e.target.value || TYPE_NAME[it.type]; renderOverlay(); }
-  });
-  leftEl.addEventListener('change', function (e) {
+  }); });
+  itemBoxes.forEach(function (box) { box.addEventListener('change', function (e) {
     if (mode !== 'measure') return;
     if (e.target.id === 'scale-sel') {
       var v = e.target.value;
@@ -3123,8 +3186,8 @@ details[open] > summary .sum { display: none; }
       renderOverlay(); renderPanels(); return;
     }
     var d = e.target.dataset || {};
-    if (d.name) { History.record(); return; }
-    if (d.val) { renderRight(); History.record(); return; }
+    if (d.name) { if (box === rightEl) renderLeft(); else if (setShowsItem()) renderRight(); History.record(); return; }
+    if (d.val) { if (box === rightEl) renderLeft(); else renderRight(); History.record(); return; }
     if (d.cat) { var it = itemById(Number(d.cat)); if (it) { it.cat = e.target.value; renderPanels(); } }
     if (d.deduct) { var it2 = itemById(Number(d.deduct)); if (it2) { it2.deduct = e.target.checked; renderOverlay(); renderPanels(); } }
     if (d.colorpick) { var it3 = itemById(Number(d.colorpick)); if (it3) setItemColor(it3, e.target.value); }
@@ -3142,15 +3205,15 @@ details[open] > summary .sum { display: none; }
     if (d.fill) { var it6 = itemById(Number(d.fill)); if (it6) { it6.fill = e.target.value; M.shapeStyle.fill = it6.fill; renderOverlay(); renderPanels(); } }
     if (d.sw) { var it7 = itemById(Number(d.sw)); if (it7) { it7.sw = Number(e.target.value); M.shapeStyle.sw = it7.sw; renderOverlay(); renderPanels(); } }
     if (d.rotv) { var it5 = itemById(Number(d.rotv)); if (it5) { it5.rot = normRot(e.target.value); renderOverlay(); renderPanels(); } }
-  });
+  }); });
   function applyResize(id) {
     var it = itemById(id), inp = $('resize-in'); if (!it || !inp) return;
     if (resizeTo(it, parseSize(inp.value))) { M.note = it.name + ' resized to ' + fmtLen(parseSize(inp.value)) + '.'; renderOverlay(); renderPanels(); }
     else { inp.focus(); inp.select(); }
   }
   leftEl.addEventListener('keydown', function (e) { if (e.target.id === 'resize-in' && e.key === 'Enter') { var b = leftEl.querySelector('[data-rsz]'); if (b) applyResize(Number(b.dataset.rsz)); } });
-  leftEl.addEventListener('keydown', function (e) { if (e.target.dataset && (e.target.dataset.name || e.target.dataset.val || e.target.dataset.rotv || e.target.dataset.fs) && e.key === 'Enter') e.target.blur(); });
-  leftEl.addEventListener('click', function (e) {
+  itemBoxes.forEach(function (box) { box.addEventListener('keydown', function (e) { if (mode === 'measure' && e.target.dataset && (e.target.dataset.name || e.target.dataset.val || e.target.dataset.rotv || e.target.dataset.fs) && e.key === 'Enter') e.target.blur(); }); });
+  itemBoxes.forEach(function (box) { box.addEventListener('click', function (e) {
     if (mode !== 'measure') return;
     var ar = e.target.closest('[data-ar]'); if (ar) { doArrange(ar.dataset.ar); return; }
     var lkb = e.target.closest('[data-lock]'); if (lkb) { flagSel('lock', [Number(lkb.dataset.lock)]); return; }
@@ -3173,9 +3236,9 @@ details[open] > summary .sum { display: none; }
     if (tab && hit) { var b0 = textBox(hit), al = tab.dataset.ta; hit.align = M.textStyle.align = al; hit.pts[0] = { x: al === 'center' ? b0.x + b0.w / 2 : al === 'right' ? b0.x + b0.w : b0.x, y: b0.y }; renderOverlay(); renderPanels(); return; }
     var rb = e.target.closest('[data-rot]');
     if (rb && hit) { hit.rot = normRot((hit.rot || 0) + Number(rb.dataset.rot)); renderOverlay(); renderPanels(); return; }
-    var row = e.target.closest('[data-item]');
-    if (row && !/INPUT|BUTTON|SELECT|LABEL/.test(e.target.tagName) && !e.target.closest('.item-more')) { var rid = Number(row.dataset.item); pickItem(rid, e.shiftKey); renderOverlay(); renderLeft(); }
-  });
+    var row = e.target.closest('.item[data-item]');
+    if (row && !/INPUT|BUTTON|SELECT|LABEL/.test(e.target.tagName) && !e.target.closest('.item-more')) { var rid = Number(row.dataset.item); pickItem(rid, e.shiftKey); renderOverlay(); renderLeft(); renderRight(); }
+  }); });
   function applyCalib() {
     var kn = $('known'), inches = parseSize(kn ? kn.value : '');
     var d = M.calib.length === 2 ? dist(M.calib[0], M.calib[1]) : 0;
@@ -3197,6 +3260,8 @@ details[open] > summary .sum { display: none; }
     var b = e.target.closest('[data-act]'); if (!b) return;
     var a = b.dataset.act;
     if (/^(addpage|duppage|delpage|pageleft|pageright)$/.test(a)) { pageAct(a); return; }
+    if (a === 'desel') { M.sel = null; M.multi = null; renderOverlay(); renderPanels(); return; }
+    if (a === 'delsel') { deleteSelection(); return; }
     if (a === 'sample') useSample();
     else if (a === 'reset') resetDrawing();
     else if (a === 'prev' && M.page > 1) goPage(M.page - 1);
@@ -3244,37 +3309,42 @@ details[open] > summary .sum { display: none; }
 
   // ---- Dock (Draw, wide windows): chips along the bottom open one floating card at a time ----
   // Item chips filter the list (and dim everything else on the canvas); setting chips show one panel section.
-  var DOCK_ITEMS = [['all', 'All', 'var(--b00)'], ['shapes', 'Shapes', '#1c1c1c'], ['mural', 'Mural', 'var(--purple)'], ['film', 'Privacy film', 'var(--teal)'], ['markers', 'Markers', 'var(--pink)'], ['signage', 'Signage', 'var(--orange)'], ['none', 'No category', 'var(--b04)']];
-  var DOCK_SETS = [['drawing', 'Drawing', ['drawing', 'project']], ['totals', 'Totals', ['totals'], 1], ['export', 'Export', ['export']], ['help', 'Help', ['keys', 'about'], 1]];
+  var DOCK_ITEMS = [['all', 'All', 'var(--b00)'], ['shapes', 'Shapes', '#1c1c1c'], ['meas', 'Measurements', 'var(--b00)'], ['mural', 'Mural', 'var(--purple)'], ['film', 'Privacy film', 'var(--teal)'], ['markers', 'Markers', 'var(--pink)'], ['signage', 'Signage', 'var(--orange)'], ['none', 'No category', 'var(--b04)']];
+  var DOCK_SETS = [['drawing', 'Drawing', ['drawing', 'project']], ['export', 'Export', ['export']], ['help', 'Help', ['keys', 'about']]];
+  // Layers (wide windows): open or closed, and under Settings on the right or on the left of the canvas; both remembered.
+  var layersOpen = true, layersLeft = false;
+  try { layersOpen = localStorage.getItem('dim-layers') !== '0'; layersLeft = localStorage.getItem('dim-layers-left') === '1'; } catch (e) {}
   var dockMQ = window.matchMedia ? matchMedia('(min-width: 900px)') : { matches: true };
   function dockOn() { return mode === 'measure' && dockMQ.matches; }
   function isItemsView(v) { return DOCK_ITEMS.some(function (d) { return d[0] === v; }); }
   function isSetView(v) { return DOCK_SETS.some(function (d) { return d[0] === v; }); }
   function dockSpec(v) { return DOCK_ITEMS.concat(DOCK_SETS).find(function (d) { return d[0] === v; }) || ['', '', '']; }
-  function inView(it, v) { return v === 'all' ? true : v === 'shapes' ? !!it.shape : v === 'none' ? !it.shape && !it.cat : !it.shape && it.cat === v; }
-  // A filtered card dims everything outside it on the canvas.
-  function dimmedOut(it) { return dockOn() && isItemsView(M.dock) && M.dock !== 'all' && !inView(it, M.dock); }
-  function itemsCard(v, mine) {
-    var sp = dockSpec(v), list = mine.filter(function (it) { return inView(it, v); }), sc = scaleNow(), h = '';
-    h += '<div class="dk-head">' + (v === 'all' || v === 'shapes' ? '' : '<span class="dk-ic" style="background:' + sp[2] + '"></span>') + '<b>' + esc(sp[1]) + '</b><span class="dk-sub">' + esc(docTitle()) + (M.pages > 1 ? ' · ' + esc(pageName()) : '') + '</span><button type="button" class="dk-x" data-dkclose="' + v + '" aria-label="Close">×</button></div>';
-    var big = '—', line = '', tiles;
+  function inView(it, v) { return v === 'all' ? true : v === 'shapes' ? !!it.shape : v === 'meas' ? !it.shape : v === 'none' ? !it.shape && !it.cat : !it.shape && it.cat === v; }
+  // A filtered Layers panel dims everything outside it on the canvas.
+  function layersView() { return isItemsView(M.dock) ? M.dock : 'all'; }
+  function dimmedOut(it) { return dockOn() && layersOpen && layersView() !== 'all' && !inView(it, layersView()); }
+  // Layers: totals for what it shows, filter pills, then one row per item (click to select, hover to find on the canvas).
+  function layersCard(mine) {
+    var v = layersView(), sp = dockSpec(v), list = mine.filter(function (it) { return inView(it, v); }), sc = scaleNow(), h = '', note = '', tiles;
+    h += '<div class="dk-head"><b>Layers</b><span class="dk-sub">' + esc(docTitle()) + (M.pages > 1 ? ' · ' + esc(pageName()) : '') + '</span><button type="button" class="dk-x" data-lyclose title="Close Layers (,)" aria-label="Close Layers">×</button></div>';
     if (v === 'shapes') {
       var by = function (k) { return list.filter(function (it) { return it.shape === k; }).length; };
-      big = list.length + (list.length === 1 ? ' shape' : ' shapes'); line = 'Drawings only: shapes stay out of totals and exports’ lists.';
       tiles = [[by('line'), 'Lines'], [by('rect') + by('ellipse'), 'Rect & ellipse'], [by('poly'), 'Pen paths'], [by('text'), 'Text']];
+      note = 'Shapes stay out of totals and exported lists.';
     } else {
       var t = totalsFor(list), net = t.area - t.deduct, ea = t.counts.reduce(function (n, c) { return n + c.pts.length; }, 0);
-      if (!sc) line = 'Set the scale (S) to see sizes.';
-      else if (t.area) { big = fmtSqft(net); line = t.deduct ? fmtSqft(t.area) + ' − ' + fmtSqft(t.deduct) + ' deducted = ' + fmtSqft(net) + ' net' : 'Net area'; }
-      else if (t.lin) { big = fmtLin(t.lin); line = 'Total length of lengths, runs and curves'; }
-      else if (ea) { big = ea + ' ea'; line = 'Counted items'; }
-      var meas = list.filter(function (it) { return !it.shape; }).length;
-      tiles = [[sc && t.lin ? fmtLin(t.lin).replace(' lin ft', ' ft') : '—', 'Length'], [sc && t.area ? fmtSqft(net) : '—', 'Net area'], [ea || '—', 'Counted'], [v === 'all' ? list.length : meas, v === 'all' ? 'Items' : 'Measured']];
+      tiles = [[sc && t.lin ? fmtLin(t.lin).replace(' lin ft', ' ft') : '—', 'Length'], [sc && t.area ? fmtSqft(net) : '—', 'Net area'], [ea || '—', 'Counted'], [list.length, 'Items']];
+      if (!sc && list.some(function (it) { return !it.shape; })) note = 'Set the scale (S) to see sizes.';
+      else if (sc && t.deduct) note = fmtSqft(t.area) + ' − ' + fmtSqft(t.deduct) + ' deducted = ' + fmtSqft(net) + ' net';
     }
-    h += '<div class="dk-hero"><div class="dk-big">' + big + '</div>' + (line ? '<div class="dk-line">' + line + '</div>' : '') + '</div>';
-    h += '<div class="dk-tiles">' + tiles.map(function (x) { return '<div class="dk-tile"><b>' + x[0] + '</b><span>' + x[1] + '</span></div>'; }).join('') + '</div>';
-    h += '<div class="dk-lab"><span>' + (v === 'shapes' ? 'Shapes' : 'Items') + '</span><span>Click to select · hover to find</span></div>';
-    if (!list.length) h += '<p class="hint dk-empty">' + (v === 'shapes' ? 'Draw with Line, Rectangle, Ellipse, Pen or Text to add shapes.' : v === 'all' || v === 'none' ? 'Nothing here yet.' : 'Nothing tagged ' + esc(sp[1]) + ' yet. Select a measurement in All and pick this category in its card.') + '</p>';
+    h += '<div class="ly-top"><div class="dk-tiles">' + tiles.map(function (x) { return '<div class="dk-tile"><b>' + x[0] + '</b><span>' + x[1] + '</span></div>'; }).join('') + '</div>' + (note ? '<p class="dk-line">' + note + '</p>' : '');
+    // All, Shapes and Measurements always show; a category shows once something on the page uses it (or while it's picked).
+    h += '<div class="ly-pills" role="group" aria-label="Show">' + DOCK_ITEMS.map(function (d) {
+      var n = mine.filter(function (it) { return inView(it, d[0]); }).length, on = v === d[0];
+      if (!(d[0] === 'all' || d[0] === 'shapes' || d[0] === 'meas' || n || on)) return '';
+      return '<button type="button" class="ly-pill' + (on ? ' on' : '') + (n ? '' : ' zero') + '" data-lyf="' + d[0] + '" aria-pressed="' + on + '">' + (/^(all|shapes|meas)$/.test(d[0]) ? '' : '<i style="background:' + d[2] + '"></i>') + esc(d[1]) + (n ? '<span class="dn">' + n + '</span>' : '') + '</button>';
+    }).join('') + '</div></div>';
+    if (!list.length) h += '<p class="hint dk-empty">' + (v === 'shapes' ? 'Draw with Line, Rectangle, Ellipse, Pen or Text to add shapes.' : v === 'all' || v === 'none' || v === 'meas' ? 'Nothing here yet.' : 'Nothing tagged ' + esc(sp[1]) + ' yet. Select a measurement and pick this category in Settings.') + '</p>';
     else h += '<div class="list dk-list">' + list.map(itemRow).join('') + '</div>';
     return h;
   }
@@ -3327,22 +3397,14 @@ details[open] > summary .sum { display: none; }
     el.hidden = false;
     var cp = curPage();
     el.innerHTML = '<span class="pages">' + PAGES.map(function (pg) { var on = cp === pg[0]; return '<button type="button" class="dchip pg' + (on ? ' on' : '') + '" data-page="' + pg[0] + '" aria-pressed="' + on + '" title="' + pg[1] + '">' + (pg[2] ? '<span class="lf">' + pg[1] + '</span><span class="ls">' + pg[2] + '</span>' : pg[1]) + '</button>'; }).join('') + '</span>';
-    var card = function (k, label) { var on = !!(UI[mode] && UI[mode][k]); return '<button type="button" class="dchip' + (on ? ' on' : '') + '" data-card="' + k + '" aria-pressed="' + on + '">' + label + '</button>'; };
     var h = '';
-    ch.classList.toggle('has-on', mode === 'measure' && isItemsView(M.dock));
     if (mode === 'layout') {
       // Layout: the job's inputs (left card), then each settings tab, the whole-job settings and Totals (right card).
       var fc = UI.layout.r ? Lay.getFocus() : '';
-      h = card('l', LEFT_LABEL[cp] || 'Inputs') + '<span class="fsep"></span>' + Lay.chips().filter(function (c) { return c[0] !== 'export'; }).map(function (c) { var on = fc === c[0]; return '<button type="button" class="dchip' + (on ? ' on' : '') + '" data-lfocus="' + c[0] + '" aria-pressed="' + on + '" title="' + esc(c[1]) + '">' + shortLab(c[1]) + '</button>'; }).join('');
+      h = Lay.chips().filter(function (c) { return c[0] !== 'export'; }).map(function (c) { var on = fc === c[0]; return '<button type="button" class="dchip' + (on ? ' on' : '') + '" data-lfocus="' + c[0] + '" aria-pressed="' + on + '" title="' + esc(c[1]) + '">' + shortLab(c[1]) + '</button>'; }).join('');
     } else if (mode === 'shop') {
       var sf = UI.shop.r ? shopFocus() : '';
-      h = card('l', 'On sheet') + '<span class="fsep"></span>' + SHOP_SECS.filter(function (x) { return x[0] !== 'sh_exp'; }).map(function (x) { var on = sf === x[0]; return '<button type="button" class="dchip' + (on ? ' on' : '') + '" data-sfocus="' + x[0] + '" aria-pressed="' + on + '" title="' + x[1] + '">' + shortLab(x[1]) + '</button>'; }).join('');
-    }
-    else if (mode === 'measure') {
-      var mine = M.items.filter(function (it) { return it.page === M.page; });
-      var chip = function (d, n) { var on = M.dock === d[0] || M.panel === d[0]; return '<button type="button" class="dchip' + (on ? ' on' : '') + (n === 0 ? ' zero' : '') + '" data-dock="' + d[0] + '" aria-pressed="' + on + '">' + (n != null && d[0] !== 'all' && d[0] !== 'shapes' ? '<i style="background:' + d[2] + '"></i>' : '') + esc(d[1]) + (n ? '<span class="dn">' + n + '</span>' : '') + '</button>'; };
-      // All and Shapes always show; a category chip shows once something uses it (or while its card is open).
-      h = DOCK_ITEMS.map(function (d) { var n = mine.filter(function (it) { return inView(it, d[0]); }).length; return d[0] === 'all' || d[0] === 'shapes' || n || M.dock === d[0] ? chip(d, n) : ''; }).join('') + '<span class="fsep"></span>' + DOCK_SETS.filter(function (d) { return d[3]; }).map(function (d) { return chip(d, null); }).join('');
+      h = SHOP_SECS.filter(function (x) { return x[0] !== 'sh_exp'; }).map(function (x) { var on = sf === x[0]; return '<button type="button" class="dchip' + (on ? ' on' : '') + '" data-sfocus="' + x[0] + '" aria-pressed="' + on + '" title="' + x[1] + '">' + shortLab(x[1]) + '</button>'; }).join('');
     }
     ch.hidden = !h; ch.innerHTML = h;
   }
@@ -3353,6 +3415,9 @@ details[open] > summary .sum { display: none; }
     mainEl.classList.toggle('fl', fl);
     mainEl.classList.toggle('draw', on);
     mainEl.classList.toggle('dk-right', on && !!M.panel);
+    mainEl.classList.toggle('ly-on', on && layersOpen);
+    mainEl.classList.toggle('ly-left', on && layersOpen && layersLeft);
+    mainEl.classList.toggle('rcol', on && (!!M.panel || (layersOpen && !layersLeft)));
     mainEl.classList.toggle('pnl', pnl); mainEl.classList.toggle('lay', pnl && mode === 'layout'); mainEl.classList.toggle('shopm', pnl && mode === 'shop');
     mainEl.classList.toggle('lc', pnl && !!u.l); mainEl.classList.toggle('rc', pnl && !!u.r);
     stage.classList.toggle('flpad', fl);
@@ -3366,9 +3431,22 @@ details[open] > summary .sum { display: none; }
     renderChrome();
   }
   function setDock(v) {
-    // Item cards open on the left, panel cards (settings, export, totals, help) on the right; one of each at a time.
-    if (isSetView(v)) M.panel = M.panel === v ? null : v; else { M.dock = M.dock === v ? null : v; M.hl = null; }
-    applyDockLayout(); renderLeft(); renderRight(); renderDock(); renderOverlay();
+    // Settings, Export and Help share the top of the right-hand column, one at a time; Layers sits under them.
+    if (isSetView(v)) M.panel = M.panel === v ? null : v;
+    applyDockLayout(); renderLeft(); renderRight(); renderFloat(); renderOverlay();
+  }
+  function setFilter(v) { M.dock = v; M.hl = null; renderLeft(); renderOverlay(); }
+  function toggleLayers(force) {
+    if (mode === 'layout' || mode === 'shop') { toggleCard('l', force); return; }
+    if (!dockOn()) return;
+    layersOpen = force == null ? !layersOpen : force;
+    try { localStorage.setItem('dim-layers', layersOpen ? '1' : '0'); } catch (e) {}
+    M.hl = null; applyDockLayout(); renderLeft(); renderFloat(); renderOverlay();
+  }
+  function setLayersLeft(v) {
+    layersLeft = !!v;
+    try { localStorage.setItem('dim-layers-left', layersLeft ? '1' : '0'); } catch (e) {}
+    applyDockLayout(); renderLeft(); renderFloat();
   }
   document.addEventListener('click', function (e) {
     var pg = e.target.closest('[data-page]'); if (pg) { showPage(pg.dataset.page); return; }
@@ -3379,12 +3457,13 @@ details[open] > summary .sum { display: none; }
     var lf = e.target.closest('[data-lfocus]');
     if (lf && mode === 'layout') { var id = lf.dataset.lfocus; if (UI.layout.r && Lay.getFocus() === id) toggleCard('r', false); else { Lay.focus(id); toggleCard('r', true); rightEl.scrollTop = 0; } return; }
     if (mode !== 'measure') return;
-    var d = e.target.closest('[data-dock]'); if (d) { setDock(d.dataset.dock); return; }
+    var f = e.target.closest('[data-lyf]'); if (f) { setFilter(f.dataset.lyf); return; }
+    if (e.target.closest('[data-lyclose]')) { toggleLayers(false); return; }
     var x = e.target.closest('[data-dkclose]'); if (x) setDock(x.dataset.dkclose);
   });
   // Hovering a card finds its item on the canvas.
-  leftEl.addEventListener('mouseover', function (e) { if (!dockOn()) return; var r = e.target.closest('[data-item]'), id = r ? Number(r.dataset.item) : null; if (id !== M.hl) { M.hl = id; renderOverlay(); } });
-  leftEl.addEventListener('mouseleave', function () { if (M.hl) { M.hl = null; renderOverlay(); } });
+  layersEl.addEventListener('mouseover', function (e) { if (!dockOn()) return; var r = e.target.closest('.item[data-item]'), id = r ? Number(r.dataset.item) : null; if (id !== M.hl) { M.hl = id; renderOverlay(); } });
+  layersEl.addEventListener('mouseleave', function () { if (M.hl) { M.hl = null; renderOverlay(); } });
   if (dockMQ.addEventListener) dockMQ.addEventListener('change', function () { renderChrome(); if (mode === 'measure') renderAll(); else if (mode === 'layout') Lay.enter(); else if (mode === 'shop') Shop.enter(); });
 
   // ---- Top left (wide windows): DIM and this project ----
@@ -3483,6 +3562,7 @@ details[open] > summary .sum { display: none; }
     open: '<path d="M2 5V3.5h5l1.5 1.5H16v2M2 5v10h12.5L17 7.5H4.5L2 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
     save: '<path d="M3 3h10l2 2v10H3z M6 3v4h6V3 M6 15v-5h6v5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
     smart: '<rect x="2" y="3" width="6" height="5" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="10" width="6" height="5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M1 8h16" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 1.6"/><path d="M10 1v16" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 1.6"/>',
+    layers: '<path d="M9 2.5l6.5 3.5L9 9.5 2.5 6z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M2.5 9.2L9 12.7l6.5-3.5M2.5 12.4L9 15.9l6.5-3.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
     ruler: '<path d="M1.5 6.5h15v5h-15z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 6.5v2.4M7.5 6.5v1.6M10.5 6.5v2.4M13.5 6.5v1.6" stroke="currentColor" stroke-width="1.2"/>',
     gear: '<g fill="currentColor"><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(0 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(45 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(90 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(135 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(180 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(225 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(270 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(315 9 9)"/></g><circle cx="9" cy="9" r="5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="9" cy="9" r="1.9" fill="none" stroke="currentColor" stroke-width="1.4"/>'
   };
@@ -3503,8 +3583,9 @@ details[open] > summary .sum { display: none; }
       var rv = mode === 'layout' ? (Lay.getFocus() === 'export' ? 'export' : 'edit') : '', rOpen = !!UI[mode].r;
       if (mode === 'shop') rv = shopFocus() === 'sh_exp' ? 'export' : 'edit';
       var guideBtns = mode === 'shop' ? sq('rulers', 'ruler', 'Rulers and guides (Shift+R)', rulersOn) + sq('smart', 'smart', 'Smart guides: line things up with other items as you drag', smartOn) + gap : '';
-      tr.innerHTML = undo() + gap + guideBtns + sq('settings', 'gear', (mode === 'layout' ? 'Layout settings' : 'Sheet settings') + ' (,)', rOpen && rv !== 'export') +
-        '<button type="button" class="sqx' + (rOpen && rv === 'export' ? ' on' : '') + '" data-fa="export" title="Export (.)">' + ficon('export') + 'Export</button>';
+        var lname = mode === 'layout' ? LEFT_LABEL[Lay.getJob()] || 'Inputs' : 'On sheet';
+      tr.innerHTML = undo() + gap + guideBtns + sq('layers', 'layers', lname + ' (,)', !!UI[mode].l) + sq('settings', 'gear', (mode === 'layout' ? 'Layout settings' : 'Sheet settings') + ' (.)', rOpen && rv !== 'export') +
+        '<button type="button" class="sqx' + (rOpen && rv === 'export' ? ' on' : '') + '" data-fa="export" title="Export (/)">' + ficon('export') + 'Export</button>';
       return;
     }
     tr.hidden = false;
@@ -3515,9 +3596,12 @@ details[open] > summary .sum { display: none; }
     h += sq('rulers', 'ruler', 'Rulers and guides (Shift+R)', rulersOn && M.src !== 'none', M.src === 'none' ? ' disabled' : '');
     h += sq('smart', 'smart', 'Smart guides: line things up with other items as you drag', smartOn && M.src !== 'none', M.src === 'none' ? ' disabled' : '');
     h += sq('tags', 'dims', 'Dimensions on the drawing: ' + tm[1] + ' (click to change)', M.tags !== 'off', '', M.tags === 'size' ? 'S' : M.tags === 'off' ? '' : 'N') + gap;
-    h += sq('settings', 'gear', 'Drawing settings (,)', dockOn() && M.panel === 'drawing');
-    h += '<button type="button" class="sqx' + (dockOn() && M.panel === 'export' ? ' on' : '') + '" data-fa="export" title="Export a marked-up PDF or JPG, the list or a CSV (.)">' + ficon('export') + 'Export</button>';
+    if (dockOn()) h += sq('layers', 'layers', 'Layers (,)', layersOpen);
+    h += sq('settings', 'gear', 'Settings (.)', dockOn() && M.panel === 'drawing');
+    h += '<button type="button" class="sq qm' + (dockOn() && M.panel === 'help' ? ' on' : '') + '" data-fa="help" title="Help and shortcuts (?)" aria-label="Help and shortcuts"' + (dockOn() ? ' aria-pressed="' + (M.panel === 'help') + '"' : '') + '>?</button>';
+    h += '<button type="button" class="sqx' + (dockOn() && M.panel === 'export' ? ' on' : '') + '" data-fa="export" title="Export a marked-up PDF or JPG, the list or a CSV (/)">' + ficon('export') + 'Export</button>';
     tr.innerHTML = h;
+    fitSelRow();
     // Bottom right: the drawing's scale (a blank canvas sets its grid size at the top right instead).
     sc.hidden = M.src === 'none' || blank;
     if (!blank) { var s0 = scaleNow(); sc.innerHTML = '<button type="button" class="fbtn" data-fa="scale" title="Set the scale (S)">Scale <em>' + esc(s0 ? scaleLabel(s0) : 'not set') + '</em></button>'; }
@@ -3544,7 +3628,7 @@ details[open] > summary .sum { display: none; }
     var a = b.dataset.fa;
     if (a === 'rulers' && mode !== 'layout') { toggleRulers(); return; }
     if (a === 'smart' && mode !== 'layout') { toggleSmart(); return; }
-    if (mode === 'layout' || mode === 'shop') { if (a === 'undo') History.undo(); else if (a === 'redo') History.redo(); else if (a === 'settings') openPanel('drawing'); else if (a === 'export') openPanel('export'); renderFloat(); return; }
+    if (mode === 'layout' || mode === 'shop') { if (a === 'undo') History.undo(); else if (a === 'redo') History.redo(); else if (a === 'layers') toggleCard('l'); else if (a === 'settings') openPanel('drawing'); else if (a === 'export') openPanel('export'); renderFloat(); return; }
     if (mode !== 'measure') return;
     if (a === 'undo') History.undo();
     else if (a === 'redo') History.redo();
@@ -3552,13 +3636,15 @@ details[open] > summary .sum { display: none; }
     else if (a === 'snap') { setBlankOpt('snap', !M.blank.snap); renderRight(); }
     else if (a === 'snapd') { M.snapDrawing = !M.snapDrawing; renderRight(); }
     else if (a === 'tags') { var i = TAG_MODES.findIndex(function (t) { return t[0] === (M.tags || 'full'); }); M.tags = TAG_MODES[(i + 1) % TAG_MODES.length][0]; try { localStorage.setItem('dim-tags', M.tags); } catch (err) {} renderOverlay(); renderRight(); }
+    else if (a === 'layers') { toggleLayers(); return; }
     else if (a === 'settings') { openPanel('drawing'); return; }
+    else if (a === 'help') { openPanel('help'); return; }
     else if (a === 'export') { openPanel('export'); return; }
     renderFloat();
   });
   document.addEventListener('keydown', function (e) {
     if ((mode !== 'layout' && mode !== 'shop') || typing(e) || e.ctrlKey || e.metaKey || e.altKey) return;
-    if (e.key === ',') { e.preventDefault(); openPanel('drawing'); } else if (e.key === '.') { e.preventDefault(); openPanel('export'); }
+    if (e.key === ',') { e.preventDefault(); toggleCard('l'); } else if (e.key === '.') { e.preventDefault(); openPanel('drawing'); } else if (e.key === '/') { e.preventDefault(); openPanel('export'); }
   });
   $('fbar-tr').addEventListener('change', function (e) { if (e.target.id === 'f-gstep') { setBlankOpt('step', Number(e.target.value)); paintGrid(); renderRight(); renderOverlay(); } });
   $('fbar-br').addEventListener('click', function (e) { var b = e.target.closest('[data-fa="scale"]'); if (b && mode === 'measure') setTool('scale'); });
@@ -7528,7 +7614,7 @@ details[open] > summary .sum { display: none; }
   // is being pressed, redraws of the panel holding it wait; when the click or choice finishes, the panel redraws fresh.
   var Hold = (function () {
     var held = null, pending = [], timer = null, desc = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
-    var boxes = [leftEl, rightEl, toolsEl, $('fbar-tl'), $('fbar-tr'), $('dock'), $('dchips'), $('fscale')];
+    var boxes = [leftEl, rightEl, layersEl, toolsEl, $('fbar-tl'), $('fbar-tr'), $('dock'), $('dchips'), $('fscale')];
     boxes.forEach(function (el) {
       Object.defineProperty(el, 'innerHTML', { configurable: true, get: function () { return desc.get.call(this); },
         set: function (v) { if (held && this.contains(held)) { if (pending.indexOf(this) < 0) pending.push(this); return; } var i = pending.indexOf(this); if (i >= 0) pending.splice(i, 1); desc.set.call(this, v); } });
