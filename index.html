@@ -468,6 +468,23 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .sheet-tabs button { flex: none; height: 22px; padding: 0 10px; font-size: 11.5px; white-space: nowrap; color: var(--b00); background: var(--b07); border: 1px solid var(--line); border-radius: 2px; }
 .sheet-tabs button:hover { background: var(--b08); }
 .sheet-tabs button.on { background: var(--yellow); color: var(--on-yellow); border-color: transparent; font-weight: 600; }
+/* Draw's page tabs sit under the boxes at the top left, as wide as they are */
+.page-tabs { z-index: 6; top: 46px; left: 10px; right: auto; max-width: var(--tlw, 320px); }
+.page-tabs[hidden] { display: none; }
+.main.rul-on .page-tabs { top: 66px; left: 30px; }
+.page-tabs .ptab-in { flex: none; width: 130px; height: 22px; padding: 0 6px; font-size: 11.5px; }
+.main.ptabs .stage.flpad { padding-top: 80px; }
+.main.rul-on.ptabs .stage.flpad { padding-top: 100px; }
+.main.ptabs.draw .dk-card { top: 84px; }
+.main.rul-on.ptabs.draw .dk-card { top: 104px; }
+/* Drawing menu: the page list */
+.pglist { display: grid; gap: 2px; max-height: 232px; overflow: auto; }
+.pgrow { display: flex; align-items: baseline; gap: 8px; width: 100%; padding: 6px 8px; text-align: left; background: var(--b08); border: 1px solid transparent; border-radius: 2px; color: var(--b00); font-size: 12px; }
+.pgrow b { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pgrow span { flex: none; color: var(--b02); font-size: 11px; white-space: nowrap; }
+.pgrow:hover { border-color: var(--line); }
+.pgrow.on { background: var(--yellow); color: var(--on-yellow); }
+.pgrow.on span { color: inherit; opacity: .75; }
 .sheet { display: block; margin: auto; flex: none; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.25), 0 6px 18px rgba(0,0,0,.18); touch-action: none; user-select: none; }
 .item .sw.none { background: linear-gradient(135deg, #fff 0 45%, var(--red) 45% 55%, #fff 55%); }
 textarea.stext { width: 100%; flex: 1 1 100%; background: var(--b08); border: 1px solid var(--line); border-radius: 2px; padding: 4px 6px; font: inherit; color: var(--b00); resize: vertical; }
@@ -640,6 +657,7 @@ details[open] > summary .sum { display: none; }
         <canvas class="rul x" id="rul-x" aria-hidden="true"></canvas><canvas class="rul y" id="rul-y" aria-hidden="true"></canvas><div class="rul c" id="rul-c" aria-hidden="true"></div>
         <!-- Top left: undo, overlays, dimensions, settings. Bottom right: units, number format, scale or grid, zoom. -->
         <div class="fbar tl" id="fbar-tl" role="toolbar" aria-label="DIM and this project" hidden></div>
+        <div class="sheet-tabs page-tabs" id="page-tabs" role="tablist" aria-label="Pages" hidden></div>
         <div class="fbar tr" id="fbar-tr" role="toolbar" aria-label="Canvas actions"></div>
         <div class="fbar bottom">
         <div class="fgroup dchips" id="dchips" role="toolbar" aria-label="This page" hidden></div>
@@ -790,8 +808,8 @@ details[open] > summary .sum { display: none; }
 
   // Units: PDF points (1/72") for PDFs and the sample, pixels for images.
   var M = {
-    src: 'none', name: '', pdf: null, pageObj: null, img: null,
-    pages: 1, page: 1, w: 1728, h: 1296, zoom: 0.4, autoFit: true, tool: 'edit',
+    src: 'none', fileSrc: '', pageList: [], name: '', pdf: null, pageObj: null, img: null,
+    pages: 0, page: 1, w: 1728, h: 1296, zoom: 0.4, autoFit: true, tool: 'edit',
     scales: {},
     items: [], draft: [], calib: [], hover: null, snapped: false, n: freshN(), error: '', note: '', last: null,
     snapDrawing: true, snaps: {}, snapKind: '', fileBytes: null, fileType: '', activeCount: null,
@@ -860,21 +878,122 @@ details[open] > summary .sum { display: none; }
   }
   // A blank canvas is in inches, so it can zoom far enough in to work in sixteenths; drawings stop at 8x.
   function maxZoom() { return M.src === 'blank' ? 800 : 8; }
+  // ---- Pages: a project holds pages, one on screen at a time, like artboards. A page is a blank canvas with its own size
+  // and grid, or a page of the project's file (a PDF page, the image or the sample plan). Items, scales and snap lines are
+  // keyed by page number; Shop drawing sheets point at a page by its id, so they keep their page when pages move.
+  // M.src is the open page's kind ('blank', or the file's 'pdf', 'image' or 'sample'); M.fileSrc is the project's file.
+  var pageGen = 0;
+  function pageRec(n) { return (M.pageList || [])[(n || M.page) - 1] || null; }
+  function pageName(n) { var p = pageRec(n); return p ? p.name : ''; }
+  function pageById(id) { var i = (M.pageList || []).findIndex(function (p) { return String(p.id) === String(id); }); return i + 1; }
+  function pageSrc(n) { var p = pageRec(n); return !p ? 'none' : p.kind === 'blank' ? 'blank' : M.fileSrc; }
+  function nextPageId() { return M.pageList.reduce(function (m, p) { return Math.max(m, p.id || 0); }, 0) + 1; }
+  function nextPageName() { var n = M.pageList.length + 1; while (M.pageList.some(function (p) { return p.name === 'Page ' + n; })) n++; return 'Page ' + n; }
+  function normBlank(B) {
+    B = B || {};
+    var b = { w: Math.max(1, B.w || 240), h: Math.max(1, B.h || 144), grid: B.grid !== false, snap: B.snap !== false, step: GRID_ALL.some(function (x) { return x[0] === B.step; }) ? B.step : 1 };
+    if (!gridSteps().some(function (x) { return x[0] === b.step; })) b.step = nearestStep(b.step);
+    return b;
+  }
+  function blankPage(B, name) { var b = normBlank(B); return { id: nextPageId(), kind: 'blank', name: name || nextPageName(), w: b.w, h: b.h, blank: b }; }
+  function blankScale() { return { inPerUnit: 1, label: 'Blank canvas, true size', how: 'blank', id: 'blank' }; }
+  // After the page list changes: the page count, and every blank page drawn at true size.
+  function syncPages() { M.pages = M.pageList.length; M.pageList.forEach(function (p, i) { if (p.kind === 'blank') M.scales[i + 1] = blankScale(); }); }
+  // The open blank page's size and grid.
   function setBlank(B) {
-    M.blank = { w: Math.max(1, B.w || 240), h: Math.max(1, B.h || 144), grid: B.grid !== false, snap: B.snap !== false, step: GRID_ALL.some(function (x) { return x[0] === B.step; }) ? B.step : 1 };
-    if (!gridSteps().some(function (x) { return x[0] === M.blank.step; })) M.blank.step = nearestStep(M.blank.step);
-    M.w = M.blank.w; M.h = M.blank.h; M.pages = 1;
-    M.scales = { 1: { inPerUnit: 1, label: 'Blank canvas, true size', how: 'blank', id: 'blank' } };
+    var b = normBlank(B), rec = pageRec();
+    M.blank = b; M.w = b.w; M.h = b.h;
+    if (rec && rec.kind === 'blank') { rec.blank = b; rec.w = b.w; rec.h = b.h; M.scales[M.page] = blankScale(); }
+  }
+  // A page's size as the page list shows it.
+  function pageSizeText(p) { return p.kind === 'blank' ? fmtLen(p.w) + ' × ' + fmtLen(p.h) : M.fileSrc === 'pdf' ? 'PDF page ' + p.fp : M.fileSrc === 'image' ? 'Image' : 'Sample plan'; }
+  // Open page n: its kind, size and grid, then draw it (Draw only) and read its lines to snap to.
+  function goPage(n) {
+    var rec = pageRec(n); if (!rec) return Promise.resolve();
+    var my = ++pageGen;
+    endTextEdit();
+    M.page = n; M.draft = []; M.calib = []; M.autoFit = true; M.sel = null; M.multi = null; M.pen = null; M.create = null; M.activeCount = null; M.hl = null;
+    if (M.tool === 'scale') M.tool = 'edit';
+    M.src = rec.kind === 'blank' ? 'blank' : M.fileSrc; M.pageObj = null; M.w = rec.w; M.h = rec.h;
+    if (rec.kind === 'blank') setBlank(rec.blank); else M.blank = null;
+    var show = function () { if (my !== pageGen) return; if (mode === 'measure') { buildPage(); fit(); renderAll(); } buildSnaps(n); };
+    if (rec.kind === 'file' && M.fileSrc === 'pdf') return M.pdf.getPage(rec.fp).then(function (pg) { if (my !== pageGen) return; var vp = pg.getViewport({ scale: 1 }); M.pageObj = pg; M.w = rec.w = vp.width; M.h = rec.h = vp.height; show(); });
+    show(); return Promise.resolve();
+  }
+  // Put the pages in a new order; pages left out are removed with their items. New records in the list start empty.
+  function reorderPages(list) {
+    var map = {}; list.forEach(function (p, i) { var old = M.pageList.indexOf(p); if (old >= 0) map[old + 1] = i + 1; });
+    M.items = M.items.filter(function (it) { return map[it.page]; });
+    M.items.forEach(function (it) { it.page = map[it.page]; });
+    var sc = {}, sn = {};
+    Object.keys(M.scales).forEach(function (k) { if (map[k]) sc[map[k]] = M.scales[k]; });
+    Object.keys(M.snaps).forEach(function (k) { if (map[k]) sn[map[k]] = M.snaps[k]; });
+    M.scales = sc; M.snaps = sn; M.pageList = list; syncPages();
+  }
+  // A new blank page at the end, the size of the open blank page (or the default canvas).
+  function addPage() {
+    if (M.src === 'none') return;
+    var cur = pageRec(), b = cur && cur.kind === 'blank' ? cur.blank : blankDefault();
+    var rec = blankPage({ w: b.w, h: b.h, grid: b.grid, snap: b.snap, step: b.step });
+    M.pageList.push(rec); syncPages(); M.note = rec.name + ' added.';
+    return goPage(M.pages);
+  }
+  // A copy of page n and everything on it, right after it.
+  function duplicatePage(n) {
+    n = n || M.page; var src = pageRec(n); if (!src) return;
+    var copy = JSON.parse(JSON.stringify(src)); copy.id = nextPageId(); copy.name = src.name + ' copy';
+    var list = M.pageList.slice(); list.splice(n, 0, copy); reorderPages(list);
+    var gmap = {}, gnext = M.items.reduce(function (m, it) { return Math.max(m, it.g || 0); }, 0) + 1;
+    M.items.filter(function (it) { return it.page === n; }).forEach(function (it) {
+      var c = JSON.parse(JSON.stringify(it)); c.id = nextId++; c.page = n + 1;
+      if (c.g) { if (!gmap[c.g]) gmap[c.g] = gnext++; c.g = gmap[c.g]; }
+      M.items.push(c);
+    });
+    if (M.scales[n]) M.scales[n + 1] = JSON.parse(JSON.stringify(M.scales[n]));
+    M.note = copy.name + ' added.';
+    return goPage(n + 1);
+  }
+  function deletePage(n) {
+    n = n || M.page; if (M.pages < 2) return;
+    var rec = pageRec(n); reorderPages(M.pageList.filter(function (p) { return p !== rec; }));
+    M.note = rec.name + ' deleted. Undo (⌘Z) brings it back.';
+    return goPage(Math.min(n, M.pages));
+  }
+  // Move page n one place earlier (d = -1) or later (d = 1); it stays open.
+  function movePage(n, d) {
+    var to = n + d; if (to < 1 || to > M.pages) return;
+    var list = M.pageList.slice(), t = list[to - 1]; list[to - 1] = list[n - 1]; list[n - 1] = t;
+    reorderPages(list); if (M.page === n) M.page = to; else if (M.page === to) M.page = n;
+    M.sel = null; M.multi = null; renderAll();
+  }
+  function renamePage(n, v) { var p = pageRec(n); v = String(v || '').trim(); if (!p || !v) return false; p.name = v; renderPanels(); return true; }
+  // The pages of a PDF, with their sizes, so every page knows its size before it's opened.
+  function pdfPages(pdf) {
+    var ns = []; for (var i = 1; i <= pdf.numPages; i++) ns.push(i);
+    return Promise.all(ns.map(function (i) { return pdf.getPage(i).then(function (pg) { var vp = pg.getViewport({ scale: 1 }); return { id: i, kind: 'file', name: 'Page ' + i, fp: i, w: vp.width, h: vp.height }; }); }));
+  }
+  // Draw something on page n's terms (its kind, size and grid) without opening it: Shop drawing and exports use this.
+  function asPage(n, fn) {
+    var rec = pageRec(n); if (!rec || n === M.page) return fn();
+    var keep = { page: M.page, src: M.src, w: M.w, h: M.h, blank: M.blank };
+    M.page = n; M.src = rec.kind === 'blank' ? 'blank' : M.fileSrc; M.w = rec.w; M.h = rec.h; M.blank = rec.blank || null;
+    try { return fn(); } finally { M.page = keep.page; M.src = keep.src; M.w = keep.w; M.h = keep.h; M.blank = keep.blank; }
   }
   // New canvases are named Drawing 1, Drawing 2… (counted in this browser).
   function nextDrawingName() {
     var n = 1; try { n = (parseInt(localStorage.getItem('dim-drawings'), 10) || 0) + 1; localStorage.setItem('dim-drawings', String(n)); } catch (e) { n = (nextDrawingName.n = (nextDrawingName.n || 0) + 1); }
     return 'Drawing ' + n;
   }
+  // A project of one blank page (no file).
+  function startBlankDoc(B) {
+    M.fileSrc = ''; M.pdf = null; M.img = null; M.pageObj = null; M.fileBytes = null; M.fileType = '';
+    M.pageList = [blankPage(B, 'Page 1')]; syncPages(); M.page = 1; M.src = 'blank'; setBlank(M.pageList[0].blank);
+  }
+  // A new project starts from Home: one blank page.
   function newBlank() {
-    resetDoc(nextDrawingName()); M.src = 'blank'; M.pdf = null; M.img = null; M.pageObj = null; M.fileBytes = null; M.fileType = '';
-    setBlank(blankDefault()); if (mode !== 'measure') setMode('measure');
-    buildPage(); fit(); renderAll(); History.reset(); askCanvasSize();
+    resetDoc(nextDrawingName()); startBlankDoc(blankDefault());
+    if (mode !== 'measure') setMode('measure');
+    goPage(1); History.reset(); askCanvasSize();
   }
   // A new canvas opens Drawing settings with the width selected, so the size is the first thing you can change.
   function askCanvasSize() {
@@ -1179,7 +1298,7 @@ details[open] > summary .sum { display: none; }
   }
 
   function resetDoc(name) {
-    M.name = name; M.items = []; M.draft = []; M.calib = []; M.scales = {}; M.n = freshN(); M.snaps = {}; M.activeCount = null;
+    M.name = name; M.items = []; M.draft = []; M.calib = []; M.scales = {}; M.n = freshN(); M.snaps = {}; M.activeCount = null; M.pageList = []; M.fileSrc = ''; M.pages = 0; pageGen++;
     M.error = ''; M.note = ''; M.page = 1; M.autoFit = true; M.tool = 'edit'; M.last = null; M.sel = null; M.textStyle.fs = 0; endTextEdit();
     $('doc-name').textContent = name || 'No drawing open';
     document.title = name ? name.replace(/\.[^.]+$/, '') + ' · DIM' : 'DIM';
@@ -1198,8 +1317,11 @@ details[open] > summary .sum { display: none; }
         bytes = r[1];
         return r[0].getDocument({ data: new Uint8Array(bytes.slice(0)), isEvalSupported: false }).promise;
       }).then(function (pdf) {
-        resetDoc(file.name); M.src = 'pdf'; M.pdf = pdf; M.img = null; M.pages = pdf.numPages; M.fileBytes = bytes; M.fileType = 'application/pdf';
-        return goPage(1).then(function () { History.reset(); });
+        return pdfPages(pdf).then(function (list) {
+          resetDoc(file.name); M.fileSrc = 'pdf'; M.pdf = pdf; M.img = null; M.fileBytes = bytes; M.fileType = 'application/pdf';
+          M.pageList = list; syncPages();
+          return goPage(1);
+        }).then(function () { History.reset(); });
       }).catch(function (err) {
         M.error = 'Could not open that PDF (' + (err && err.message ? err.message : 'unknown error') + '). Password-protected files are not supported.';
         renderPanels(); updateStatus();
@@ -1208,34 +1330,29 @@ details[open] > summary .sum { display: none; }
       var url = URL.createObjectURL(file), img = new Image();
       img.onload = function () {
         file.arrayBuffer().then(function (buf) {
-          resetDoc(file.name); M.src = 'image'; M.img = img; M.pdf = null; M.pageObj = null; M.pages = 1; M.w = img.naturalWidth; M.h = img.naturalHeight;
+          resetDoc(file.name); M.fileSrc = 'image'; M.img = img; M.pdf = null; M.pageObj = null;
           M.fileBytes = buf; M.fileType = file.type || 'image/png';
-          buildPage(); fit(); renderAll(); History.reset();
+          M.pageList = [{ id: 1, kind: 'file', name: 'Page 1', fp: 1, w: img.naturalWidth, h: img.naturalHeight }]; syncPages();
+          goPage(1); History.reset();
         });
       };
       img.onerror = function () { M.error = 'Could not read that image.'; renderPanels(); };
       img.src = url;
     }
   }
-  function goPage(n) {
-    return M.pdf.getPage(n).then(function (pg) {
-      var vp = pg.getViewport({ scale: 1 });
-      M.page = n; M.pageObj = pg; M.w = vp.width; M.h = vp.height; M.draft = []; M.calib = []; M.autoFit = true; M.sel = null;
-      if (M.tool === 'scale') M.tool = 'edit';
-      buildPage(); fit(); renderAll(); buildSnaps(n);
-    });
-  }
+  // Clear page: everything drawn on the open page goes (Undo brings it back).
   function resetDrawing() {
-    var n = M.items.length; if (!n) return;
-    M.items = []; M.n = freshN(); M.sel = null; M.draft = []; M.activeCount = null; M.last = null;
-    M.note = 'Removed ' + n + ' item' + (n === 1 ? '' : 's') + '. Undo (Ctrl+Z) brings them back.';
+    var n = M.items.filter(function (it) { return it.page === M.page; }).length; if (!n) return;
+    M.items = M.items.filter(function (it) { return it.page !== M.page; }); M.sel = null; M.multi = null; M.draft = []; M.activeCount = null; M.last = null;
+    M.note = 'Removed ' + n + ' item' + (n === 1 ? '' : 's') + ' from ' + pageName() + '. Undo (⌘Z) brings them back.';
     renderOverlay(); renderPanels();
   }
   function useSample() {
-    resetDoc('Sample: A-101 First floor plan.pdf'); M.src = 'sample'; M.pdf = null; M.img = null; M.pageObj = null; M.pages = 1; M.w = 1728; M.h = 1296;
-    M.fileBytes = null; M.fileType = ''; sampleItems();
+    resetDoc('Sample: A-101 First floor plan.pdf'); M.fileSrc = 'sample'; M.pdf = null; M.img = null; M.pageObj = null;
+    M.fileBytes = null; M.fileType = '';
+    M.pageList = [{ id: 1, kind: 'file', name: 'Page 1', fp: 1, w: 1728, h: 1296 }]; syncPages(); M.page = 1; sampleItems();
     document.title = 'DIM';
-    buildPage(); fit(); renderAll(); buildSnaps(1); History.reset();
+    goPage(1); History.reset();
   }
 
   // ---- Snap to the drawing's own lines ----
@@ -1294,16 +1411,17 @@ details[open] > summary .sum { display: none; }
     });
   }
   function buildSnaps(n) {
-    if (M.snaps[n]) return;
-    if (M.src === 'sample') { M.snaps[n] = makeIndex(sampleSegments()); return; }
-    if (M.src !== 'pdf' || !M.pdf) return;
+    var rec = pageRec(n); if (M.snaps[n] || !rec || rec.kind !== 'file') return;
+    if (M.fileSrc === 'sample') { M.snaps[n] = makeIndex(sampleSegments()); return; }
+    if (M.fileSrc !== 'pdf' || !M.pdf) return;
     M.snaps[n] = { pending: true };
-    var pdf = M.pdf;
-    Promise.all([getPdfjs(), pdf.getPage(n)]).then(function (r) { return pdfSegments(r[1], r[0]); }).then(function (segs) {
-      if (M.pdf !== pdf) return;
-      M.snaps[n] = makeIndex(segs); M.snaps[n].count = segs.length / 4;
-      if (mode === 'measure' && M.page === n) renderRight();
-    }).catch(function () { M.snaps[n] = { failed: true }; });
+    // The page may move while its lines are read, so they land on wherever it is by then.
+    var pdf = M.pdf, at = function () { return M.pageList.indexOf(rec) + 1; };
+    Promise.all([getPdfjs(), pdf.getPage(rec.fp)]).then(function (r) { return pdfSegments(r[1], r[0]); }).then(function (segs) {
+      var i = at(); if (M.pdf !== pdf || !i) return;
+      M.snaps[i] = makeIndex(segs); M.snaps[i].count = segs.length / 4;
+      if (mode === 'measure' && M.page === i) renderRight();
+    }).catch(function () { var i = at(); if (i) M.snaps[i] = { failed: true }; });
   }
   // Nearest line end (preferred) or nearest point on a line, within tol page units.
   function drawingSnap(p, tol) {
@@ -2440,6 +2558,7 @@ details[open] > summary .sum { display: none; }
     else if ((e.key === 'Backspace' || e.key === 'Delete') && M.sel) { deleteSelection(); e.preventDefault(); }
     else if (ARROWS[e.key] && M.sel) { var d = ARROWS[e.key], f = e.shiftKey ? 10 : 1; nudge(d[0] * f, d[1] * f); e.preventDefault(); }
     else if (e.shiftKey && key === 'r') { toggleRulers(); }
+    else if ((e.key === 'PageDown' || e.key === 'PageUp') && M.pages > 1) { var to = M.page + (e.key === 'PageDown' ? 1 : -1); if (to >= 1 && to <= M.pages) goPage(to); e.preventDefault(); }
     else if (HOTKEYS[key]) { setTool(HOTKEYS[key]); }
     else if (key === 'f') { fit(); }
     else if (key === '=' || key === '+') { zoomAt(1.25); }
@@ -2624,7 +2743,7 @@ details[open] > summary .sum { display: none; }
       updateLive(); updateStatus(); return;
     }
     if (!mine.length) { leftEl.innerHTML = h; updateLive(); updateStatus(); return; }
-    h += '<div class="block"><div class="label">' + (mine.some(function (x) { return x.shape; }) ? 'On the canvas' : 'Measurements') + (M.pages > 1 ? ' · page ' + M.page : '') + '</div>';
+    h += '<div class="block"><div class="label">' + (mine.some(function (x) { return x.shape; }) ? 'On the canvas' : 'Measurements') + (M.pages > 1 ? ' · ' + esc(pageName()) : '') + '</div>';
     h += '<div class="list">' + mine.map(itemRow).join('') + '</div>';
     h += '</div>';
     leftEl.innerHTML = h;
@@ -2729,23 +2848,25 @@ details[open] > summary .sum { display: none; }
   function renderRight() {
     if (mode !== 'measure') return;
     var s = scaleNow(), h = '';
-    // Drawing: its name, then a blank canvas's size or the file's size and pages, Length step and Reset. Grid, snap and
-    // dimensions on the drawing are buttons at the top right. Wide windows have Open and Save as boxes at the top left,
-    // so only narrow windows list them here.
-    var wide = dockOn(), d = '';
-    if (M.src !== 'none') d += '<label class="field">Name<input type="text" id="draw-name" value="' + esc(docTitle()) + '" spellcheck="false" aria-label="Drawing name"></label>';
-    if (M.src === 'blank') d += '<div class="row2"><label class="field">Canvas width<input type="text" id="blank-w" value="' + esc(fmtLen(M.blank.w)) + '"></label><label class="field">Canvas height<input type="text" id="blank-h" value="' + esc(fmtLen(M.blank.h)) + '"></label></div>';
-    var ix = M.snaps[M.page], snapInfo = M.src === 'image' ? 'Images have no lines to snap to.' : !ix ? '' : ix.pending ? 'Reading drawing lines…' : ix.failed ? 'Could not read lines from this PDF.' : (M.src === 'sample' ? 'Snaps to wall ends and along walls.' : num0(ix.count || 0) + ' lines found to snap to.');
-    if (M.src === 'none') d += '<p class="hint" style="margin:0">No drawing open.</p>';
-    else if (M.src !== 'blank') d += '<p class="hint" style="margin:0">' + sizeText() + (M.pages > 1 ? ' · page ' + M.page + ' of ' + M.pages : '') + (snapInfo ? '. ' + snapInfo : '') + '</p>';
-    if (!wide) {
-      d += '<div class="row"><label class="btn strong" for="file">Open file</label><input type="file" id="file" accept="application/pdf,image/*,.dim,.json" hidden>';
-      if (M.src !== 'blank') d += '<button type="button" class="btn" data-act="blank">Blank canvas</button>';
-      d += '</div><p class="hint" style="margin:0">PDF, JPG, PNG, GIF, WebP or .dim project. Or drop a file on canvas.</p>';
-      if (M.pages > 1) d += '<div class="row"><button type="button" class="btn" data-act="prev"' + (M.page === 1 ? ' disabled' : '') + '>‹ Prev page</button><button type="button" class="btn" data-act="next"' + (M.page === M.pages ? ' disabled' : '') + '>Next page ›</button></div>';
+    // Drawing: its name and pages, then the open page's name and size (or the file's), Length step and Clear page. Grid,
+    // snap and dimensions on the drawing are buttons at the top right. Wide windows have Open and Save as boxes at the
+    // top left, so only narrow windows list them here. New projects start from Home.
+    var wide = dockOn(), d = '', open = M.src !== 'none';
+    if (open) {
+      d += '<label class="field">Name<input type="text" id="draw-name" value="' + esc(docTitle()) + '" spellcheck="false" aria-label="Drawing name"></label>';
+      d += '<div class="label">Pages</div><div class="pglist" role="listbox" aria-label="Pages">' + M.pageList.map(function (p, i) { var on = i + 1 === M.page; return '<button type="button" class="pgrow' + (on ? ' on' : '') + '" data-pgo="' + (i + 1) + '" role="option" aria-selected="' + on + '"><b>' + esc(p.name) + '</b><span>' + esc(pageSizeText(p)) + '</span></button>'; }).join('') + '</div>';
+      d += '<div class="row"><button type="button" class="btn" data-act="addpage">+ New page</button><button type="button" class="btn" data-act="duppage">Duplicate</button>' + (M.pages > 1 ? '<button type="button" class="btn" data-act="delpage">Delete</button>' : '') + '</div>';
+      if (M.pages > 1) d += '<div class="row"><button type="button" class="btn" data-act="pageleft"' + (M.page > 1 ? '' : ' disabled') + '>← Move earlier</button><button type="button" class="btn" data-act="pageright"' + (M.page < M.pages ? '' : ' disabled') + '>Move later →</button></div>';
+      d += '<p class="hint" style="margin:0">Each page has its own size and drawing, like an artboard. ' + (wide ? 'The tabs above the canvas switch pages (double-click one to rename it); ' : '') + 'Page Up and Page Down switch too.</p>';
+      d += '<label class="field">Page name<input type="text" id="page-name" value="' + esc(pageName()) + '" spellcheck="false"></label>';
     }
-    if (M.src !== 'none') d += '<label class="field">Length step<select id="round-sel">' + roundOpts() + '</select></label><p class="hint" style="margin:0">Points you click land on whole steps, so a line reads ' + (isMetric() ? '2,440 mm instead of 2,438.7 mm' : '96 1/4" instead of 96 3/16"') + '. Alt ignores it.</p>';
-    if (M.src !== 'none') d += '<div class="row"><button type="button" class="btn" data-act="reset"' + (M.items.length ? '' : ' disabled') + '>' + (M.src === 'blank' ? 'Reset canvas' : 'Clear measurements') + '</button></div><p class="hint" style="margin:0">' + (M.src === 'blank' ? 'Removes everything drawn on canvas.' : 'Removes every measurement and note, on every page. Drawing and scale stay.') + ' Undo (⌘Z) brings them back.</p>';
+    if (M.src === 'blank') d += '<div class="row2"><label class="field">Page width<input type="text" id="blank-w" value="' + esc(fmtLen(M.blank.w)) + '"></label><label class="field">Page height<input type="text" id="blank-h" value="' + esc(fmtLen(M.blank.h)) + '"></label></div>';
+    var ix = M.snaps[M.page], snapInfo = M.src === 'image' ? 'Images have no lines to snap to.' : !ix ? '' : ix.pending ? 'Reading drawing lines…' : ix.failed ? 'Could not read lines from this PDF.' : (M.src === 'sample' ? 'Snaps to wall ends and along walls.' : num0(ix.count || 0) + (ix.count === 1 ? ' line' : ' lines') + ' found to snap to.');
+    if (!open) d += '<p class="hint" style="margin:0">No drawing open.</p>';
+    else if (M.src !== 'blank') d += '<p class="hint" style="margin:0">' + sizeText() + (snapInfo ? '. ' + snapInfo : '') + '</p>';
+    if (!wide) d += '<div class="row"><label class="btn strong" for="file">Open file</label><input type="file" id="file" accept="application/pdf,image/*,.dim,.json" hidden></div><p class="hint" style="margin:0">PDF, JPG, PNG, GIF, WebP or .dim project. Or drop a file on canvas.</p>';
+    if (open) d += '<label class="field">Length step<select id="round-sel">' + roundOpts() + '</select></label><p class="hint" style="margin:0">Points you click land on whole steps, so a line reads ' + (isMetric() ? '2,440 mm instead of 2,438.7 mm' : '96 1/4" instead of 96 3/16"') + '. Alt ignores it.</p>';
+    if (open) d += '<div class="row"><button type="button" class="btn" data-act="reset"' + (M.items.some(function (it) { return it.page === M.page; }) ? '' : ' disabled') + '>Clear page</button></div><p class="hint" style="margin:0">Removes everything drawn on this page' + (M.src === 'blank' ? '' : '; the drawing and its scale stay') + '. Undo (⌘Z) brings it back.</p>';
     if (M.error) d += '<p class="err">' + esc(M.error) + '</p>';
     h += sec('drawing', 'Drawing', d);
     // Project (narrow windows; wide windows save from the box at the top left)
@@ -2783,7 +2904,7 @@ details[open] > summary .sum { display: none; }
     return sec('about', 'About', '<p>DIM measures drawings and photos, lays out murals, privacy film and distraction markers, and makes shop drawings.</p><p class="hint" style="margin:0">Files open on this device and are never uploaded. PDFs are drawn with Mozilla pdf.js and written with pdf-lib.</p>');
   }
   function renderPanels() {
-    applyDockLayout(); renderLeft(); renderRight(); renderTopLeft(); renderFloat(); renderDock();
+    applyDockLayout(); renderLeft(); renderRight(); renderTopLeft(); renderPageTabs(); renderFloat(); renderDock();
     if (M.note) { clearTimeout(renderPanels.t); renderPanels.t = setTimeout(function () { M.note = ''; if (mode === 'measure') renderLeft(); }, 3000); }
     History.record();
   }
@@ -2820,6 +2941,7 @@ details[open] > summary .sum { display: none; }
 
   rightEl.addEventListener('change', function (e) {
     if (e.target.id === 'file') { openFile(e.target.files && e.target.files[0]); e.target.value = ''; return; }
+    if (e.target.id === 'page-name') { if (!renamePage(M.page, e.target.value)) e.target.value = pageName(); return; }
     if (e.target.id === 'draw-name') { if (!renameDoc(e.target.value)) e.target.value = docTitle(); renderTopLeft(); renderLeft(); return; }
     if (e.target.id === 'round-sel') { M.round = e.target.value; renderRight(); return; }
     if (/^blank-(w|h)$/.test(e.target.id) && M.src === 'blank') {
@@ -2919,10 +3041,11 @@ details[open] > summary .sum { display: none; }
     else if (b.dataset.act === 'recal') { M.calib = []; M.calibErr = ''; renderOverlay(); renderPanels(); }
   });
   rightEl.addEventListener('click', function (e) {
+    var pg = e.target.closest('[data-pgo]'); if (pg && mode === 'measure') { if (Number(pg.dataset.pgo) !== M.page) goPage(Number(pg.dataset.pgo)); return; }
     var b = e.target.closest('[data-act]'); if (!b) return;
     var a = b.dataset.act;
+    if (/^(addpage|duppage|delpage|pageleft|pageright)$/.test(a)) { pageAct(a); return; }
     if (a === 'sample') useSample();
-    else if (a === 'blank') newBlank();
     else if (a === 'reset') resetDrawing();
     else if (a === 'prev' && M.page > 1) goPage(M.page - 1);
     else if (a === 'next' && M.page < M.pages) goPage(M.page + 1);
@@ -2981,7 +3104,7 @@ details[open] > summary .sum { display: none; }
   function dimmedOut(it) { return dockOn() && isItemsView(M.dock) && M.dock !== 'all' && !inView(it, M.dock); }
   function itemsCard(v, mine) {
     var sp = dockSpec(v), list = mine.filter(function (it) { return inView(it, v); }), sc = scaleNow(), h = '';
-    h += '<div class="dk-head">' + (v === 'all' || v === 'shapes' ? '' : '<span class="dk-ic" style="background:' + sp[2] + '"></span>') + '<b>' + esc(sp[1]) + '</b><span class="dk-sub">' + esc(M.name || 'Drawing') + (M.pages > 1 ? ' · page ' + M.page : '') + '</span><button type="button" class="dk-x" data-dkclose="' + v + '" aria-label="Close">×</button></div>';
+    h += '<div class="dk-head">' + (v === 'all' || v === 'shapes' ? '' : '<span class="dk-ic" style="background:' + sp[2] + '"></span>') + '<b>' + esc(sp[1]) + '</b><span class="dk-sub">' + esc(docTitle()) + (M.pages > 1 ? ' · ' + esc(pageName()) : '') + '</span><button type="button" class="dk-x" data-dkclose="' + v + '" aria-label="Close">×</button></div>';
     var big = '—', line = '', tiles;
     if (v === 'shapes') {
       var by = function (k) { return list.filter(function (it) { return it.shape === k; }).length; };
@@ -3123,8 +3246,7 @@ details[open] > summary .sum { display: none; }
     var sq = function (act, icon, title) { return '<button type="button" class="sq" data-tl="' + act + '" title="' + title + '" aria-label="' + title + '">' + ficon(icon) + '</button>'; };
     var h = '<span class="tbox brand"><button type="button" class="tbtn logo" data-tl="home" title="Home">DIM</button><button type="button" class="tbtn ic" data-tl="theme" title="Light or dark theme" aria-label="Light or dark theme">' + HALF.replace('width="18" height="18"', 'width="15" height="15"') + '</button></span>';
     h += '<span class="tbox doc"><button type="button" class="tbtn" data-tl="rename" title="Rename">' + ficon('file') + '<span class="dname">' + esc(nm) + '</span></button></span>';
-    h += sq('new', 'new', 'New blank canvas') + '<label class="sq" for="tl-file" title="Open a PDF, image or .dim project" aria-label="Open file">' + ficon('open') + '</label><input type="file" id="tl-file" accept="application/pdf,image/*,.dim,.json" hidden>' + sq('save', 'save', 'Save project (.dim)');
-    if (mode === 'measure' && M.pages > 1) h += '<span class="sqgap"></span><span class="tbox pager"><button type="button" class="tbtn ic" data-tl="prev" aria-label="Previous page"' + (M.page === 1 ? ' disabled' : '') + '>‹</button><span>' + M.page + ' / ' + M.pages + '</span><button type="button" class="tbtn ic" data-tl="next" aria-label="Next page"' + (M.page === M.pages ? ' disabled' : '') + '>›</button></span>';
+    h += '<label class="sq" for="tl-file" title="Open a PDF, image or .dim project" aria-label="Open file">' + ficon('open') + '</label><input type="file" id="tl-file" accept="application/pdf,image/*,.dim,.json" hidden>' + sq('save', 'save', 'Save project (.dim)');
     tl.innerHTML = h;
     document.querySelector('.main').style.setProperty('--tlw', tl.offsetWidth + 'px');
   }
@@ -3156,14 +3278,44 @@ details[open] > summary .sum { display: none; }
     if (a === 'home') setMode('home');
     else if (a === 'theme') $('theme').click();
     else if (a === 'rename') startRename();
-    else if (a === 'new') newBlank();
     else if (a === 'save') Project.save();
-    else if (a === 'prev' && M.page > 1) goPage(M.page - 1);
-    else if (a === 'next' && M.page < M.pages) goPage(M.page + 1);
   });
   $('fbar-tl').addEventListener('change', function (e) { if (e.target.id === 'tl-file') { openFile(e.target.files && e.target.files[0]); e.target.value = ''; } });
   $('fbar-tl').addEventListener('keydown', function (e) { if (e.target.id === 'tl-name') { if (e.key === 'Enter') endRename(true); else if (e.key === 'Escape') endRename(false); } });
   $('fbar-tl').addEventListener('focusout', function (e) { if (e.target.id === 'tl-name') endRename(true); });
+
+  // ---- Page tabs (wide windows): above the canvas, like Shop drawing's sheet tabs. + adds a page; double-click renames ----
+  var pageRenaming = false;
+  function renderPageTabs() {
+    var el = $('page-tabs'), show = mode === 'measure' && flOn() && M.src !== 'none';
+    el.hidden = !show; document.querySelector('.main').classList.toggle('ptabs', show);
+    if (!show || pageRenaming) return;
+    // Same pages as before: only the open one changes, so a double-click lands on the tab it started on.
+    var tabs = el.querySelectorAll('[data-ptab]:not([data-ptab="add"])');
+    if (tabs.length === M.pages && M.pageList.every(function (p, i) { return tabs[i].textContent === p.name; })) {
+      tabs.forEach(function (t, i) { var on = i + 1 === M.page; t.classList.toggle('on', on); t.setAttribute('aria-selected', on); });
+      return;
+    }
+    el.innerHTML = M.pageList.map(function (p, i) { var on = i + 1 === M.page; return '<button type="button" role="tab" class="' + (on ? 'on' : '') + '" data-ptab="' + (i + 1) + '" aria-selected="' + on + '" title="' + esc(p.name) + ' · double-click to rename">' + esc(p.name) + '</button>'; }).join('') +
+      '<button type="button" data-ptab="add" title="New page" aria-label="New page">+</button>';
+  }
+  function pageAct(a) {
+    if (a === 'addpage') addPage();
+    else if (a === 'duppage') duplicatePage(M.page);
+    else if (a === 'delpage') deletePage(M.page);
+    else if (a === 'pageleft') movePage(M.page, -1);
+    else if (a === 'pageright') movePage(M.page, 1);
+  }
+  function endPageRename(inp, keep) { if (!pageRenaming) return; pageRenaming = false; var el = $('page-tabs'); el.innerHTML = ''; if (!(keep && renamePage(Number(inp.dataset.pren), inp.value))) renderPageTabs(); }
+  $('page-tabs').addEventListener('click', function (e) { var b = e.target.closest('button[data-ptab]'); if (!b || pageRenaming) return; var t = b.dataset.ptab; if (t === 'add') addPage(); else if (Number(t) !== M.page) goPage(Number(t)); });
+  $('page-tabs').addEventListener('dblclick', function (e) {
+    var b = e.target.closest('button[data-ptab]'); if (!b || b.dataset.ptab === 'add') return;
+    var n = Number(b.dataset.ptab); pageRenaming = true;
+    b.outerHTML = '<input type="text" class="ptab-in" data-pren="' + n + '" value="' + esc(pageName(n)) + '" aria-label="Page name" spellcheck="false">';
+    var inp = $('page-tabs').querySelector('.ptab-in'); inp.focus(); inp.select();
+  });
+  $('page-tabs').addEventListener('keydown', function (e) { if (!e.target.dataset.pren) return; if (e.key === 'Enter') endPageRename(e.target, true); else if (e.key === 'Escape') endPageRename(e.target, false); });
+  $('page-tabs').addEventListener('focusout', function (e) { if (e.target.dataset.pren) endPageRename(e.target, true); });
 
   // ---- Floating bars ----
   var FICON = {
@@ -3258,7 +3410,24 @@ details[open] > summary .sum { display: none; }
   // ---------- Undo / redo: snapshots of everything you can change ----------
   var History = (function () {
     var stack = [], redo = [], restoring = false, api = { ready: false };
-    function snap() { return JSON.stringify({ items: M.items, scales: M.scales, n: M.n, nextId: nextId, lay: Lay.getState(), shop: Shop.getState() }); }
+    // Pages are kept by id, name, file page and size: adding, removing, moving or resizing a page undoes; the grid and snap
+    // switches don't, and neither does which page is open.
+    function pagesSnap() { return (M.pageList || []).map(function (p) { return { id: p.id, kind: p.kind, name: p.name, fp: p.fp, w: p.w, h: p.h }; }); }
+    function snap() { return JSON.stringify({ items: M.items, scales: M.scales, n: M.n, nextId: nextId, pages: pagesSnap(), lay: Lay.getState(), shop: Shop.getState() }); }
+    // Back to a saved page list, keeping each page's own record (and its grid settings) where it still exists.
+    function restorePages(list) {
+      var before = JSON.stringify(pagesSnap()), openId = (pageRec() || {}).id, cur = {};
+      M.pageList.forEach(function (p) { cur[p.id] = p; });
+      M.pageList = list.map(function (q) {
+        var r = cur[q.id] || { id: q.id, kind: q.kind };
+        r.name = q.name; r.w = q.w; r.h = q.h; if (q.kind === 'file') r.fp = q.fp;
+        if (q.kind === 'blank') { var b = r.blank || blankDefault(); r.blank = normBlank({ w: q.w, h: q.h, grid: b.grid, snap: b.snap, step: b.step }); }
+        return r;
+      });
+      syncPages();
+      var at = pageById(openId) || Math.min(M.page, M.pages);
+      return JSON.stringify(pagesSnap()) !== before || at !== M.page ? at : 0;
+    }
     api.record = function () {
       if (restoring || !api.ready) return;
       var s = snap(); if (stack[stack.length - 1] === s) return;
@@ -3268,8 +3437,11 @@ details[open] > summary .sum { display: none; }
     function apply(s) {
       var o = JSON.parse(s); restoring = true;
       M.items = o.items; M.scales = o.scales; M.n = o.n; nextId = o.nextId; Lay.setState(o.lay); Shop.setState(o.shop);
+      var reopen = o.pages && M.src !== 'none' ? restorePages(o.pages) : 0;
       M.sel = null; M.draft = []; M.activeCount = null; M.drag = null;
-      if (mode === 'measure') renderAll(); else if (mode === 'layout') Lay.enter(); else if (mode === 'shop') Shop.enter();
+      if (reopen) goPage(reopen);
+      else if (mode === 'measure') renderAll();
+      if (mode === 'layout') Lay.enter(); else if (mode === 'shop') Shop.enter();
       restoring = false; paintUndo(); Autosave.schedule();
     }
     api.undo = function () { if (stack.length < 2) return; redo.push(stack.pop()); apply(stack[stack.length - 1]); };
@@ -3307,7 +3479,8 @@ details[open] > summary .sum { display: none; }
   function toB64(blob) { return new Promise(function (res, rej) { var fr = new FileReader(); fr.onload = function () { res(String(fr.result).split(',')[1]); }; fr.onerror = function () { rej(fr.error); }; fr.readAsDataURL(blob); }); }
   function fromB64(b, type) { var bin = atob(b), u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return new Blob([u], { type: type || 'application/octet-stream' }); }
   var Project = {
-    state: function () { return { app: 'DIM', v: 1, name: M.name, src: M.src, page: M.page, scales: M.scales, items: M.items, n: M.n, nextId: nextId, snapDrawing: M.snapDrawing, units: UNITS, style: M.style, round: M.round || '', blank: M.blank || null, markerArt: Lay.markerArt(), graphicArt: Lay.graphicArt(), layout: Lay.getState(), shop: Shop.getState(), shopLogo: Shop.getLogo(), shopPics: Shop.getPics() }; },
+    // v2 keeps the page list; src and blank stay for older copies of DIM, which open the first blank page.
+    state: function () { var b0 = M.pageList.find(function (p) { return p.kind === 'blank'; }); return { app: 'DIM', v: 2, name: M.name, src: M.src === 'none' ? 'none' : M.fileSrc || 'blank', fileSrc: M.fileSrc, pages: M.pageList, page: M.page, scales: M.scales, items: M.items, n: M.n, nextId: nextId, snapDrawing: M.snapDrawing, units: UNITS, style: M.style, round: M.round || '', blank: b0 ? b0.blank : null, markerArt: Lay.markerArt(), graphicArt: Lay.graphicArt(), layout: Lay.getState(), shop: Shop.getState(), shopLogo: Shop.getLogo(), shopPics: Shop.getPics() }; },
     save: function () {
       var st = Project.state(), img = Lay.imageBlob();
       Promise.all([M.fileBytes ? toB64(new Blob([M.fileBytes])) : null, img ? toB64(img) : null]).then(function (r) {
@@ -3332,21 +3505,39 @@ details[open] > summary .sum { display: none; }
       Lay.setState(st.layout, imgBlob); if (st.markerArt) Lay.setMarkerArt(st.markerArt); Lay.setGraphicArt(st.graphicArt);
       Shop.setState(st.shop); Shop.setPics(st.shopPics); if (st.shopLogo) Shop.setLogo(st.shopLogo);
     }
+    // The project's file: v2 files say so; older ones only had src, which was the file or 'blank'.
+    var fileSrc = st.fileSrc != null ? st.fileSrc : /^(pdf|image|sample)$/.test(st.src) ? st.src : '';
+    // The saved page list, or (older files) the file's pages, or one blank page.
+    function usePages(filePages) {
+      var list = (st.pages && st.pages.length ? st.pages : null), ids = {};
+      if (list) list = list.map(function (q) {
+        var r = { id: q.id, kind: q.kind === 'blank' ? 'blank' : 'file', name: String(q.name || ''), fp: q.fp || 1, w: q.w, h: q.h };
+        if (r.kind === 'blank') { r.blank = normBlank(q.blank || q); r.w = r.blank.w; r.h = r.blank.h; delete r.fp; }
+        else { var f = filePages.find(function (x) { return x.fp === r.fp; }); if (!f) return null; r.w = f.w; r.h = f.h; }
+        return r;
+      }).filter(Boolean);
+      if (!list || !list.length) list = st.src === 'blank' || !filePages.length ? [{ id: 1, kind: 'blank', name: 'Page 1', blank: normBlank(st.blank || {}) }] : filePages;
+      list.forEach(function (r, i) { if (r.kind === 'blank') { r.w = r.blank.w; r.h = r.blank.h; } if (!r.id || ids[r.id]) r.id = Math.max.apply(null, [0].concat(Object.keys(ids).map(Number))) + 1; ids[r.id] = 1; if (!r.name) r.name = 'Page ' + (i + 1); });
+      M.pageList = list;
+    }
+    function openAt() { syncPages(); return goPage(Math.max(1, Math.min(st.page || 1, M.pages))); }
     var p;
-    if (st.src === 'pdf' && drawingBlob) {
+    if (fileSrc === 'pdf' && drawingBlob) {
       p = Promise.all([getPdfjs(), drawingBlob.arrayBuffer()]).then(function (r) {
         return r[0].getDocument({ data: new Uint8Array(r[1].slice(0)), isEvalSupported: false }).promise.then(function (pdf) {
-          resetDoc(st.name); M.src = 'pdf'; M.pdf = pdf; M.img = null; M.pages = pdf.numPages; M.fileBytes = r[1]; M.fileType = drawingBlob.type || 'application/pdf';
-          applyData(); return goPage(Math.min(st.page || 1, pdf.numPages));
+          return pdfPages(pdf).then(function (fp) {
+            resetDoc(st.name); M.fileSrc = 'pdf'; M.pdf = pdf; M.img = null; M.fileBytes = r[1]; M.fileType = drawingBlob.type || 'application/pdf';
+            usePages(fp); applyData(); return openAt();
+          });
         });
       });
-    } else if (st.src === 'image' && drawingBlob) {
+    } else if (fileSrc === 'image' && drawingBlob) {
       p = new Promise(function (res, rej) {
         var img = new Image();
         img.onload = function () {
           drawingBlob.arrayBuffer().then(function (buf) {
-            resetDoc(st.name); M.src = 'image'; M.img = img; M.pdf = null; M.pageObj = null; M.pages = 1; M.w = img.naturalWidth; M.h = img.naturalHeight; M.fileBytes = buf; M.fileType = drawingBlob.type;
-            applyData(); buildPage(); fit(); renderAll(); res();
+            resetDoc(st.name); M.fileSrc = 'image'; M.img = img; M.pdf = null; M.pageObj = null; M.fileBytes = buf; M.fileType = drawingBlob.type;
+            usePages([{ id: 1, kind: 'file', name: 'Page 1', fp: 1, w: img.naturalWidth, h: img.naturalHeight }]); applyData(); openAt(); res();
           });
         };
         img.onerror = function () { rej(new Error('the drawing image could not be read')); };
@@ -3354,11 +3545,12 @@ details[open] > summary .sum { display: none; }
       });
     } else {
       p = Promise.resolve().then(function () {
-        var isSample = st.src === 'sample', isBlank = st.src === 'blank';
-        resetDoc(isSample ? st.name || 'Sample: A-101 First floor plan.pdf' : isBlank ? st.name || 'Blank canvas' : ''); M.src = isSample ? 'sample' : isBlank ? 'blank' : 'none'; M.pdf = null; M.img = null; M.pageObj = null; M.pages = 1; M.w = 1728; M.h = 1296; M.fileBytes = null; M.fileType = '';
-        if (isBlank) setBlank(st.blank || {});
+        var isSample = fileSrc === 'sample', isBlank = !isSample && (st.src === 'blank' || (st.pages || []).some(function (q) { return q.kind === 'blank'; }));
+        resetDoc(isSample ? st.name || 'Sample: A-101 First floor plan.pdf' : isBlank ? st.name || 'Blank canvas' : ''); M.pdf = null; M.img = null; M.pageObj = null; M.fileBytes = null; M.fileType = '';
         if (/^Sample/.test(M.name)) document.title = 'DIM';
-        applyData(); buildPage(); fit(); renderAll(); buildSnaps(1);
+        if (!isSample && !isBlank) { M.src = 'none'; applyData(); buildPage(); renderAll(); return; }
+        M.fileSrc = isSample ? 'sample' : '';
+        usePages(isSample ? [{ id: 1, kind: 'file', name: 'Page 1', fp: 1, w: 1728, h: 1296 }] : []); applyData(); return openAt();
       });
     }
     return p.then(function () {
@@ -3375,7 +3567,7 @@ details[open] > summary .sum { display: none; }
   }
   var Markup = { busy: false, note: '' };
   // Blank canvases are in inches; the PDF page is scaled up so the long side is about 17".
-  function blankPdfScale() { return Math.max(1, 1224 / Math.max(M.w, M.h)); }
+  function blankPdfScale(w, h) { return Math.max(1, 1224 / Math.max(w || M.w, h || M.h)); }
   function rgbCss(a) { return 'rgb(' + a.map(function (v) { return Math.round(v * 255); }).join(',') + ')'; }
   function canvasMarkup(ctx, items, f) {
     items = items.filter(function (it) { return !it.hidden; });
@@ -3458,7 +3650,7 @@ details[open] > summary .sum { display: none; }
     Markup.busy = true; Markup.note = 'Making the image…'; renderRight();
     var f, paintP;
     if (M.src === 'image') { f = Math.min(1, 6000 / Math.max(M.w, M.h)); paintP = Promise.resolve(function (ctx) { ctx.drawImage(M.img, 0, 0, M.w * f, M.h * f); }); }
-    else if (M.src === 'pdf') { f = Math.min(4, 4000 / Math.max(M.w, M.h)); paintP = M.pdf.getPage(M.page).then(function (pg) { return function (ctx) { return pg.render({ canvasContext: ctx, viewport: pg.getViewport({ scale: f }) }).promise; }; }); }
+    else if (M.src === 'pdf') { f = Math.min(4, 4000 / Math.max(M.w, M.h)); paintP = M.pdf.getPage(pageRec().fp).then(function (pg) { return function (ctx) { return pg.render({ canvasContext: ctx, viewport: pg.getViewport({ scale: f }) }).promise; }; }); }
     else {
       f = Math.min(12, 3500 / Math.max(M.w, M.h));
       paintP = new Promise(function (res, rej) {
@@ -3485,39 +3677,51 @@ details[open] > summary .sum { display: none; }
     if (Markup.busy) return;
     Markup.busy = true; Markup.note = 'Making the PDF…'; renderRight();
     var PL, doc, font, bold;
+    // One PDF page per project page, in order: PDF pages copied from the original (vector, untouched), blank pages with
+    // their grid, the image or the sample plan; then the measurements on top, and the list pages.
+    var srcDoc = null, img = null;
     getPdfLib().then(function (lib) {
       PL = lib;
-      return M.src === 'pdf' ? PL.PDFDocument.load(M.fileBytes.slice(0), { ignoreEncryption: true }) : PL.PDFDocument.create();
-    }).then(function (d) {
-      doc = d; return Promise.all([doc.embedFont(PL.StandardFonts.Helvetica), doc.embedFont(PL.StandardFonts.HelveticaBold)]);
+      return Promise.all([PL.PDFDocument.create(), M.fileSrc === 'pdf' ? PL.PDFDocument.load(M.fileBytes.slice(0), { ignoreEncryption: true }) : null]);
+    }).then(function (r) {
+      doc = r[0]; srcDoc = r[1]; return Promise.all([doc.embedFont(PL.StandardFonts.Helvetica), doc.embedFont(PL.StandardFonts.HelveticaBold)]);
     }).then(function (f) {
       font = f[0]; bold = f[1];
-      if (M.src === 'image') {
-        var t = (M.fileType || '').toLowerCase();
-        var emb = t.indexOf('png') >= 0 ? doc.embedPng(M.fileBytes) : /jpe?g/.test(t) ? doc.embedJpg(M.fileBytes) : new Promise(function (res) { var c = document.createElement('canvas'); c.width = M.w; c.height = M.h; c.getContext('2d').drawImage(M.img, 0, 0); c.toBlob(function (b) { b.arrayBuffer().then(res); }, 'image/png'); }).then(function (b) { return doc.embedPng(b); });
-        return emb.then(function (im) { var pg = doc.addPage([M.w, M.h]); pg.drawImage(im, { x: 0, y: 0, width: M.w, height: M.h }); });
-      }
-      if (M.src === 'sample') {
-        var pg = doc.addPage([M.w, M.h]), segs = sampleSegments();
-        for (var i = 0; i < segs.length; i += 4) pg.drawLine({ start: { x: segs[i], y: M.h - segs[i + 1] }, end: { x: segs[i + 2], y: M.h - segs[i + 3] }, thickness: 5, color: PL.rgb(0.1, 0.1, 0.1) });
-        [['LOBBY', 12, 10], ['WAITING', 34, 10], ['OFFICE', 52, 6.5], ['OFFICE', 52, 16.5], ['RECEPTION', 18, 28.5], ['EXAM 1', 42, 28.5], ['EXAM 2', 54, 28.5]].forEach(function (r) {
-          var w = bold.widthOfTextAtSize(r[0], 16); pg.drawText(r[0], { x: X(r[1]) - w / 2, y: M.h - Y(r[2]), size: 16, font: bold, color: PL.rgb(0.1, 0.1, 0.1) });
+      var embedImg = function () {
+        if (img) return Promise.resolve(img);
+        var t = (M.fileType || '').toLowerCase(), iw = M.img.naturalWidth, ih = M.img.naturalHeight;
+        var emb = t.indexOf('png') >= 0 ? doc.embedPng(M.fileBytes) : /jpe?g/.test(t) ? doc.embedJpg(M.fileBytes) : new Promise(function (res) { var c = document.createElement('canvas'); c.width = iw; c.height = ih; c.getContext('2d').drawImage(M.img, 0, 0); c.toBlob(function (b) { b.arrayBuffer().then(res); }, 'image/png'); }).then(function (b) { return doc.embedPng(b); });
+        return emb.then(function (im) { img = im; return im; });
+      };
+      return M.pageList.reduce(function (chain, rec) {
+        return chain.then(function () {
+          if (rec.kind === 'blank') {
+            var bf = blankPdfScale(rec.w, rec.h), bpg = doc.addPage([rec.w * bf, rec.h * bf]), B = rec.blank, gstep = Math.max(B.w, B.h) > 2400 ? 120 : 12, gc = PL.rgb(0.88, 0.88, 0.88);
+            if (B.grid) {
+              for (var gx = gstep; gx < B.w; gx += gstep) bpg.drawLine({ start: { x: gx * bf, y: 0 }, end: { x: gx * bf, y: B.h * bf }, thickness: 0.4, color: gc });
+              for (var gy = gstep; gy < B.h; gy += gstep) bpg.drawLine({ start: { x: 0, y: gy * bf }, end: { x: B.w * bf, y: gy * bf }, thickness: 0.4, color: gc });
+            }
+            return;
+          }
+          if (M.fileSrc === 'pdf') return doc.copyPages(srcDoc, [rec.fp - 1]).then(function (cp) { doc.addPage(cp[0]); });
+          if (M.fileSrc === 'image') return embedImg().then(function (im) { var pg = doc.addPage([rec.w, rec.h]); pg.drawImage(im, { x: 0, y: 0, width: rec.w, height: rec.h }); });
+          if (M.fileSrc === 'sample') {
+            var pg = doc.addPage([rec.w, rec.h]), segs = sampleSegments();
+            for (var i = 0; i < segs.length; i += 4) pg.drawLine({ start: { x: segs[i], y: rec.h - segs[i + 1] }, end: { x: segs[i + 2], y: rec.h - segs[i + 3] }, thickness: 5, color: PL.rgb(0.1, 0.1, 0.1) });
+            [['LOBBY', 12, 10], ['WAITING', 34, 10], ['OFFICE', 52, 6.5], ['OFFICE', 52, 16.5], ['RECEPTION', 18, 28.5], ['EXAM 1', 42, 28.5], ['EXAM 2', 54, 28.5]].forEach(function (r) {
+              var w = bold.widthOfTextAtSize(r[0], 16); pg.drawText(r[0], { x: X(r[1]) - w / 2, y: rec.h - Y(r[2]), size: 16, font: bold, color: PL.rgb(0.1, 0.1, 0.1) });
+            });
+            pg.drawText('SAMPLE CLINIC  ·  FIRST FLOOR PLAN  ·  SCALE: 1/4" = 1\'-0"', { x: 144, y: 90, size: 18, font: bold });
+          }
         });
-        pg.drawText('SAMPLE CLINIC  ·  FIRST FLOOR PLAN  ·  SCALE: 1/4" = 1\'-0"', { x: 144, y: 90, size: 18, font: bold });
-      }
-      if (M.src === 'blank') {
-        var bf = blankPdfScale(), bpg = doc.addPage([M.w * bf, M.h * bf]), B = M.blank, gstep = Math.max(B.w, B.h) > 2400 ? 120 : 12, gc = PL.rgb(0.88, 0.88, 0.88);
-        if (B.grid) {
-          for (var gx = gstep; gx < B.w; gx += gstep) bpg.drawLine({ start: { x: gx * bf, y: 0 }, end: { x: gx * bf, y: B.h * bf }, thickness: 0.4, color: gc });
-          for (var gy = gstep; gy < B.h; gy += gstep) bpg.drawLine({ start: { x: 0, y: gy * bf }, end: { x: B.w * bf, y: gy * bf }, thickness: 0.4, color: gc });
-        }
-      }
+      }, Promise.resolve());
     }).then(function () {
-      var pagesWith = []; M.items.forEach(function (it) { if (pagesWith.indexOf(it.page) < 0) pagesWith.push(it.page); });
+      var pagesWith = []; M.items.forEach(function (it) { if (pagesWith.indexOf(it.page) < 0 && pageRec(it.page)) pagesWith.push(it.page); });
       return pagesWith.reduce(function (chain, n) {
         return chain.then(function () {
-          var mapP = M.src === 'pdf' ? M.pdf.getPage(n).then(function (pg) { var vp = pg.getViewport({ scale: 1 }); return { map: function (p) { var r = vp.convertToPdfPoint(p.x, p.y); return { x: r[0], y: r[1] }; }, w: vp.width, h: vp.height }; })
-            : Promise.resolve((function () { var bf = M.src === 'blank' ? blankPdfScale() : 1; return { map: function (p) { return { x: p.x * bf, y: (M.h - p.y) * bf }; }, w: M.w * bf, h: M.h * bf }; })());
+          var rec = pageRec(n);
+          var mapP = rec.kind === 'file' && M.fileSrc === 'pdf' ? M.pdf.getPage(rec.fp).then(function (pg) { var vp = pg.getViewport({ scale: 1 }); return { map: function (p) { var r = vp.convertToPdfPoint(p.x, p.y); return { x: r[0], y: r[1] }; }, w: vp.width, h: vp.height }; })
+            : Promise.resolve((function () { var bf = rec.kind === 'blank' ? blankPdfScale(rec.w, rec.h) : 1; return { map: function (p) { return { x: p.x * bf, y: (rec.h - p.y) * bf }; }, w: rec.w * bf, h: rec.h * bf }; })());
           return mapP.then(function (m) { var its = M.items.filter(function (it) { return it.page === n && !it.hidden; }); return textImgs(its, m).then(function (ti) { drawOnPage(doc.getPage(n - 1), its, m, n, ti); }); });
         });
       }, Promise.resolve());
@@ -6059,9 +6263,14 @@ details[open] > summary .sum { display: none; }
       return { W: W, H: H, border: B, tbY: ty, cells: cells, frame: { x: B.x + pad, y: B.y + pad, w: B.w - 2 * pad, h: ty - B.y - 2 * pad } };
     }
     // The part of the Measure page shown in the frame, and how big it's drawn (z = sheet points per page unit).
+    // The Draw page a sheet or drawing box shows: the one it picked, or (older sheets) whichever page Draw has open.
+    function dpage(V) { V = V || S; return (V.dpage != null && pageById(V.dpage)) || M.page; }
     function region(V) {
       V = V || S;
       if (V.src !== 'measure' || M.src === 'none') return null;
+      return asPage(dpage(V), function () { return region0(V); });
+    }
+    function region0(V) {
       var F = rectOf(V), sc = scaleFor(M.page), base = { x: 0, y: 0, w: M.w, h: M.h };
       if (V.fitTo === 'items') {
         var pts = []; M.items.forEach(function (it) { if (it.page === M.page) pts = pts.concat(geomPts(it)); });
@@ -6338,17 +6547,17 @@ details[open] > summary .sum { display: none; }
         return Promise.resolve({ canvas: cv, info: renderView.info });
       }
       var r = region(V); if (!r) return Promise.resolve({ canvas: cv, info: null, empty: true });
-      var f = r.z * ppp, paint;
-      if (M.src === 'pdf') paint = M.pdf.getPage(M.page).then(function (pg) { return pg.render({ canvasContext: ctx, viewport: pg.getViewport({ scale: f, offsetX: -r.x * f, offsetY: -r.y * f }) }).promise; });
-      else if (M.src === 'image') { ctx.setTransform(f, 0, 0, f, -r.x * f, -r.y * f); ctx.drawImage(M.img, 0, 0); ctx.setTransform(1, 0, 0, 1, 0, 0); paint = Promise.resolve(); }
+      var f = r.z * ppp, paint, n = dpage(V), rec = pageRec(n), src = pageSrc(n);
+      if (src === 'pdf') paint = M.pdf.getPage(rec.fp).then(function (pg) { return pg.render({ canvasContext: ctx, viewport: pg.getViewport({ scale: f, offsetX: -r.x * f, offsetY: -r.y * f }) }).promise; });
+      else if (src === 'image') { ctx.setTransform(f, 0, 0, f, -r.x * f, -r.y * f); ctx.drawImage(M.img, 0, 0); ctx.setTransform(1, 0, 0, 1, 0, 0); paint = Promise.resolve(); }
       else paint = new Promise(function (res) {
-        var im = new Image();
-        im.onload = function () { ctx.setTransform(f, 0, 0, f, -r.x * f, -r.y * f); ctx.drawImage(im, 0, 0, M.w, M.h); ctx.setTransform(1, 0, 0, 1, 0, 0); res(); };
+        var im = new Image(), svgBase = asPage(n, function () { return baseSVG(S.grid === false); });
+        im.onload = function () { ctx.setTransform(f, 0, 0, f, -r.x * f, -r.y * f); ctx.drawImage(im, 0, 0, rec.w, rec.h); ctx.setTransform(1, 0, 0, 1, 0, 0); res(); };
         im.onerror = function () { res(); };
-        im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + M.w + ' ' + M.h + '" width="' + Math.round(M.w * f) + '" height="' + Math.round(M.h * f) + '">' + baseSVG(S.grid === false) + '</svg>');
+        im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + rec.w + ' ' + rec.h + '" width="' + Math.round(rec.w * f) + '" height="' + Math.round(rec.h * f) + '">' + svgBase + '</svg>');
       });
       return paint.then(function () {
-        ctx.save(); ctx.translate(-r.x * f, -r.y * f); canvasMarkup(ctx, M.items.filter(function (it) { return it.page === M.page; }), f); ctx.restore();
+        ctx.save(); ctx.translate(-r.x * f, -r.y * f); asPage(n, function () { canvasMarkup(ctx, M.items.filter(function (it) { return it.page === n; }), f); }); ctx.restore();
         return { canvas: cv, info: r };
       });
     }
@@ -6360,7 +6569,7 @@ details[open] > summary .sum { display: none; }
     function viewKey(V) {
       V = V || S;
       var F = rectOf(V), r = region(V);
-      return JSON.stringify([V.src, V.grid, V.layDims, V.scale, V.mrunsOff, V.grunsOff, V.frowsOff, V.src === 'measure' ? 0 : [Math.round(V.pan.x), Math.round(V.pan.y)], [F.w, F.h].map(Math.round), r && [r.x, r.y, r.w, r.h].map(function (v) { return Math.round(v * 10); }), V.src === 'measure' ? [M.src, M.name, M.page, M.items.filter(function (it) { return it.page === M.page; }), M.scales[M.page]] : [Lay.getState(), Lay.imageName(), UNITS, Lay.markerArt().map(function (g) { return g.name + g.w; }), Lay.graphicArt().map(function (g) { return g.id + g.name + g.w; })]]);
+      return JSON.stringify([V.src, V.grid, V.layDims, V.scale, V.mrunsOff, V.grunsOff, V.frowsOff, V.src === 'measure' ? 0 : [Math.round(V.pan.x), Math.round(V.pan.y)], [F.w, F.h].map(Math.round), r && [r.x, r.y, r.w, r.h].map(function (v) { return Math.round(v * 10); }), V.src === 'measure' ? (function (n) { return [pageSrc(n), M.name, n, pageRec(n), M.items.filter(function (it) { return it.page === n; }), M.scales[n]]; })(dpage(V)) : [Lay.getState(), Lay.imageName(), UNITS, Lay.markerArt().map(function (g) { return g.name + g.w; }), Lay.graphicArt().map(function (g) { return g.id + g.name + g.w; })]]);
     }
     function ensureViews() { views().forEach(ensureView); }
     function ensureView(V) {
@@ -6458,10 +6667,11 @@ details[open] > summary .sum { display: none; }
     // A new drawing box goes in the upper right of the frame, a third of its size, captioned Detail A, B, C...
     function addView(src) {
       var F = geom().frame, nth = views().length - 1, w = F.w * 0.36, h = F.h * 0.4;
-      var n = { id: S.nextId++, k: 'view', src: src, x: F.x + F.w - w - 12 - nth * 14, y: F.y + 12 + nth * 14, w: w, h: h, pan: { x: 0, y: 0 }, scale: 'fit', fitTo: 'page', grid: true,
+      var n = { id: S.nextId++, k: 'view', src: src, dpage: src === 'measure' && pageRec() ? pageRec().id : null, x: F.x + F.w - w - 12 - nth * 14, y: F.y + 12 + nth * 14, w: w, h: h, pan: { x: 0, y: 0 }, scale: 'fit', fitTo: 'page', grid: true,
         mrunsOff: [], grunsOff: [], frowsOff: [], layDims: true, border: true, cap: 'Detail ' + String.fromCharCode(65 + (nth % 26)), stroke: '#1c1c1c', sw: 0.75 };
       S.notes.push(n); sel = n.id; multi = []; tool = 'select';
     }
+    function pageOpts(n) { return M.pageList.map(function (p, i) { return '<option value="' + p.id + '"' + (i + 1 === n ? ' selected' : '') + '>' + esc(p.name) + '</option>'; }).join(''); }
     function srcName(src) { return src === 'measure' ? 'Draw: ' + (M.src === 'none' ? 'no drawing open' : baseName()) : 'Layout: ' + SOURCES[src]; }
     function guideById(id) { return (S.guides || []).find(function (gd) { return gd.id === id; }); }
     function hitGuide(p) { if (!guidesOn) return null; var tol = 5 / pxPerPt(); return (S.guides || []).slice().reverse().find(function (gd) { return Math.abs((gd.o === 'v' ? p.x : p.y) - gd.p) < tol; }) || null; }
@@ -6655,6 +6865,7 @@ details[open] > summary .sum { display: none; }
     function viewProps(n) {
       var h = '<label class="field">Caption<input type="text" data-vk="cap" value="' + esc(n.cap || '') + '" placeholder="Detail A"></label>';
       h += '<label class="field">Show<select data-vk="src">' + ['graphic', 'markers', 'film', 'mural', 'measure'].map(function (k) { return '<option value="' + k + '"' + (n.src === k ? ' selected' : '') + '>' + esc(srcName(k)) + '</option>'; }).join('') + '</select></label>';
+      if (n.src === 'measure' && M.pages > 1) h += '<label class="field">Page<select data-vk="dpage">' + pageOpts(dpage(n)) + '</select></label>';
       if (n.src === 'measure') h += '<label class="field">Frame<select data-vk="fitTo"><option value="page"' + (n.fitTo !== 'items' ? ' selected' : '') + '>Whole page</option><option value="items"' + (n.fitTo === 'items' ? ' selected' : '') + '>Measurements only</option></select></label>';
       h += '<label class="field">Scale<select data-vk="scale">' + scaleOpts(n.scale, 'Fit box') + '</select></label>';
       var rr = region(n); if (rr && rr.warn) h += '<p class="err" style="margin:0">' + esc(rr.warn) + '</p>';
@@ -6706,15 +6917,16 @@ details[open] > summary .sum { display: none; }
       if (sheets.length > 1) sh += '<div class="row"><button type="button" class="btn" data-sact="sheetleft"' + (cur ? '' : ' disabled') + '>← Move earlier</button><button type="button" class="btn" data-sact="sheetright"' + (cur < sheets.length - 1 ? '' : ' disabled') + '>Move later →</button></div>';
       sh += '<p class="hint" style="margin:0">' + (sheets.length > 1 ? 'Sheet ' + (cur + 1) + ' of ' + sheets.length + '. Tabs above the sheet switch between them (Page Up / Page Down too).' : 'Add sheets to put each drawing on its own page.') + ' A new sheet keeps this one\u2019s paper and project details.</p>';
       h += sec('sh_sheet', 'Sheet', sh);
-      var dv = '<label class="field">Show<select data-sk="src"><option value="measure"' + (S.src === 'measure' ? ' selected' : '') + '>Draw: ' + esc(M.src === 'none' ? 'no drawing open' : baseName() + (M.pages > 1 ? ', page ' + M.page : '')) + '</option>' +
+      var dv = '<label class="field">Show<select data-sk="src"><option value="measure"' + (S.src === 'measure' ? ' selected' : '') + '>Draw: ' + esc(M.src === 'none' ? 'no drawing open' : baseName()) + '</option>' +
         Object.keys(SOURCES).map(function (k) { return '<option value="' + k + '"' + (S.src === k ? ' selected' : '') + '>Layout: ' + SOURCES[k] + '</option>'; }).join('') + '</select></label>';
       if (S.src === 'measure') {
         var groups = {}; PRESETS.forEach(function (p) { (groups[p.group] = groups[p.group] || []).push(p); });
+        if (M.pages > 1) dv += '<label class="field">Page<select data-sk="dpage">' + pageOpts(dpage()) + '</select></label>';
         dv += '<label class="field">Frame<select data-sk="fitTo"><option value="page"' + (S.fitTo === 'page' ? ' selected' : '') + '>Whole page</option><option value="items"' + (S.fitTo === 'items' ? ' selected' : '') + '>Measurements only</option></select></label>';
         dv += '<label class="field">Sheet scale<select data-sk="scale"><option value="fit"' + (S.scale === 'fit' ? ' selected' : '') + '>Fit frame</option>' + Object.keys(groups).map(function (gname) { return '<optgroup label="' + gname + '">' + groups[gname].map(function (p) { return '<option value="' + p.id + '"' + (S.scale === p.id ? ' selected' : '') + '>' + esc(p.label) + '</option>'; }).join('') + '</optgroup>'; }).join('') + '</select></label>';
         var r = region();
         if (r && r.warn) dv += '<p class="err">' + esc(r.warn) + '</p>';
-        if (M.src === 'blank') dv += '<label class="chk"><input type="checkbox" data-sk="grid"' + (S.grid !== false ? ' checked' : '') + '> Canvas grid</label>';
+        if (pageSrc(dpage()) === 'blank') dv += '<label class="chk"><input type="checkbox" data-sk="grid"' + (S.grid !== false ? ' checked' : '') + '> Canvas grid</label>';
         dv += '<div class="row"><button type="button" class="btn" data-sact="center"' + (S.pan.x || S.pan.y ? '' : ' disabled') + '>Center drawing</button></div><p class="hint" style="margin:0">Hand tool (H) slides the drawing in its frame. Measurements show as in Draw.</p>';
       } else {
         dv += '<label class="field">Sheet scale<select data-sk="scale">' + scaleOpts(S.scale, 'Fit frame') + '</select></label>';
@@ -6833,7 +7045,7 @@ details[open] > summary .sum { display: none; }
       if (d.shex) { var hx = String(e.target.value).trim().replace(/^#?/, '#'); if (/^#[0-9a-f]{3}$/i.test(hx)) hx = '#' + hx.slice(1).replace(/./g, '$&$&'); if (/^#[0-9a-f]{6}$/i.test(hx)) { hx = hx.toLowerCase(); edit(function (n) { S.style[d.shex] = n[d.shex] = hx; }); History.record(); } left(); return; }
       if (d.vk) {
         var vv = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-        edit(function (n) { if (n.k !== 'view') return; n[d.vk] = vv; if (d.vk === 'src' || d.vk === 'fitTo') n.pan = { x: 0, y: 0 }; });
+        edit(function (n) { if (n.k !== 'view') return; n[d.vk] = vv; if (d.vk === 'src' || d.vk === 'fitTo' || d.vk === 'dpage') n.pan = { x: 0, y: 0 }; if (d.vk === 'src' && vv === 'measure' && pageRec()) n.dpage = pageRec().id; });
         left(); History.record(); return;
       }
       if (d.vrun) {
@@ -6865,7 +7077,8 @@ details[open] > summary .sum { display: none; }
       if (d.srun != null) { var ri = Number(d.srun); S.mrunsOff = (S.mrunsOff || []).filter(function (x) { return x !== ri; }); if (!el.checked) S.mrunsOff.push(ri); all(); History.record(); return; }
       if (d.sk) {
         S[d.sk] = el.type === 'checkbox' ? el.checked : el.value;
-        if (d.sk === 'src' || d.sk === 'fitTo') S.pan = { x: 0, y: 0 };
+        if (d.sk === 'src' || d.sk === 'fitTo' || d.sk === 'dpage') S.pan = { x: 0, y: 0 };
+        if (d.sk === 'src' && S.src === 'measure' && pageRec()) S.dpage = pageRec().id;
         all(); History.record();
       }
     });
@@ -7044,6 +7257,7 @@ details[open] > summary .sum { display: none; }
   var booting = true;   // during startup Draw is set up behind Home; it shouldn't name a new canvas yet
   function setMode(m) {
     mode = m; applyDockLayout();
+    if (m !== 'measure') { $('page-tabs').hidden = true; document.querySelector('.main').classList.remove('ptabs'); }
     document.querySelector('.main').classList.toggle('home', m === 'home');
     document.querySelectorAll('[data-mode]').forEach(function (b) { b.classList.toggle('on', b.dataset.mode === m); b.setAttribute('aria-pressed', b.dataset.mode === m ? 'true' : 'false'); });
     zoomEl.hidden = m !== 'measure';
@@ -7056,7 +7270,7 @@ details[open] > summary .sum { display: none; }
     if (m === 'measure') {
       // Draw opens on a blank canvas when nothing else is open.
       var fresh = M.src === 'none' && !booting;
-      if (fresh) { resetDoc(nextDrawingName()); M.src = 'blank'; setBlank(blankDefault()); }
+      if (fresh) { resetDoc(nextDrawingName()); startBlankDoc(blankDefault()); }
       if (M.dock === undefined) M.dock = 'all';
       if (fresh && dockOn()) M.panel = 'drawing';
       buildPage(); renderAll();
