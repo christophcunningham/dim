@@ -271,6 +271,15 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 /* Rulers along the top and left edges of the canvas (Shift+R) */
 .rul { position: absolute; z-index: 5; display: none; pointer-events: none; }
 .main.rul-on .rul { display: block; }
+/* Pull a guide out of a ruler: the top one makes a guide across, the left one a guide down */
+.main.rul-on .rul.x, .main.rul-on .rul.y { pointer-events: auto; touch-action: none; }
+.main.rul-on .rul.x { cursor: row-resize; }
+.main.rul-on .rul.y { cursor: col-resize; }
+.main.rul-on.shopm .stage.flpad .sheet-tabs { top: 70px; left: 48px; }
+/* Typing a guide's position */
+.gpop { position: fixed; z-index: 60; width: 236px; display: grid; gap: 8px; padding: 10px; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 45%, transparent); border-radius: 3px; box-shadow: 0 6px 22px rgb(0 0 0 / .18); }
+.gpop .row { margin: 0; }
+.gpop input.bad { border-color: var(--red); }
 .rul.x { top: 0; left: 20px; width: calc(100% - 20px); height: 20px; }
 .rul.y { top: 20px; left: 0; width: 20px; height: calc(100% - 20px); }
 .main.rul-on .rul.c { top: 0; left: 0; width: 20px; height: 20px; display: grid; place-items: center; background: var(--b07); box-shadow: inset -1px -1px 0 var(--b05); font-size: 8px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--b02); }
@@ -912,7 +921,7 @@ details[open] > summary .sum { display: none; }
     var rec = pageRec(n); if (!rec) return Promise.resolve();
     var my = ++pageGen;
     endTextEdit();
-    M.page = n; M.draft = []; M.calib = []; M.autoFit = true; M.sel = null; M.multi = null; M.pen = null; M.create = null; M.activeCount = null; M.hl = null;
+    M.page = n; M.draft = []; M.calib = []; M.autoFit = true; M.sel = null; M.multi = null; M.selGuide = null; M.pen = null; M.create = null; M.activeCount = null; M.hl = null;
     if (M.tool === 'scale') M.tool = 'edit';
     M.src = rec.kind === 'blank' ? 'blank' : M.fileSrc; M.pageObj = null; M.w = rec.w; M.h = rec.h;
     if (rec.kind === 'blank') setBlank(rec.blank); else M.blank = null;
@@ -1546,19 +1555,30 @@ details[open] > summary .sum { display: none; }
   try { if (localStorage.getItem('dim-rulers') === 'off') rulersOn = false; } catch (e) {}
   function paintRulersSoon() { if (rulQueued) return; rulQueued = true; requestAnimationFrame(function () { rulQueued = false; paintRulers(); }); }
   stage.addEventListener('scroll', paintRulersSoon, { passive: true });
-  function toggleRulers() { rulersOn = !rulersOn; try { localStorage.setItem('dim-rulers', rulersOn ? 'on' : 'off'); } catch (e) {} paintRulers(); renderFloat(); if (M.autoFit) fit(); }
+  // Hiding the rulers hides the guides too (and they stop snapping).
+  function toggleRulers() {
+    rulersOn = !rulersOn; try { localStorage.setItem('dim-rulers', rulersOn ? 'on' : 'off'); } catch (e) {}
+    if (!rulersOn) { M.selGuide = null; closeGuidePopup(); }
+    paintRulers(); renderFloat();
+    if (mode === 'measure') { renderOverlay(); if (M.autoFit) fit(); } else if (mode === 'shop') Shop.paint();
+  }
+  // Smart guides: moving things lines them up with other items' edges and centers (and the page's or the frame's).
+  var smartOn = true;
+  try { if (localStorage.getItem('dim-smart') === 'off') smartOn = false; } catch (e) {}
+  function toggleSmart() { smartOn = !smartOn; try { localStorage.setItem('dim-smart', smartOn ? 'on' : 'off'); } catch (e) {} renderFloat(); }
   // Major steps with their subdivisions: inches (imperial), millimeters (metric), or plain drawing units before a scale is set.
   var RUL_IMP = [[1 / 16, 1], [1 / 8, 2], [1 / 4, 2], [1 / 2, 2], [1, 8], [2, 4], [3, 3], [6, 6], [12, 12], [24, 4], [36, 3], [48, 4], [60, 5], [120, 10], [240, 4], [600, 5], [1200, 10], [2400, 4], [6000, 5], [12000, 10], [24000, 4], [60000, 5]];
   var RUL_MET = [], RUL_RAW = [];
   [0, 1, 2, 3, 4, 5, 6].forEach(function (k) { var q = Math.pow(10, k); RUL_MET.push([q, 10], [2 * q, 2], [5 * q, 5]); });
   [-2, -1, 0, 1, 2, 3, 4, 5, 6].forEach(function (k) { var q = Math.pow(10, k); RUL_RAW.push([q, 10], [2 * q, 2], [5 * q, 5]); });
-  function rulerSpec() {
-    var sc = scaleFor(M.page), met = isMetric(), list = !sc ? RUL_RAW : met ? RUL_MET : RUL_IMP, per = !sc ? 1 : met ? 1 / 25.4 / sc.inPerUnit : 1 / sc.inPerUnit;
+  // list: steps; per: canvas units per step unit; z: screen pixels per canvas unit. With no list, the open Draw page's.
+  function rulerSpec(list, per, z, kind) {
+    if (!list) { var sc = scaleFor(M.page), met = isMetric(); list = !sc ? RUL_RAW : met ? RUL_MET : RUL_IMP; per = !sc ? 1 : met ? 1 / 25.4 / sc.inPerUnit : 1 / sc.inPerUnit; z = M.zoom; kind = !sc ? 'raw' : met ? 'met' : 'imp'; }
     var pick = list[list.length - 1];
-    for (var i = 0; i < list.length; i++) if (list[i][0] * per * M.zoom >= 64) { pick = list[i]; break; }
+    for (var i = 0; i < list.length; i++) if (list[i][0] * per * z >= 64) { pick = list[i]; break; }
     var major = pick[0] * per, sub = pick[1];
-    while (sub > 1 && major * M.zoom / sub < 6) { var d = sub - 1; while (d > 1 && sub % d) d--; sub = d; }
-    return { major: major, sub: sub, val: pick[0], kind: !sc ? 'raw' : met ? 'met' : 'imp' };
+    while (sub > 1 && major * z / sub < 6) { var d = sub - 1; while (d > 1 && sub % d) d--; sub = d; }
+    return { major: major, sub: sub, val: pick[0], kind: kind };
   }
   function rulIn(v) {
     var a = Math.abs(v), w = Math.floor(a + 1e-9), f = Math.round((a - w) * 16), d = 16;
@@ -1568,24 +1588,40 @@ details[open] > summary .sum { display: none; }
   }
   function rulerLabel(v, kind) {
     if (kind === 'raw') return String(Math.round(v * 100) / 100);
+    if (kind === 'sheet') return rulIn(v);
     if (kind === 'met') return String(+(UNITS === 'cm' ? v / 10 : UNITS === 'm' ? v / 1000 : v).toFixed(3));
     if (UNITS === 'in' || Math.abs(v) < 12) return rulIn(v);
     var a = Math.abs(v), ft = Math.floor(a / 12 + 1e-9), r = a - ft * 12;
     return (v < 0 ? '-' : '') + ft + "'" + (r > 1e-6 ? rulIn(r) : '');
   }
+  // What the rulers measure: the open Draw page, or the Shop drawing sheet. el is the element at the canvas origin, z its
+  // screen pixels per canvas unit, W and H its size; guides is that page's or sheet's list ({ id, o: 'v' or 'h', p }).
+  function rulerHost() {
+    if (mode === 'shop') return Shop.rulerHost();
+    if (mode !== 'measure' || !pageEl) return null;
+    var spec = rulerSpec(), sb = null;
+    selIds().forEach(function (id) { var it = itemById(id); if (it && !it.hidden) sb = unionBox(sb, itemBox(it)); });
+    return { el: pageEl, z: M.zoom, W: M.w, H: M.h, spec: spec, sel: sb, cur: M.cur, guides: drawGuides(),
+      corner: spec.kind === 'raw' ? (M.src === 'pdf' ? 'pt' : 'px') : spec.kind === 'met' ? UNITS : UNITS === 'in' ? 'in' : 'ft',
+      // Shift: whole ruler ticks; on a snapping grid, grid steps. Alt places freely.
+      round: function (v, e) { if (e.altKey) return v; var st = e.shiftKey ? spec.major / spec.sub : gridOn() ? M.blank.step : 0; return st ? Math.round(v / st) * st : v; },
+      text: guideText, parse: guideParse,
+      select: function (id) { M.selGuide = id; if (id != null) { M.sel = null; M.multi = null; } },
+      repaint: renderOverlay, commit: function () { renderPanels(); } };
+  }
   function paintRulers() {
-    var on = mode === 'measure' && rulersOn && !!pageEl, mainEl = document.querySelector('.main');
+    var host = rulersOn ? rulerHost() : null, on = !!host, mainEl = document.querySelector('.main');
     if (mainEl.classList.contains('rul-on') !== on) mainEl.classList.toggle('rul-on', on);
     if (!on) return;
-    var spec = rulerSpec(), pr = pageEl.getBoundingClientRect(), dpr = window.devicePixelRatio || 1, cs = getComputedStyle(document.documentElement);
+    var spec = host.spec, pr = host.el.getBoundingClientRect(), dpr = window.devicePixelRatio || 1, cs = getComputedStyle(document.documentElement);
     var bg = cs.getPropertyValue('--b07').trim() || '#fafafa', ink = cs.getPropertyValue('--b02').trim() || '#666666', edge = cs.getPropertyValue('--b05').trim() || '#cccccc';
-    $('rul-c').textContent = spec.kind === 'raw' ? (M.src === 'pdf' ? 'pt' : 'px') : spec.kind === 'met' ? UNITS : UNITS === 'in' ? 'in' : 'ft';
+    $('rul-c').textContent = host.corner;
     // The selection's extent shades each ruler; a blue line follows the pointer.
-    var sb = null; selIds().forEach(function (id) { var it = itemById(id); if (it && !it.hidden) sb = unionBox(sb, itemBox(it)); });
+    var sb = host.sel, cur = host.cur;
     [['x', $('rul-x')], ['y', $('rul-y')]].forEach(function (a) {
       var ax = a[0], cv = a[1], w = cv.clientWidth, h = cv.clientHeight; if (!w || !h) return;
       var W = Math.round(w * dpr), H = Math.round(h * dpr); if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
-      var ctx = cv.getContext('2d'), r = cv.getBoundingClientRect(), o = ax === 'x' ? pr.left - r.left : pr.top - r.top, len = ax === 'x' ? w : h, th = ax === 'x' ? h : w, z = M.zoom;
+      var ctx = cv.getContext('2d'), r = cv.getBoundingClientRect(), o = ax === 'x' ? pr.left - r.left : pr.top - r.top, len = ax === 'x' ? w : h, th = ax === 'x' ? h : w, z = host.z;
       // Draw along the ruler as x and across it as y; the left ruler swaps them.
       var flat = function () { if (ax === 'x') ctx.setTransform(dpr, 0, 0, dpr, 0, 0); else ctx.setTransform(0, dpr, dpr, 0, 0, 0); };
       flat(); ctx.fillStyle = bg; ctx.fillRect(0, 0, len, th);
@@ -1599,7 +1635,7 @@ details[open] > summary .sum { display: none; }
       }
       ctx.stroke();
       ctx.strokeStyle = edge; ctx.beginPath(); ctx.moveTo(0, th - 0.5); ctx.lineTo(len, th - 0.5); ctx.stroke();
-      if (M.cur) { var cp = Math.round(o + (ax === 'x' ? M.cur.x : M.cur.y) * z) + 0.5; ctx.strokeStyle = '#3e7bfa'; ctx.beginPath(); ctx.moveTo(cp, 0); ctx.lineTo(cp, th); ctx.stroke(); }
+      if (cur) { var cp = Math.round(o + (ax === 'x' ? cur.x : cur.y) * z) + 0.5; ctx.strokeStyle = '#3e7bfa'; ctx.beginPath(); ctx.moveTo(cp, 0); ctx.lineTo(cp, th); ctx.stroke(); }
       ctx.fillStyle = ink; ctx.font = '500 9px Manrope, system-ui, sans-serif'; ctx.textBaseline = 'top';
       for (var m = first; m <= last; m++) {
         var sx = Math.round(o + m * spec.major * z); if (sx < -60 || sx > len) continue;
@@ -1610,6 +1646,86 @@ details[open] > summary .sum { display: none; }
       }
     });
   }
+
+  // ---- Guides: pull one out of a ruler (top ruler: across, left ruler: down). They never print. Drag one with Select to
+  // move it, drag it back onto a ruler (or off the page) or press Delete to remove it, double-click it to type where it goes.
+  // Draw keeps guides per page, Shop drawing per sheet; hiding the rulers hides them. ----
+  var pull = null;
+  ['x', 'y'].forEach(function (ax) {
+    var cv = $('rul-' + ax);
+    var at = function (e, h, o) { var r = h.el.getBoundingClientRect(); return o === 'h' ? (e.clientY - r.top) / h.z : (e.clientX - r.left) / h.z; };
+    cv.addEventListener('pointerdown', function (e) {
+      var h = rulersOn && e.button === 0 ? rulerHost() : null; if (!h) return;
+      var o = ax === 'x' ? 'h' : 'v', gd = { id: h.guides.reduce(function (m, g) { return Math.max(m, g.id || 0); }, 0) + 1, o: o, p: -1e6 };
+      closeGuidePopup(); h.guides.push(gd); h.select(gd.id); pull = { h: h, gd: gd, at: at };
+      cv.setPointerCapture(e.pointerId); e.preventDefault(); h.repaint();
+    });
+    cv.addEventListener('pointermove', function (e) { if (!pull) return; pull.gd.p = pull.h.round(pull.at(e, pull.h, pull.gd.o), e); pull.h.repaint(); });
+    cv.addEventListener('pointerup', function (e) {
+      if (!pull) return; var h = pull.h, gd = pull.gd; pull = null;
+      if (overRuler(e) || gd.p < 0 || gd.p > (gd.o === 'v' ? h.W : h.H)) { h.guides.splice(h.guides.indexOf(gd), 1); h.select(null); }
+      h.repaint(); h.commit();
+    });
+  });
+  function overRuler(e) {
+    if (!document.querySelector('.main').classList.contains('rul-on')) return false;
+    return ['rul-x', 'rul-y', 'rul-c'].some(function (id) { var r = $(id).getBoundingClientRect(); return r.width && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom; });
+  }
+  // Draw: the open page's guides, where a point near one lands, and how its distance reads and is typed.
+  function drawGuides() { var p = pageRec(); return p ? (p.guides = p.guides || []) : []; }
+  function hitDrawGuide(p) { if (!rulersOn) return null; var tol = 5 / M.zoom; return drawGuides().slice().reverse().find(function (g) { return Math.abs((g.o === 'v' ? p.x : p.y) - g.p) < tol; }) || null; }
+  function guideSnap(p, tol) {
+    if (!rulersOn) return null; var out = null;
+    drawGuides().forEach(function (g) { var k = g.o === 'v' ? 'x' : 'y', d = Math.abs(p[k] - g.p); if (d < tol && (!out || out[k] == null || d < Math.abs(p[k] - out[k]))) { out = out || {}; out[k] = g.p; } });
+    return out;
+  }
+  function removeDrawGuide(id) { var gs = drawGuides(), i = gs.findIndex(function (g) { return g.id === id; }); if (i >= 0) gs.splice(i, 1); M.selGuide = null; renderOverlay(); renderPanels(); }
+  function guideText(p) { var sc = scaleNow(); return sc ? fmtLen(p * sc.inPerUnit) : String(Math.round(p * 100) / 100); }
+  function guideParse(v) { var sc = scaleNow(); if (sc) { var inch = parseSize(v); return isFinite(inch) ? inch / sc.inPerUnit : null; } var n = parseFloat(v); return isFinite(n) ? n : null; }
+  // Moving items in Draw: the selection's edges and center pull onto guides and, with Smart guides on, onto other items'
+  // edges and centers and the page's edges and middle. b0 is the selection's box where the drag started.
+  function alignMove(b0, skip, dx, dy) {
+    var tol = 6 / M.zoom, tx = [], ty = [];
+    if (rulersOn) drawGuides().forEach(function (g) { (g.o === 'v' ? tx : ty).push(g.p); });
+    if (smartOn) {
+      tx.push(0, M.w / 2, M.w); ty.push(0, M.h / 2, M.h);
+      M.items.forEach(function (it) { if (it.page !== M.page || it.hidden || skip.indexOf(it.id) >= 0) return; var b = itemBox(it); tx.push(b.x, b.x + b.w / 2, b.x + b.w); ty.push(b.y, b.y + b.h / 2, b.y + b.h); });
+    }
+    var bx = nearestLine([b0.x + dx, b0.x + b0.w / 2 + dx, b0.x + b0.w + dx], tx, tol), by = nearestLine([b0.y + dy, b0.y + b0.h / 2 + dy, b0.y + b0.h + dy], ty, tol), lines = [];
+    if (bx) { dx += bx.d; lines.push({ o: 'v', p: bx.t }); }
+    if (by) { dy += by.d; lines.push({ o: 'h', p: by.t }); }
+    return { dx: dx, dy: dy, lines: lines };
+  }
+  // The closest pairing of one of vals with one of the lines ts, within tol: how far to move (d) and to which line (t).
+  function nearestLine(vals, ts, tol) { var r = null; vals.forEach(function (v) { ts.forEach(function (t) { var d = t - v; if (Math.abs(d) < tol && (!r || Math.abs(d) < Math.abs(r.d))) r = { d: d, t: t }; }); }); return r; }
+  // A second click on the same guide soon after the first opens its box. (Both canvases redraw on the first click, so the
+  // browser's own double-click doesn't reach them.)
+  var lastGuideClick = { id: null, t: 0 };
+  function guideDouble(id) { var now = Date.now(), d = lastGuideClick.id === id && now - lastGuideClick.t < 450; lastGuideClick = { id: d ? null : id, t: now }; return d; }
+  // Typing a guide's position: a small box by the pointer. Enter or Set moves it, Delete removes it.
+  var gpop = null;
+  function guidePopup(e, h, gd) {
+    closeGuidePopup(); if (!h || !gd) return;
+    var el = document.createElement('div'), n = h.guides.length;
+    el.className = 'gpop'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Guide position');
+    el.innerHTML = '<label class="field">' + (gd.o === 'v' ? 'From the left edge' : 'From the top edge') + '<input type="text" value="' + esc(h.text(gd.p)) + '" spellcheck="false" autocomplete="off"></label>' +
+      '<div class="row"><button type="button" class="btn strong" data-g="set">Set</button><button type="button" class="btn" data-g="del">Delete</button>' + (n > 1 ? '<button type="button" class="btn" data-g="clear">Delete all ' + n + '</button>' : '') + '</div>';
+    document.body.appendChild(el);
+    var x = Math.min(e.clientX + 12, window.innerWidth - el.offsetWidth - 8), y = Math.min(e.clientY + 12, window.innerHeight - el.offsetHeight - 8);
+    el.style.left = Math.max(8, x) + 'px'; el.style.top = Math.max(8, y) + 'px';
+    var inp = el.querySelector('input'); setTimeout(function () { inp.focus(); inp.select(); }, 0);
+    var done = function (act) {
+      if (act === 'set') { var v = h.parse(inp.value); if (v == null || v < 0 || v > (gd.o === 'v' ? h.W : h.H)) { inp.classList.add('bad'); inp.focus(); return; } gd.p = v; }
+      else if (act === 'del') { var i = h.guides.indexOf(gd); if (i >= 0) h.guides.splice(i, 1); }
+      else if (act === 'clear') h.guides.length = 0;
+      h.select(act === 'set' ? gd.id : null); closeGuidePopup(); h.repaint(); h.commit();
+    };
+    el.addEventListener('click', function (ev) { var b = ev.target.closest('[data-g]'); if (b) done(b.dataset.g); });
+    inp.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') { ev.preventDefault(); done('set'); } else if (ev.key === 'Escape') { ev.preventDefault(); closeGuidePopup(); } ev.stopPropagation(); });
+    gpop = { el: el, off: function (ev) { if (!el.contains(ev.target)) closeGuidePopup(); } };
+    setTimeout(function () { if (gpop && gpop.el === el) document.addEventListener('pointerdown', gpop.off, true); }, 0);
+  }
+  function closeGuidePopup() { if (!gpop) return; document.removeEventListener('pointerdown', gpop.off, true); gpop.el.remove(); gpop = null; }
 
   // ---- Overlay ----
   var ovQueued = false;
@@ -1863,6 +1979,15 @@ details[open] > summary .sum { display: none; }
       if (hp2 && M.snapKind === 'line') o += '<path d="M' + hp2.x + ' ' + (hp2.y - 6 * k) + 'l' + 6 * k + ' ' + 6 * k + 'l' + (-6 * k) + ' ' + 6 * k + 'l' + (-6 * k) + ' ' + (-6 * k) + 'z" fill="' + COL.snap + '" stroke="#4a4a4a" stroke-width="1" vector-effect="non-scaling-stroke"/>';
       else if (hp2) o += pt(hp2, COL.snap, true);
     }
+    // Guides (cyan, never printed); the selected one shows its distance from the page's left or top edge. Smart guide
+    // matches show in pink while you drag.
+    if (rulersOn) drawGuides().forEach(function (g) {
+      var v = g.o === 'v', on = g.id === M.selGuide;
+      o += '<line x1="' + (v ? g.p : -M.w) + '" y1="' + (v ? -M.h : g.p) + '" x2="' + (v ? g.p : 2 * M.w) + '" y2="' + (v ? 2 * M.h : g.p) + '" stroke="#00a5c8" stroke-width="' + (on ? 1.75 : 1) + '" vector-effect="non-scaling-stroke" pointer-events="none"/>';
+      if (on && g.p > -1e5) { var lab = guideText(g.p), lw = (lab.length * 6.4 + 8) * k, lx = v ? g.p + 4 * k : 4 * k, ly = v ? 4 * k : g.p - 20 * k;
+        o += '<rect x="' + lx + '" y="' + ly + '" width="' + lw + '" height="' + 16 * k + '" fill="#00a5c8" pointer-events="none"/><text x="' + (lx + 4 * k) + '" y="' + (ly + 12 * k) + '" font-family="Manrope, system-ui, sans-serif" font-size="' + 11 * k + '" fill="#ffffff" pointer-events="none">' + esc(lab) + '</text>'; }
+    });
+    if (M.smart && M.drag) M.smart.forEach(function (l) { var v = l.o === 'v'; o += '<line x1="' + (v ? l.p : -M.w) + '" y1="' + (v ? -M.h : l.p) + '" x2="' + (v ? l.p : 2 * M.w) + '" y2="' + (v ? 2 * M.h : l.p) + '" stroke="#e93d82" stroke-width="1" stroke-dasharray="4 3" vector-effect="non-scaling-stroke" pointer-events="none"/>'; });
     ovEl.innerHTML = o;
     placeTextEd();
   }
@@ -1891,6 +2016,7 @@ details[open] > summary .sum { display: none; }
       return { p: gq ? op : roundLen(op, last, e), snapped: !!gq, kind: gq ? 'grid' : '' };
     }
     if (!e.altKey) { var ds = drawingSnap(p, tol); if (ds) return { p: { x: ds.x, y: ds.y }, snapped: true, kind: ds.kind }; }
+    if (!e.altKey) { var gd = guideSnap(p, tol); if (gd) { var gq2 = gridSnap(p).p; return { p: { x: gd.x != null ? gd.x : gq2.x, y: gd.y != null ? gd.y : gq2.y }, snapped: true, kind: 'guide' }; } }
     if (!e.altKey) { var gs = gridSnap(p, tol); if (gs.on) return { p: roundLen(gs.p, last, e, gs), snapped: true, kind: 'grid' }; }
     return { p: roundLen(p, last, e), snapped: false };
   }
@@ -2337,6 +2463,11 @@ details[open] > summary .sum { display: none; }
       if (M.tool === 'edit') {
         var p = toPage(e), hp = hitPoint(p), before = selIds(), deep = e.metaKey || e.ctrlKey;
         var hs = hp ? null : hitSegment(p), hitId = hp ? hp.item : hs ? hs.item : null;
+        M.selGuide = null;
+        // A guide (where nothing else is): select it and drag to move it.
+        var gh = !hitId && !e.shiftKey ? hitDrawGuide(p) : null;
+        if (gh && guideDouble(gh.id)) { setSel([], null); M.selGuide = gh.id; e.preventDefault(); renderOverlay(); renderPanels(); guidePopup(e, rulerHost(), gh); return; }
+        if (gh) { setSel([], null); M.selGuide = gh.id; M.drag = { guide: gh.id, moved: false }; pageEl.setPointerCapture(e.pointerId); renderOverlay(); renderPanels(); return; }
         // Empty canvas: drag a box to select everything it touches (Shift adds to the selection).
         if (!hitId) {
           setSel(e.shiftKey ? before : [], M.sel && M.sel.item);
@@ -2395,10 +2526,18 @@ details[open] > summary .sum { display: none; }
     });
     pageEl.addEventListener('pointermove', function (e) {
       M.cur = toPage(e);
+      if (M.drag && M.drag.guide != null) {
+        var gm = drawGuides().find(function (g) { return g.id === M.drag.guide; }), hg = rulerHost();
+        if (gm && hg) { gm.p = hg.round(gm.o === 'v' ? M.cur.x : M.cur.y, e); M.drag.moved = true; renderOverlay(); }
+        return;
+      }
       if (M.drag && M.drag.multi) {
         var mq = M.cur, mdx = mq.x - M.drag.from.x, mdy = mq.y - M.drag.from.y;
+        if (!M.drag.box0) M.drag.box0 = M.drag.ids.reduce(function (b, id) { var it = itemById(id); return it ? unionBox(b, itemBox(it)) : b; }, null);
+        M.smart = null;
         if (e.shiftKey) { if (Math.abs(mdx) > Math.abs(mdy)) mdy = 0; else mdx = 0; }
-        else if (!e.altKey && M.drag.ref) { var rf2 = M.drag.ref, sn2 = snapMove({ x: rf2.x + mdx, y: rf2.y + mdy }, M.drag.ids); mdx = sn2.p.x - rf2.x; mdy = sn2.p.y - rf2.y; M.snapped = !!sn2.kind; M.snapKind = sn2.kind; }
+        else if (!e.altKey && M.drag.ref) { var rf2 = M.drag.ref, sn2 = snapMove({ x: rf2.x + mdx, y: rf2.y + mdy }, M.drag.ids); mdx = sn2.p.x - rf2.x; mdy = sn2.p.y - rf2.y; M.snapped = !!sn2.kind; M.snapKind = sn2.kind;
+          if (sn2.kind !== 'point' && M.drag.box0) { var al2 = alignMove(M.drag.box0, M.drag.ids, mdx, mdy); mdx = al2.dx; mdy = al2.dy; M.smart = al2.lines; } }
         M.drag.ids.forEach(function (id) { var it = itemById(id), o = M.drag.orig[id]; if (!it) return; it.pts = o.pts.map(function (q) { return Object.assign({}, q, { x: q.x + mdx, y: q.y + mdy }); }); if (o.lab) it.lab = { x: o.lab.x + mdx, y: o.lab.y + mdy }; });
         M.drag.moved = M.drag.moved || Math.hypot(mdx, mdy) * M.zoom > 1; renderOverlay(); return;
       }
@@ -2431,7 +2570,11 @@ details[open] > summary .sum { display: none; }
         if (M.drag.whole) {
           var ddx = dp.x - M.drag.from.x, ddy = dp.y - M.drag.from.y;
           // The point you grabbed nearest lands on the grid or on another item's point (Alt moves freely).
-          if (!e.altKey && M.drag.ref) { var rf = M.drag.ref, sn = snapMove({ x: rf.x + ddx, y: rf.y + ddy }, dit.id); ddx = sn.p.x - rf.x; ddy = sn.p.y - rf.y; M.snapped = !!sn.kind; M.snapKind = sn.kind; } dit.pts = M.drag.orig.map(function (q) { return { x: q.x + ddx, y: q.y + ddy }; }); }
+          if (!M.drag.box0) M.drag.box0 = itemBox(dit);
+          M.smart = null;
+          if (!e.altKey && M.drag.ref) { var rf = M.drag.ref, sn = snapMove({ x: rf.x + ddx, y: rf.y + ddy }, dit.id); ddx = sn.p.x - rf.x; ddy = sn.p.y - rf.y; M.snapped = !!sn.kind; M.snapKind = sn.kind;
+            if (sn.kind !== 'point') { var al = alignMove(M.drag.box0, [dit.id], ddx, ddy); ddx = al.dx; ddy = al.dy; M.smart = al.lines; } }
+          dit.pts = M.drag.orig.map(function (q) { return { x: q.x + ddx, y: q.y + ddy }; }); }
         else { var c = M.drag.c, f = Math.max(0.02, dist(dp, c) / M.drag.d0); dit.pts = M.drag.orig.map(function (q) { return { x: c.x + (q.x - c.x) * f, y: c.y + (q.y - c.y) * f }; }); scaleExtras(dit, f, M.drag.ox); }
         M.drag.moved = true; renderOverlay(); return;
       }
@@ -2471,8 +2614,15 @@ details[open] > summary .sum { display: none; }
         return;
       }
       if (M.drag && M.drag.marquee) { M.drag = null; renderOverlay(); renderPanels(); return; }
+      if (M.drag && M.drag.guide != null) {   // dropped on a ruler or off the page: gone
+        var gdr = M.drag; M.drag = null;
+        var gg = drawGuides().find(function (g) { return g.id === gdr.guide; });
+        if (gg && gdr.moved && (overRuler(e) || gg.p < 0 || gg.p > (gg.o === 'v' ? M.w : M.h))) removeDrawGuide(gg.id);
+        else { renderOverlay(); renderPanels(); }
+        return;
+      }
       if (M.drag) {
-        var dd = M.drag, moved = dd.moved; M.drag = null; pageEl.classList.remove('dragging');
+        var dd = M.drag, moved = dd.moved; M.drag = null; M.smart = null; pageEl.classList.remove('dragging');
         if (!moved && dd.inserted) { var di = itemById(dd.item); if (di) { di.pts.splice(dd.idx, 1); M.sel = { item: di.id, pt: null }; } }
         if (!moved && dd.pick) { setSel(dd.pick.before, dd.pick.before[0]); pickItem(dd.pick.id, true); renderOverlay(); renderPanels(); return; }
         if (moved) renderPanels(); renderOverlay(); return;
@@ -2486,6 +2636,7 @@ details[open] > summary .sum { display: none; }
       e.preventDefault();
       if (M.tool === 'edit') {
         var p = toPage(e), dtx = hitText(p), dhp = hitPoint(p), dpi = dhp && itemById(dhp.item);
+        if (M.selGuide != null && hitDrawGuide(p)) return;
         if (dtx && !dhp) { startTextEdit(dtx); return; }
         if (dpi && (dpi.shape === 'poly' || dpi.shape === 'line')) { toggleSmooth(dpi, dhp.idx); if (dpi.type === 'length') dpi.type = 'run'; M.sel = { item: dpi.id, pt: null }; renderOverlay(); renderPanels(); return; }
         if (!dhp) { var hs = hitSegment(p); if (hs && hs.seg >= 0) insertPoint(hs); } return;
@@ -2553,9 +2704,10 @@ details[open] > summary .sum { display: none; }
     else if (e.key === 'Enter') { if (e.target.tagName === 'BUTTON') e.preventDefault(); finish(); }
     else if (e.key === ',') { openPanel('drawing'); }
     else if (e.key === '.') { openPanel('export'); }
-    else if (e.key === 'Escape') { if (!M.draft.length && !M.calib.length && !M.sel && (M.panel || M.dock)) { setDock(M.panel || M.dock); return; } M.draft = []; M.calib = []; M.sel = null; renderOverlay(); renderPanels(); }
+    else if (e.key === 'Escape') { if (!M.draft.length && !M.calib.length && !M.sel && (M.panel || M.dock)) { setDock(M.panel || M.dock); return; } M.draft = []; M.calib = []; M.sel = null; M.selGuide = null; renderOverlay(); renderPanels(); }
     else if ((e.key === 'Backspace' || e.key === 'Delete') && M.draft.length) { M.draft.pop(); renderOverlay(); e.preventDefault(); }
     else if ((e.key === 'Backspace' || e.key === 'Delete') && M.sel) { deleteSelection(); e.preventDefault(); }
+    else if ((e.key === 'Backspace' || e.key === 'Delete') && M.selGuide != null) { removeDrawGuide(M.selGuide); e.preventDefault(); }
     else if (ARROWS[e.key] && M.sel) { var d = ARROWS[e.key], f = e.shiftKey ? 10 : 1; nudge(d[0] * f, d[1] * f); e.preventDefault(); }
     else if (e.shiftKey && key === 'r') { toggleRulers(); }
     else if ((e.key === 'PageDown' || e.key === 'PageUp') && M.pages > 1) { var to = M.page + (e.key === 'PageDown' ? 1 : -1); if (to >= 1 && to <= M.pages) goPage(to); e.preventDefault(); }
@@ -3159,7 +3311,7 @@ details[open] > summary .sum { display: none; }
   // A left card's header on wide windows: its name, a note, and a close button.
   function cardHead(title, sub) { return flOn() ? '<div class="dk-head"><b>' + esc(title) + '</b><span class="dk-sub">' + esc(sub || '') + '</span><button type="button" class="dk-x" data-cardclose="l" aria-label="Close">×</button></div>' : ''; }
   // Shop drawing: each section of the Sheet card is a dock chip; the card shows the one picked (Export from the top right).
-  var SHOP_SECS = [['sh_sheet', 'Sheet'], ['sh_view', 'Drawing'], ['sh_guides', 'Guides'], ['sh_pics', 'Images'], ['sh_tb', 'Title block'], ['sh_exp', 'Export']];
+  var SHOP_SECS = [['sh_sheet', 'Sheet'], ['sh_view', 'Drawing'], ['sh_pics', 'Images'], ['sh_tb', 'Title block'], ['sh_exp', 'Export']];
   function shopFocus() { var f = UI.shop.focus; return SHOP_SECS.some(function (x) { return x[0] === f; }) ? f : 'sh_sheet'; }
   function shopFocusRight() {
     var old = rightEl.querySelector(':scope > .dk-head'); if (old) old.remove();
@@ -3330,6 +3482,7 @@ details[open] > summary .sum { display: none; }
     new: '<path d="M4 2h7l4 4v10H4z M11 2v4h4M9.5 8.5v5M7 11h5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round"/>',
     open: '<path d="M2 5V3.5h5l1.5 1.5H16v2M2 5v10h12.5L17 7.5H4.5L2 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
     save: '<path d="M3 3h10l2 2v10H3z M6 3v4h6V3 M6 15v-5h6v5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>',
+    smart: '<rect x="2" y="3" width="6" height="5" fill="none" stroke="currentColor" stroke-width="1.4"/><rect x="10" y="10" width="6" height="5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M1 8h16" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 1.6"/><path d="M10 1v16" stroke="currentColor" stroke-width="1.1" stroke-dasharray="2 1.6"/>',
     ruler: '<path d="M1.5 6.5h15v5h-15z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M4.5 6.5v2.4M7.5 6.5v1.6M10.5 6.5v2.4M13.5 6.5v1.6" stroke="currentColor" stroke-width="1.2"/>',
     gear: '<g fill="currentColor"><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(0 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(45 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(90 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(135 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(180 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(225 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(270 9 9)"/><rect x="7.6" y="1" width="2.8" height="3.4" rx=".5" transform="rotate(315 9 9)"/></g><circle cx="9" cy="9" r="5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="9" cy="9" r="1.9" fill="none" stroke="currentColor" stroke-width="1.4"/>'
   };
@@ -3349,7 +3502,8 @@ details[open] > summary .sum { display: none; }
       tr.hidden = false;
       var rv = mode === 'layout' ? (Lay.getFocus() === 'export' ? 'export' : 'edit') : '', rOpen = !!UI[mode].r;
       if (mode === 'shop') rv = shopFocus() === 'sh_exp' ? 'export' : 'edit';
-      tr.innerHTML = undo() + gap + sq('settings', 'gear', (mode === 'layout' ? 'Layout settings' : 'Sheet settings') + ' (,)', rOpen && rv !== 'export') +
+      var guideBtns = mode === 'shop' ? sq('rulers', 'ruler', 'Rulers and guides (Shift+R)', rulersOn) + sq('smart', 'smart', 'Smart guides: line things up with other items as you drag', smartOn) + gap : '';
+      tr.innerHTML = undo() + gap + guideBtns + sq('settings', 'gear', (mode === 'layout' ? 'Layout settings' : 'Sheet settings') + ' (,)', rOpen && rv !== 'export') +
         '<button type="button" class="sqx' + (rOpen && rv === 'export' ? ' on' : '') + '" data-fa="export" title="Export (.)">' + ficon('export') + 'Export</button>';
       return;
     }
@@ -3358,7 +3512,8 @@ details[open] > summary .sum { display: none; }
     var h = undo() + gap;
     if (blank) h += sq('grid', 'grid', 'Show the grid', M.blank.grid) + '<select class="sqsel" id="f-gstep" title="Grid size" aria-label="Grid size">' + gridSteps().map(function (g) { return '<option value="' + g[0] + '"' + (g[0] === M.blank.step ? ' selected' : '') + '>' + g[1] + '</option>'; }).join('') + '</select>' + sq('snap', 'magnet', 'Snap to the grid (hold Alt to place freely)', M.blank.snap);
     else h += sq('snapd', 'magnet', M.src === 'pdf' ? 'Snap to the drawing’s lines (hold Alt to place freely)' : 'Only PDFs have lines to snap to', M.snapDrawing && M.src === 'pdf', M.src === 'pdf' ? '' : ' disabled');
-    h += sq('rulers', 'ruler', 'Rulers (Shift+R)', rulersOn && M.src !== 'none', M.src === 'none' ? ' disabled' : '');
+    h += sq('rulers', 'ruler', 'Rulers and guides (Shift+R)', rulersOn && M.src !== 'none', M.src === 'none' ? ' disabled' : '');
+    h += sq('smart', 'smart', 'Smart guides: line things up with other items as you drag', smartOn && M.src !== 'none', M.src === 'none' ? ' disabled' : '');
     h += sq('tags', 'dims', 'Dimensions on the drawing: ' + tm[1] + ' (click to change)', M.tags !== 'off', '', M.tags === 'size' ? 'S' : M.tags === 'off' ? '' : 'N') + gap;
     h += sq('settings', 'gear', 'Drawing settings (,)', dockOn() && M.panel === 'drawing');
     h += '<button type="button" class="sqx' + (dockOn() && M.panel === 'export' ? ' on' : '') + '" data-fa="export" title="Export a marked-up PDF or JPG, the list or a CSV (.)">' + ficon('export') + 'Export</button>';
@@ -3387,9 +3542,10 @@ details[open] > summary .sum { display: none; }
   $('fbar-tr').addEventListener('click', function (e) {
     var b = e.target.closest('[data-fa]'); if (!b) return;
     var a = b.dataset.fa;
+    if (a === 'rulers' && mode !== 'layout') { toggleRulers(); return; }
+    if (a === 'smart' && mode !== 'layout') { toggleSmart(); return; }
     if (mode === 'layout' || mode === 'shop') { if (a === 'undo') History.undo(); else if (a === 'redo') History.redo(); else if (a === 'settings') openPanel('drawing'); else if (a === 'export') openPanel('export'); renderFloat(); return; }
     if (mode !== 'measure') return;
-    if (a === 'rulers') { toggleRulers(); return; }
     if (a === 'undo') History.undo();
     else if (a === 'redo') History.redo();
     else if (a === 'grid') { setBlankOpt('grid', !M.blank.grid); paintGrid(); renderRight(); }
@@ -3412,21 +3568,24 @@ details[open] > summary .sum { display: none; }
     var stack = [], redo = [], restoring = false, api = { ready: false };
     // Pages are kept by id, name, file page and size: adding, removing, moving or resizing a page undoes; the grid and snap
     // switches don't, and neither does which page is open.
-    function pagesSnap() { return (M.pageList || []).map(function (p) { return { id: p.id, kind: p.kind, name: p.name, fp: p.fp, w: p.w, h: p.h }; }); }
+    function pagesSnap() { return (M.pageList || []).map(function (p) { return { id: p.id, kind: p.kind, name: p.name, fp: p.fp, w: p.w, h: p.h, guides: p.guides || [] }; }); }
     function snap() { return JSON.stringify({ items: M.items, scales: M.scales, n: M.n, nextId: nextId, pages: pagesSnap(), lay: Lay.getState(), shop: Shop.getState() }); }
     // Back to a saved page list, keeping each page's own record (and its grid settings) where it still exists.
     function restorePages(list) {
-      var before = JSON.stringify(pagesSnap()), openId = (pageRec() || {}).id, cur = {};
+      // Only a change to the pages themselves reopens the page; guides just redraw.
+      var shape = function () { return JSON.stringify(pagesSnap().map(function (q) { delete q.guides; return q; })); };
+      var before = shape(), openId = (pageRec() || {}).id, cur = {};
       M.pageList.forEach(function (p) { cur[p.id] = p; });
       M.pageList = list.map(function (q) {
         var r = cur[q.id] || { id: q.id, kind: q.kind };
         r.name = q.name; r.w = q.w; r.h = q.h; if (q.kind === 'file') r.fp = q.fp;
+        r.guides = (q.guides || []).map(function (g) { return { id: g.id, o: g.o, p: g.p }; });
         if (q.kind === 'blank') { var b = r.blank || blankDefault(); r.blank = normBlank({ w: q.w, h: q.h, grid: b.grid, snap: b.snap, step: b.step }); }
         return r;
       });
       syncPages();
       var at = pageById(openId) || Math.min(M.page, M.pages);
-      return JSON.stringify(pagesSnap()) !== before || at !== M.page ? at : 0;
+      return shape() !== before || at !== M.page ? at : 0;
     }
     api.record = function () {
       if (restoring || !api.ready) return;
@@ -3511,7 +3670,7 @@ details[open] > summary .sum { display: none; }
     function usePages(filePages) {
       var list = (st.pages && st.pages.length ? st.pages : null), ids = {};
       if (list) list = list.map(function (q) {
-        var r = { id: q.id, kind: q.kind === 'blank' ? 'blank' : 'file', name: String(q.name || ''), fp: q.fp || 1, w: q.w, h: q.h };
+        var r = { id: q.id, kind: q.kind === 'blank' ? 'blank' : 'file', name: String(q.name || ''), fp: q.fp || 1, w: q.w, h: q.h, guides: (q.guides || []).filter(function (g) { return g && (g.o === 'v' || g.o === 'h') && isFinite(g.p); }).map(function (g) { return { id: g.id, o: g.o, p: g.p }; }) };
         if (r.kind === 'blank') { r.blank = normBlank(q.blank || q); r.w = r.blank.w; r.h = r.blank.h; delete r.fp; }
         else { var f = filePages.find(function (x) { return x.fp === r.fp; }); if (!f) return null; r.w = f.w; r.h = f.h; }
         return r;
@@ -6209,7 +6368,7 @@ details[open] > summary .sum { display: none; }
     function toolCard() { var ti = TOOL_INFO[tool] || TOOL_INFO.select; return '<div class="block toolcard"><div class="tool-name">' + ti[0] + ' <kbd>' + ti[1] + '</kbd></div><p class="tip">' + ti[2] + '</p></div>'; }
     var SIZES = [8, 10, 12, 14, 18, 24, 36, 48, 72], WIDTHS = [0.5, 1, 1.5, 2, 3, 4, 6];
     // S is the open sheet, one of sheets; every sheet keeps its own paper, drawing, title block and items.
-    var S = fresh(), sheets = [S], cur = 0, logo = null, pics = {}, sel = null, multi = [], selGuide = null, guidesOn = true, tool = 'select', drag = null, metrics = null, svg = null, note = '', busy = false;
+    var S = fresh(), sheets = [S], cur = 0, logo = null, pics = {}, sel = null, multi = [], selGuide = null, smartLines = [], curPt = null, tool = 'select', drag = null, metrics = null, svg = null, note = '', busy = false;
     // A sheet shows its main drawing in the frame (the sheet itself holds its settings) and any number of drawing boxes,
     // which are sheet items (k: 'view') with the same settings plus a caption. Each keeps its own rendered image here, by id.
     var vstate = {};
@@ -6629,12 +6788,13 @@ details[open] > summary .sum { display: none; }
       var built = prims(false), g = built.g, o = built.P.map(primSvg).join(''), k = 1 / pxPerPt(), F = g.frame;
       o += '<rect x="' + F.x + '" y="' + F.y + '" width="' + F.w + '" height="' + F.h + '" fill="none" stroke="#3e7bfa" stroke-opacity=".35" stroke-width="' + k + '" stroke-dasharray="' + 4 * k + ' ' + 3 * k + '" pointer-events="none"/>';
       // Guides: cyan lines across the sheet that never print. The selected one shows how far it is from the sheet's left or top edge.
-      if (guidesOn) (S.guides || []).forEach(function (gd) {
+      if (rulersOn) (S.guides || []).forEach(function (gd) {
         var on = gd.id === selGuide, v = gd.o === 'v';
         o += '<line x1="' + (v ? gd.p : 0) + '" y1="' + (v ? 0 : gd.p) + '" x2="' + (v ? gd.p : g.W) + '" y2="' + (v ? g.H : gd.p) + '" stroke="#00a5c8" stroke-width="' + (on ? 1.75 : 1) * k + '" pointer-events="none"/>';
         if (on) { var lab = inStr(gd.p / 72), fs = 11 * k, lw = (lab.length * 6.4 + 8) * k, lx = v ? Math.min(gd.p + 4 * k, g.W - lw) : 4 * k, ly = v ? 4 * k : Math.max(gd.p - 20 * k, 0);
           o += '<rect x="' + lx + '" y="' + ly + '" width="' + lw + '" height="' + 16 * k + '" fill="#00a5c8" pointer-events="none"/><text x="' + (lx + 4 * k) + '" y="' + (ly + 12 * k) + '" font-family="Helvetica, Arial, sans-serif" font-size="' + fs + '" fill="#ffffff" pointer-events="none">' + esc(lab) + '</text>'; }
       });
+      if (drag && drag.move) smartLines.forEach(function (l) { var v = l.o === 'v'; o += '<line x1="' + (v ? l.p : 0) + '" y1="' + (v ? 0 : l.p) + '" x2="' + (v ? l.p : g.W) + '" y2="' + (v ? g.H : l.p) + '" stroke="#e93d82" stroke-width="' + k + '" stroke-dasharray="' + 4 * k + ' ' + 3 * k + '" pointer-events="none"/>'; });
       selList().forEach(function (m) { if (m.id === sel) return; if (m.k === 'dim') { var mg = dimGeo(m); o += '<line x1="' + mg.a.x + '" y1="' + mg.a.y + '" x2="' + mg.b.x + '" y2="' + mg.b.y + '" stroke="#3e7bfa" stroke-opacity=".5" stroke-width="' + 5 * k + '" pointer-events="none"/>'; } else if (m.k === 'line' || m.k === 'arrow') o += '<line x1="' + m.x1 + '" y1="' + m.y1 + '" x2="' + m.x2 + '" y2="' + m.y2 + '" stroke="#3e7bfa" stroke-opacity=".5" stroke-width="' + 5 * k + '" pointer-events="none"/>'; else { var mb = box(m); o += '<rect x="' + mb.x + '" y="' + mb.y + '" width="' + mb.w + '" height="' + mb.h + '" fill="none" stroke="#3e7bfa" stroke-width="' + k + '" stroke-dasharray="' + 4 * k + ' ' + 3 * k + '" pointer-events="none"/>'; } });
       var n = sel != null && noteById(sel);
       if (n) {
@@ -6643,6 +6803,7 @@ details[open] > summary .sum { display: none; }
         handlesOf(n).forEach(function (hd) { o += '<rect x="' + (hd.x - 4 * k) + '" y="' + (hd.y - 4 * k) + '" width="' + 8 * k + '" height="' + 8 * k + '" fill="#ffffff" stroke="#3e7bfa" stroke-width="' + 1.5 * k + '"/>'; });
       }
       if (tool === 'dim') o += dimPreview(k);
+      paintRulersSoon();
       svg.innerHTML = o;
       svg.style.cursor = tool === 'hand' ? (drag && drag.pan ? 'grabbing' : 'grab') : tool === 'select' ? 'default' : 'crosshair';
     }
@@ -6674,21 +6835,35 @@ details[open] > summary .sum { display: none; }
     function pageOpts(n) { return M.pageList.map(function (p, i) { return '<option value="' + p.id + '"' + (i + 1 === n ? ' selected' : '') + '>' + esc(p.name) + '</option>'; }).join(''); }
     function srcName(src) { return src === 'measure' ? 'Draw: ' + (M.src === 'none' ? 'no drawing open' : baseName()) : 'Layout: ' + SOURCES[src]; }
     function guideById(id) { return (S.guides || []).find(function (gd) { return gd.id === id; }); }
-    function hitGuide(p) { if (!guidesOn) return null; var tol = 5 / pxPerPt(); return (S.guides || []).slice().reverse().find(function (gd) { return Math.abs((gd.o === 'v' ? p.x : p.y) - gd.p) < tol; }) || null; }
-    // A new guide goes through the middle of the drawing frame, stepped aside if one is already there.
-    function addGuide(o) {
-      var F = geom().frame, at = o === 'v' ? F.x + F.w / 2 : F.y + F.h / 2; S.guides = S.guides || [];
-      while (S.guides.some(function (gd) { return gd.o === o && Math.abs(gd.p - at) < 1; })) at += 18;
-      var gd = { id: S.nextId++, o: o, p: at }; S.guides.push(gd); guidesOn = true; selGuide = gd.id; sel = null; tool = 'select';
-    }
-    // Moving something near a guide pulls its edge or center (a line's ends) onto it. Alt turns this off.
-    function snapToGuides(n) {
-      if (!guidesOn || !(S.guides || []).length || n.k === 'dim') return;
-      var tol = 6 / pxPerPt(), ln = n.k === 'line' || n.k === 'arrow', b = ln ? null : box(n);
+    function hitGuide(p) { if (!rulersOn) return null; var tol = 5 / pxPerPt(); return (S.guides || []).slice().reverse().find(function (gd) { return Math.abs((gd.o === 'v' ? p.x : p.y) - gd.p) < tol; }) || null; }
+    // Moving something pulls its edges or center (a line's ends) onto a guide and, with Smart guides on, onto other items'
+    // edges and centers and the frame's edges and middle (a pink line shows the match). skip: the others moving with it.
+    function snapToGuides(n, skip) {
+      smartLines = []; if (n.k === 'dim') return;
+      var tol = 6 / pxPerPt(), ln = n.k === 'line' || n.k === 'arrow', b = ln ? null : box(n), tx = [], ty = [];
       var xs = ln ? [n.x1, n.x2] : [b.x, b.x + b.w / 2, b.x + b.w], ys = ln ? [n.y1, n.y2] : [b.y, b.y + b.h / 2, b.y + b.h];
-      var near = function (vals, o) { var best = null; S.guides.forEach(function (gd) { if (gd.o !== o) return; vals.forEach(function (v) { var d = gd.p - v; if (Math.abs(d) < tol && (best == null || Math.abs(d) < Math.abs(best))) best = d; }); }); return best || 0; };
-      var dx = near(xs, 'v'), dy = near(ys, 'h');
+      if (rulersOn) (S.guides || []).forEach(function (gd) { (gd.o === 'v' ? tx : ty).push(gd.p); });
+      if (smartOn) {
+        var g = geom(), F = g.frame; tx.push(F.x, F.x + F.w / 2, F.x + F.w); ty.push(F.y, F.y + F.h / 2, F.y + F.h);
+        S.notes.forEach(function (m) {
+          if (m === n || m.k === 'dim' || (skip || []).indexOf(m.id) >= 0) return;
+          if (m.k === 'line' || m.k === 'arrow') { tx.push(m.x1, m.x2); ty.push(m.y1, m.y2); return; }
+          var mb = box(m); tx.push(mb.x, mb.x + mb.w / 2, mb.x + mb.w); ty.push(mb.y, mb.y + mb.h / 2, mb.y + mb.h);
+        });
+      }
+      var bx = nearestLine(xs, tx, tol), by = nearestLine(ys, ty, tol), dx = bx ? bx.d : 0, dy = by ? by.d : 0;
+      if (bx) smartLines.push({ o: 'v', p: bx.t }); if (by) smartLines.push({ o: 'h', p: by.t });
       if (ln) { n.x1 += dx; n.x2 += dx; n.y1 += dy; n.y2 += dy; } else { n.x += dx; n.y += dy; }
+    }
+    // The rulers along the sheet: inches from the paper's top left corner.
+    function rulerHost() {
+      if (mode !== 'shop' || !svg || !svg.clientWidth) return null;
+      var g = geom(), z = pxPerPt(), sb = null; S.guides = S.guides || [];
+      selList().forEach(function (m) { if (m.k === 'dim') return; var mb = m.k === 'line' || m.k === 'arrow' ? { x: Math.min(m.x1, m.x2), y: Math.min(m.y1, m.y2), w: Math.abs(m.x2 - m.x1), h: Math.abs(m.y2 - m.y1) } : box(m); sb = unionBox(sb, mb); });
+      return { el: svg, z: z, W: g.W, H: g.H, spec: rulerSpec(RUL_IMP, 72, z, 'sheet'), sel: sb, cur: curPt, guides: S.guides, corner: 'in',
+        round: function (v, e) { return e.shiftKey ? Math.round(v / 9) * 9 : v; },   // Shift: whole 1/8" of sheet
+        text: function (v) { return inStr(v / 72); }, parse: function (t) { var v = parseLen(t, true); return isFinite(v) && v >= 0 ? v * 72 : null; },
+        select: function (id) { selGuide = id; if (id != null) { sel = null; multi = []; } }, repaint: paint, commit: function () { left(); History.record(); } };
     }
     function toSheet(e) { var r = svg.getBoundingClientRect(), g = geom(); return { x: (e.clientX - r.left) / r.width * g.W, y: (e.clientY - r.top) / r.height * g.H }; }
     function hitHandle(p) { var n = sel != null && noteById(sel), tol = 7 / pxPerPt(); if (!n) return null;
@@ -6736,6 +6911,7 @@ details[open] > summary .sum { display: none; }
           } else if (n && isSel(n.id)) { if (sel !== n.id) { multi = multi.filter(function (x) { return x !== n.id; }); multi.push(sel); sel = n.id; } selGuide = null; }
           else { sel = n ? n.id : null; multi = []; selGuide = gh ? gh.id : null; }
           if (n) drag = { move: true, id: n.id, orig: JSON.parse(JSON.stringify(n)), p: p, group: selList().filter(function (x) { return x !== n; }).map(function (x) { return { n: x, orig: JSON.parse(JSON.stringify(x)) }; }) };
+          else if (gh && guideDouble(gh.id)) { e.preventDefault(); paint(); left(); guidePopup(e, rulerHost(), gh); return; }
           else if (gh) drag = { guide: gh.id, p: p };
           paint(); left(); return;
         }
@@ -6754,7 +6930,9 @@ details[open] > summary .sum { display: none; }
         }
         var nn = newNote(tool, p, p); S.notes.push(nn); sel = nn.id; multi = []; drag = { create: true, id: nn.id, p: p }; paint();
       });
+      svg.addEventListener('pointerleave', function () { curPt = null; paintRulersSoon(); });
       svg.addEventListener('pointermove', function (e) {
+        curPt = toSheet(e); paintRulersSoon();
         if (tool === 'dim' && !drag) { var hp = toSheet(e); dimMouse = hp; dimHover = e.altKey ? null : snapAt(hp); paint(); return; }
         if (!drag) return;
         var p = toSheet(e), dx = p.x - drag.p.x, dy = p.y - drag.p.y, n = drag.id != null && noteById(drag.id);
@@ -6769,9 +6947,9 @@ details[open] > summary .sum { display: none; }
           var o = drag.orig;
           moveNote(n, o, dx, dy);
           if (drag.group && drag.group.length) {   // the others follow the key item, snap included
-            if (!e.altKey) { var bx = n.x, by = n.y, bx1 = n.x1, by1 = n.y1; snapToGuides(n); dx += (n.x != null ? n.x - bx : n.x1 - bx1) || 0; dy += (n.y != null ? n.y - by : n.y1 - by1) || 0; }
+            if (!e.altKey) { var bx = n.x, by = n.y, bx1 = n.x1, by1 = n.y1; snapToGuides(n, drag.group.map(function (gm) { return gm.n.id; })); dx += (n.x != null ? n.x - bx : n.x1 - bx1) || 0; dy += (n.y != null ? n.y - by : n.y1 - by1) || 0; } else smartLines = [];
             drag.group.forEach(function (gm) { moveNote(gm.n, gm.orig, dx, dy); });
-          } else if (!e.altKey) snapToGuides(n);
+          } else if (!e.altKey) snapToGuides(n); else smartLines = [];
         } else if (drag.handle && n.k === 'dim') {
           if (drag.handle === 'lab') n.lt = (drag.orig.lt || 0) + (n.o === 'h' ? dx : dy);
           else { var hp2 = { x: drag.orig[drag.handle].x + dx, y: drag.orig[drag.handle].y + dy }, hs2 = e.altKey ? null : snapAt(hp2); n[drag.handle] = dimPt(hs2 || hp2, hs2); }
@@ -6792,12 +6970,13 @@ details[open] > summary .sum { display: none; }
         }
         paint();
       });
-      svg.addEventListener('pointerup', function () {
+      svg.addEventListener('pointerup', function (e) {
         if (!drag) return;
         var d = drag, n = d.id != null && noteById(d.id); drag = null;
-        if (d.guide != null) {   // a guide dragged off the sheet is removed
+        smartLines = [];
+        if (d.guide != null) {   // a guide dragged onto a ruler or off the sheet is removed
           var gu = guideById(d.guide), gg = geom();
-          if (gu && (gu.p < 0 || gu.p > (gu.o === 'v' ? gg.W : gg.H))) { S.guides = S.guides.filter(function (x) { return x !== gu; }); selGuide = null; d.moved = true; }
+          if (gu && d.moved && (overRuler(e) || gu.p < 0 || gu.p > (gu.o === 'v' ? gg.W : gg.H))) { S.guides = S.guides.filter(function (x) { return x !== gu; }); selGuide = null; d.moved = true; }
           right();
         }
         if (d.handle && n && n.k === 'figure') { var rr = realPerPt(); if (isFinite(rr)) n.hIn = Math.max(1, Math.round(Math.abs(n.h) * rr * 4) / 4); fitFig(n); }
@@ -6815,6 +6994,7 @@ details[open] > summary .sum { display: none; }
         if (d.create && n && n.k === 'text') { var ta = leftEl.querySelector('[data-sn="text"]'); if (ta) { ta.focus(); ta.select(); } }
       });
       svg.addEventListener('dblclick', function (e) {
+        if (selGuide != null && !hitNote(toSheet(e)) && hitGuide(toSheet(e))) return;
         var n = hitNote(toSheet(e)); if (n && n.k === 'text') { sel = n.id; left(); var ta = leftEl.querySelector('[data-sn="text"]'); if (ta) { ta.focus(); ta.select(); } }
       });
     }
@@ -6940,10 +7120,6 @@ details[open] > summary .sum { display: none; }
       dv += '<div class="label" style="margin-top:6px">More drawings on this sheet' + (nv ? ' (' + nv + ')' : '') + '</div><div class="row"><select data-addsrc aria-label="Drawing to add">' + ['graphic', 'markers', 'film', 'mural', 'measure'].map(function (k) { return '<option value="' + k + '">' + esc(srcName(k)) + '</option>'; }).join('') + '</select><button type="button" class="btn" data-sact="addview">+ Add</button></div>' +
         '<p class="hint keep" style="margin:0">Adds a drawing box you can move and resize, with its own runs, scale and caption. Select it to set those in the left panel.</p>';
       h += sec('sh_view', 'Drawing', dv);
-      var ng = (S.guides || []).length;
-      h += sec('sh_guides', 'Guides', '<div class="row"><button type="button" class="btn" data-sact="guidev">+ Vertical</button><button type="button" class="btn" data-sact="guideh">+ Horizontal</button>' + (ng ? '<button type="button" class="btn" data-sact="guideclear">Clear</button>' : '') + '</div>' +
-        (ng ? '<label class="chk"><input type="checkbox" data-sguides="1"' + (guidesOn ? ' checked' : '') + '> Show guides (' + ng + ')</label>' : '') +
-        '<p class="hint" style="margin:0">Guides line things up and never print. Drag one with Select to move it (Shift for whole 1/8"); drag it off the sheet or press Delete to remove it. Text, shapes and images snap to guides as you move them; hold Alt to place freely. A new sheet keeps this sheet\u2019s guides.</p>');
       h += sec('sh_pics', 'Images', '<div class="row"><label class="btn" for="shop-pic">Upload image</label><input type="file" id="shop-pic" accept="image/*" multiple hidden></div><p class="hint" style="margin:0">Photos, renderings or logos go on the sheet. Drag to move, drag a corner to resize. You can also drop image files on the sheet.</p>');
       var f = function (label, key, ph) { return '<label class="field">' + label + '<input type="text" data-stb="' + key + '" value="' + esc(t[key]) + '"' + (ph ? ' placeholder="' + esc(ph) + '"' : '') + '></label>'; };
       var on = S.tbStyle !== 'none';
@@ -7071,7 +7247,6 @@ details[open] > summary .sum { display: none; }
       if (el.id === 'shop-logo') { readLogo(el.files && el.files[0]); el.value = ''; return; }
       if (el.id === 'shop-pic') { addPics(el.files); el.value = ''; return; }
       if (d.stb) { tabsBar(); History.record(); return; }
-      if (d.sguides) { guidesOn = el.checked; if (!guidesOn) selGuide = null; paint(); return; }
       if (d.frow != null) { var fi = Number(d.frow); S.frowsOff = (S.frowsOff || []).filter(function (x) { return x !== fi; }); if (!el.checked) S.frowsOff.push(fi); all(); History.record(); return; }
       if (d.grun != null) { var gi2 = Number(d.grun); S.grunsOff = (S.grunsOff || []).filter(function (x) { return x !== gi2; }); if (!el.checked) S.grunsOff.push(gi2); all(); History.record(); return; }
       if (d.srun != null) { var ri = Number(d.srun); S.mrunsOff = (S.mrunsOff || []).filter(function (x) { return x !== ri; }); if (!el.checked) S.mrunsOff.push(ri); all(); History.record(); return; }
@@ -7087,8 +7262,6 @@ details[open] > summary .sum { display: none; }
       var b = e.target.closest('[data-sact]'); if (!b) return;
       var a = b.dataset.sact;
       if (sheetAct(a)) return;
-      if (a === 'guidev' || a === 'guideh') { addGuide(a === 'guidev' ? 'v' : 'h'); tools(); all(); History.record(); return; }
-      if (a === 'guideclear') { S.guides = []; selGuide = null; all(); History.record(); return; }
       if (a === 'pdf') exportPdf();
       else if (a === 'pdfone') exportPdf(true);
       else if (a === 'center') { S.pan = { x: 0, y: 0 }; all(); History.record(); }
@@ -7108,6 +7281,7 @@ details[open] > summary .sum { display: none; }
       else if (e.key === 'Escape' && dimDraft) { dimDraft = null; paint(); }
       else if (e.key === 'Escape') { sel = null; selGuide = null; tool = 'select'; tools(); left(); paint(); }
       else if ((e.key === 'PageDown' || e.key === 'PageUp') && sheets.length > 1) { go(cur + (e.key === 'PageDown' ? 1 : -1)); e.preventDefault(); }
+      else if (e.shiftKey && k === 'r') { toggleRulers(); }
       else if (ARROWS[e.key] && n) {
         var st = (e.shiftKey ? 10 : 1), dx = ARROWS[e.key][0] * st, dy = ARROWS[e.key][1] * st;
         selList().forEach(function (m) { moveNote(m, JSON.parse(JSON.stringify(m)), dx, dy); });
@@ -7232,7 +7406,7 @@ details[open] > summary .sum { display: none; }
       cur = Math.max(0, Math.min(sheets.length - 1, st.sheets ? st.cur | 0 : 0)); S = sheets[cur];
       if (sel != null && !noteById(sel)) sel = null; if (selGuide != null && !guideById(selGuide)) selGuide = null; resetViews();
     }
-    return { enter: enter, paint: paint, getState: getState, setState: setState, setLogo: setLogo, getLogo: function () { return logo; }, getPics: getPics, setPics: setPics, addPics: function (files, e) { addPics(files, e && dropAt(e)); },
+    return { enter: enter, paint: paint, rulerHost: rulerHost, getState: getState, setState: setState, setLogo: setLogo, getLogo: function () { return logo; }, getPics: getPics, setPics: setPics, addPics: function (files, e) { addPics(files, e && dropAt(e)); },
       // Open as shop drawing: go to the sheet that already shows this layout, or put it on the open sheet.
       useSource: function (src) { var i = S.src === src ? cur : sheets.map(function (sh) { return sh.src; }).indexOf(src); if (i >= 0) { cur = i; S = sheets[i]; sel = null; return; } S.src = src; S.pan = { x: 0, y: 0 }; } };
   })();
