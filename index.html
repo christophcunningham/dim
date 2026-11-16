@@ -281,6 +281,11 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .layers > .dk-list { flex: 1 1 auto; min-height: 0; overflow: auto; margin: 0; padding: 0 12px 12px; align-content: start; }
 .ly-top { padding-bottom: 10px; border-bottom: 1px solid color-mix(in oklch, var(--line) 18%, transparent); margin-bottom: 10px; }
 .ly-top .dk-line { margin: 6px 12px 0; }
+.ly-lab { margin: 10px 12px 0; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--b02); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ly-break { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 10px; margin: 8px 12px 0; font-size: 11.5px; }
+.ly-break dt { display: flex; align-items: center; gap: 6px; min-width: 0; color: var(--b01); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ly-break dt i { width: 9px; height: 9px; border-radius: 2px; flex: none; }
+.ly-break dd { margin: 0; font-weight: 600; color: var(--b00); white-space: nowrap; text-align: right; }
 .ly-pills { display: flex; flex-wrap: wrap; gap: 4px; margin: 10px 12px 0; }
 .ly-pill { height: 24px; display: inline-flex; align-items: center; gap: 5px; padding: 0 8px; background: var(--b08); border: 0; border-radius: 2px; color: var(--b00); font-size: 11px; font-weight: 600; white-space: nowrap; }
 .ly-pill i { width: 9px; height: 9px; border-radius: 2px; flex: none; }
@@ -516,21 +521,28 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .sheet-tabs button { flex: none; height: 22px; padding: 0 10px; font-size: 11.5px; white-space: nowrap; color: var(--b00); background: var(--b07); border: 1px solid var(--line); border-radius: 2px; }
 .sheet-tabs button:hover { background: var(--b08); }
 .sheet-tabs button.on { background: var(--yellow); color: var(--on-yellow); border-color: transparent; font-weight: 600; }
-/* Draw's page tabs sit under the boxes at the top left, as wide as they are */
-.page-tabs { z-index: 6; top: 46px; left: 10px; right: auto; max-width: var(--tlw, 320px); }
+/* Draw's page tabs sit under the boxes at the top left, as wide as they are (the selection box and its bar use the space to
+   their right), and wrap onto more rows instead of hiding tabs; the canvas moves down by the extra rows (--ptx). */
+.page-tabs { z-index: 6; top: 46px; left: 10px; right: auto; max-width: var(--tlw, 320px); flex-wrap: wrap; row-gap: 3px; overflow: visible; }
 .page-tabs[hidden] { display: none; }
 .stage-wrap.tr-low > .fbar.tr { top: 42px; }
 .main.rul-on .stage-wrap.tr-low > .fbar.tr { top: 62px; }
-.main.fl.draw.trlow .dk-tool { left: calc(var(--rail) + 32px + var(--lyw, 0px)); top: 86px; max-width: calc(100% - var(--rail) - 56px - var(--lyw, 0px) - var(--rcw, 0px)); }
-.main.rul-on.draw.trlow .dk-tool { top: 106px; }
+.main.fl.draw.trlow .dk-tool { left: calc(var(--rail) + 32px + var(--lyw, 0px)); top: calc(86px + var(--ptx, 0px)); max-width: calc(100% - var(--rail) - 56px - var(--lyw, 0px) - var(--rcw, 0px)); }
+.main.rul-on.draw.trlow .dk-tool { top: calc(106px + var(--ptx, 0px)); }
 /* Shop drawing: when the top-right bar drops a row, the sheet tabs drop under it */
 .stage-wrap.tr-low .stage.flpad .sheet-tabs:not(.page-tabs) { top: 82px; }
 .main.rul-on.shopm .stage-wrap.tr-low .stage.flpad .sheet-tabs { top: 102px; }
-.stage-wrap.tr-low > .page-tabs { max-width: min(var(--tlw, 320px), calc(100% - var(--trw, 0px) - 60px)); }
+/* When the top-right bar drops a row, the page tabs go under it at full width, and the selection box under them */
+.stage-wrap.tr-low > .page-tabs { top: 80px; max-width: calc(100% - 40px); }
+.main.rul-on .stage-wrap.tr-low > .page-tabs { top: 100px; }
+.main.trlow.ptabs .stage.flpad { padding-top: calc(114px + var(--ptx, 0px)); }
+.main.rul-on.trlow.ptabs .stage.flpad { padding-top: calc(134px + var(--ptx, 0px)); }
+.main.fl.draw.trlow.ptabs .dk-tool { top: calc(110px + var(--ptx, 0px)); }
+.main.rul-on.draw.trlow.ptabs .dk-tool { top: calc(130px + var(--ptx, 0px)); }
 .main.rul-on .page-tabs { top: 66px; left: 30px; }
 .page-tabs .ptab-in { flex: none; width: 130px; height: 22px; padding: 0 6px; font-size: 11.5px; }
-.main.ptabs .stage.flpad { padding-top: 80px; }
-.main.rul-on.ptabs .stage.flpad { padding-top: 100px; }
+.main.ptabs .stage.flpad { padding-top: calc(80px + var(--ptx, 0px)); }
+.main.rul-on.ptabs .stage.flpad { padding-top: calc(100px + var(--ptx, 0px)); }
 /* Drawing menu: the page list */
 .pglist { display: grid; gap: 2px; max-height: 232px; overflow: auto; }
 .pgrow { display: flex; align-items: baseline; gap: 8px; width: 100%; padding: 6px 8px; text-align: left; background: var(--b08); border: 1px solid transparent; border-radius: 2px; color: var(--b00); font-size: 12px; }
@@ -2918,9 +2930,10 @@ details[open] > summary .sum { display: none; }
   function fitTopBars() {
     var wrap = stage.parentNode, tl = $('fbar-tl'), tr = $('fbar-tr'), mainEl = document.querySelector('.main');
     wrap.classList.remove('tr-low'); mainEl.classList.remove('trlow');
-    if ((mode !== 'measure' && mode !== 'shop' && mode !== 'layout') || tl.hidden || tr.hidden || !flOn()) return;
+    if ((mode !== 'measure' && mode !== 'shop' && mode !== 'layout') || tl.hidden || tr.hidden || !flOn()) { if (mode === 'measure') fitPageTabs(); return; }
     // The selection box then gets a row of its own under them.
     if (tl.getBoundingClientRect().right + 12 > tr.getBoundingClientRect().left) { wrap.classList.add('tr-low'); mainEl.classList.add('trlow'); wrap.style.setProperty('--trw', tr.offsetWidth + 'px'); }
+    if (mode === 'measure') fitPageTabs();
   }
   function scaleOptions(s) {
     var groups = {}, o = '<option value="">Choose…</option>';
@@ -3367,8 +3380,10 @@ details[open] > summary .sum { display: none; }
   function layersView() { return isItemsView(M.dock) ? M.dock : 'all'; }
   function dimmedOut(it) { return dockOn() && layersOpen && layersView() !== 'all' && !inView(it, layersView()); }
   // Layers: totals for what it shows, filter pills, then one row per item (click to select, hover to find on the canvas).
+  // A category's line under the Layers totals: length, net area and count, whichever it has.
+  function catLine(t) { var ea = t.counts.reduce(function (n, c) { return n + c.pts.length; }, 0); return [t.lin ? fmtLin(t.lin).replace(' lin ft', ' ft') : '', t.area - t.deduct ? fmtSqft(t.area - t.deduct) : '', ea ? ea + ' ea' : ''].filter(Boolean).join(' · ') || '—'; }
   function layersCard(mine) {
-    var v = layersView(), sp = dockSpec(v), list = mine.filter(function (it) { return inView(it, v); }), sc = scaleNow(), h = '', note = '', tiles;
+    var v = layersView(), sp = dockSpec(v), list = mine.filter(function (it) { return inView(it, v); }), sc = scaleNow(), h = '', note = '', tiles, brk = '';
     h += '<div class="dk-head"><b>Layers</b><span class="dk-sub">' + esc(docTitle()) + (M.pages > 1 ? ' · ' + esc(pageName()) : '') + '</span><button type="button" class="dk-x" data-lyclose title="Close Layers (,)" aria-label="Close Layers">×</button></div>';
     if (v === 'shapes') {
       var by = function (k) { return list.filter(function (it) { return it.shape === k; }).length; };
@@ -3379,8 +3394,21 @@ details[open] > summary .sum { display: none; }
       tiles = [[sc && t.lin ? fmtLin(t.lin).replace(' lin ft', ' ft') : '—', 'Length'], [sc && t.area ? fmtSqft(net) : '—', 'Net area'], [ea || '—', 'Counted'], [list.length, 'Items']];
       if (!sc && list.some(function (it) { return !it.shape; })) note = 'Set the scale (S) to see sizes.';
       else if (sc && t.deduct) note = fmtSqft(t.area) + ' − ' + fmtSqft(t.deduct) + ' deducted = ' + fmtSqft(net) + ' net';
+      // Under the tiles: each category's total (once any category is in use) and each count by name.
+      var rows = [], cats = {};
+      if (sc && (v === 'all' || v === 'meas')) {
+        list.forEach(function (it) { if (!it.shape && it.cat) (cats[it.cat] = cats[it.cat] || []).push(it); });
+        var catKeys = DOCK_ITEMS.filter(function (d) { return cats[d[0]]; });
+        if (catKeys.length) {
+          var bare = list.filter(function (it) { return !it.shape && !it.cat; });
+          catKeys.forEach(function (d) { rows.push([d[2], d[1], catLine(totalsFor(cats[d[0]]))]); });
+          if (bare.length) rows.push(['var(--b04)', 'No category', catLine(totalsFor(bare))]);
+        }
+      }
+      if (t.counts.length > 1 || (t.counts.length && rows.length)) t.counts.forEach(function (c) { rows.push(['', c.name, c.pts.length + ' ea']); });
+      if (rows.length) brk = '<dl class="ly-break">' + rows.map(function (r) { return '<dt>' + (r[0] ? '<i style="background:' + r[0] + '"></i>' : '') + esc(r[1]) + '</dt><dd>' + r[2] + '</dd>'; }).join('') + '</dl>';
     }
-    h += '<div class="ly-top"><div class="dk-tiles">' + tiles.map(function (x) { return '<div class="dk-tile"><b>' + x[0] + '</b><span>' + x[1] + '</span></div>'; }).join('') + '</div>' + (note ? '<p class="dk-line">' + note + '</p>' : '');
+    h += '<div class="ly-top"><div class="ly-lab">' + (v === 'shapes' ? 'Shapes on this page' : 'Totals' + (v === 'all' ? '' : ' · ' + esc(sp[1])) + (M.pages > 1 ? ' · ' + esc(pageName()) : '')) + '</div><div class="dk-tiles">' + tiles.map(function (x) { return '<div class="dk-tile"><b>' + x[0] + '</b><span>' + x[1] + '</span></div>'; }).join('') + '</div>' + (note ? '<p class="dk-line">' + note + '</p>' : '') + brk;
     // All, Shapes and Measurements always show; a category shows once something on the page uses it (or while it's picked).
     h += '<div class="ly-pills" role="group" aria-label="Show">' + DOCK_ITEMS.map(function (d) {
       var n = mine.filter(function (it) { return inView(it, d[0]); }).length, on = v === d[0];
@@ -3559,15 +3587,23 @@ details[open] > summary .sum { display: none; }
   function renderPageTabs() {
     var el = $('page-tabs'), show = mode === 'measure' && flOn() && M.src !== 'none';
     el.hidden = !show; document.querySelector('.main').classList.toggle('ptabs', show);
-    if (!show || pageRenaming) return;
+    if (!show || pageRenaming) { fitPageTabs(); return; }
     // Same pages as before: only the open one changes, so a double-click lands on the tab it started on.
     var tabs = el.querySelectorAll('[data-ptab]:not([data-ptab="add"])');
     if (tabs.length === M.pages && M.pageList.every(function (p, i) { return tabs[i].textContent === p.name; })) {
       tabs.forEach(function (t, i) { var on = i + 1 === M.page; t.classList.toggle('on', on); t.setAttribute('aria-selected', on); });
-      return;
+      fitPageTabs(); return;
     }
     el.innerHTML = M.pageList.map(function (p, i) { var on = i + 1 === M.page; return '<button type="button" role="tab" class="' + (on ? 'on' : '') + '" data-ptab="' + (i + 1) + '" aria-selected="' + on + '" title="' + esc(p.name) + ' · double-click to rename">' + esc(p.name) + '</button>'; }).join('') +
       '<button type="button" data-ptab="add" title="New page" aria-label="New page">+</button>';
+    fitPageTabs();
+  }
+  // When the tabs take more than one row, the canvas moves down by the extra rows.
+  function fitPageTabs() {
+    var el = $('page-tabs'), mainEl = document.querySelector('.main'), x = !el.hidden && el.offsetHeight > 30 ? el.offsetHeight - 22 : 0;
+    if (mainEl.style.getPropertyValue('--ptx') === x + 'px') return;
+    mainEl.style.setProperty('--ptx', x + 'px');
+    if (mode === 'measure' && M.autoFit) requestAnimationFrame(fit);
   }
   function pageAct(a) {
     if (a === 'addpage') addPage();
