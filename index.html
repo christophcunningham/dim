@@ -198,29 +198,46 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .tight .dchip .ls { display: inline; }
 .fbar.bottom.stack .units button { padding: 0 7px; }
 .main.fl.draw .dk-tool { left: calc(var(--rail) + 32px + var(--lyw, 0px) + var(--tlw, 0px)); top: 18px; max-width: calc(100% - var(--rail) - 56px - var(--lyw, 0px) - var(--rcw, 0px) - var(--tlw, 0px)); }
-/* Layout and Shop drawing on wide windows: tools in a rail, their panels as cards the dock opens and closes */
-.main.pnl { --rail: 84px; grid-template-columns: var(--rail) auto minmax(0, 1fr) auto; }
+/* Layout and Shop drawing on wide windows: tools in a rail, the canvas, then the same right-hand column as Draw: settings on
+   top (tabs across the head) and the list (Layers in Shop, Panels/Panes/Runs/Elevations in Layout) under it, or left of the canvas. */
+.main.pnl { --rail: 84px; grid-template-columns: var(--rail) minmax(0, 1fr); grid-template-rows: fit-content(62%) minmax(0, 1fr); }
+.main.pnl.rcol { grid-template-columns: var(--rail) minmax(0, 1fr) 330px; }
+.main.pnl.lyl { grid-template-columns: var(--rail) 330px minmax(0, 1fr); }
+.main.pnl.lyl.rcol { grid-template-columns: var(--rail) 330px minmax(0, 1fr) 330px; }
 .main.pnl.lay { --rail: 0px; column-gap: 0; }
-.main.pnl.lay.lc > .center, .main.pnl.lay.rc > .center { margin: 0 4px; }
+.main.pnl.lay.rcol > .center { margin-right: 8px; }
+.main.pnl.lay.lyl > .center { margin-left: 8px; }
 .main.pnl > .left { display: contents; }
-.main.pnl #tools { grid-column: 1; grid-row: 1; align-self: start; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; padding: 10px 8px; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 55%, transparent); border-radius: 4px; box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
+.main.pnl #tools { grid-column: 1; grid-row: 1 / -1; align-self: start; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; padding: 10px 8px; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 55%, transparent); border-radius: 4px; box-shadow: 0 1px 2px rgb(0 0 0 / .12); }
 .main.pnl.lay #tools, .main.pnl #legend { display: none; }
 .main.pnl.shopm { --rail: 50px; }
 .main.pnl.shopm #tools { grid-template-columns: minmax(0, 1fr); padding: 8px 7px; }
-.main.pnl #left { grid-column: 2; grid-row: 1; width: 330px; min-height: 0; overflow: auto; display: none; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 45%, transparent); border-radius: 4px; box-shadow: 0 6px 22px rgb(0 0 0 / .12); }
-.main.pnl.lc #left { display: block; }
+.main.pnl > .center { grid-column: 2; grid-row: 1 / -1; }
+.main.pnl.lyl > .center { grid-column: 3; }
+.main.pnl #left, .main.pnl > .right { display: none; min-height: 0; overflow: auto; background: var(--b07); border: 1px solid color-mix(in oklch, var(--line) 45%, transparent); border-radius: 4px; box-shadow: 0 6px 22px rgb(0 0 0 / .12); }
+.main.pnl.lc #left { display: block; grid-column: -2 / -1; grid-row: 1 / -1; }
+.main.pnl.lc.rc:not(.lyl) #left { grid-row: 2; }
+.main.pnl.lyl #left { grid-column: 2; }
+.main.pnl.rc > .right { display: block; grid-column: -2 / -1; grid-row: 1 / -1; align-self: start; max-height: 100%; }
+.main.pnl.rc.lc:not(.lyl) > .right { grid-row: 1; align-self: stretch; }
 .lp.focus .lp-head { align-items: flex-start; gap: 6px; }
 .lp.focus .lp-head > div:first-child { flex: 1; min-width: 0; }
 .lp.focus .lp-title { font-size: 15px; }
 .lp.focus .lp-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.main.pnl > .center { grid-column: 3; grid-row: 1; }
-.main.pnl > .right { grid-column: 4; grid-row: 1; width: 330px; display: none; box-shadow: 0 6px 22px rgb(0 0 0 / .12); border-color: color-mix(in oklch, var(--line) 45%, transparent); }
-.main.pnl.rc > .right { display: block; }
 .main.pnl > .right details[hidden] { display: none; }
 .main.pnl > .right details.solo { border-bottom: 0; }
 .main.pnl > .right details.solo > summary { display: none; }
 .main.pnl > .right details.solo > .sec { padding-top: 12px; }
 .main.pnl > .right > .dk-head { position: sticky; top: 0; z-index: 2; }
+/* The settings card's head: a tab per section, then a close button */
+.dk-head.dk-tabs { display: flex; align-items: flex-end; gap: 2px; padding: 6px 8px 0; flex-wrap: wrap; row-gap: 0; }
+.dk-tabs [role="tab"] { height: 32px; padding: 0 8px; background: none; border: 0; border-bottom: 2px solid transparent; border-radius: 0; color: var(--b01); font-size: 12px; font-weight: 500; white-space: nowrap; }
+.dk-tabs [role="tab"]:hover { color: var(--b00); background: none; }
+.dk-tabs [role="tab"][aria-selected="true"] { border-bottom-color: var(--b00); color: var(--b00); font-weight: 700; }
+.dk-tabs .dk-sp { flex: 1; }
+.dk-tabs .dk-x, .dk-tabs .lp-tips { align-self: center; }
+.ly-foot { padding: 10px 12px 12px; border-top: 1px solid color-mix(in oklch, var(--line) 25%, transparent); display: grid; gap: 4px; }
+.status .end .sinfo { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 
 /* Bottom row over the canvas: the dock (centered in the free space) and the units bar */
 .fbar.bottom { left: 10px; right: 14px; bottom: 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: end; gap: 8px; max-width: none; }
@@ -506,6 +523,9 @@ body.fl .app { grid-template-rows: minmax(0, 1fr); }
 .main.rul-on .stage-wrap.tr-low > .fbar.tr { top: 62px; }
 .main.fl.draw.trlow .dk-tool { left: calc(var(--rail) + 32px + var(--lyw, 0px)); top: 86px; max-width: calc(100% - var(--rail) - 56px - var(--lyw, 0px) - var(--rcw, 0px)); }
 .main.rul-on.draw.trlow .dk-tool { top: 106px; }
+/* Shop drawing: when the top-right bar drops a row, the sheet tabs drop under it */
+.stage-wrap.tr-low .stage.flpad .sheet-tabs:not(.page-tabs) { top: 82px; }
+.main.rul-on.shopm .stage-wrap.tr-low .stage.flpad .sheet-tabs { top: 102px; }
 .stage-wrap.tr-low > .page-tabs { max-width: min(var(--tlw, 320px), calc(100% - var(--trw, 0px) - 60px)); }
 .main.rul-on .page-tabs { top: 66px; left: 30px; }
 .page-tabs .ptab-in { flex: none; width: 130px; height: 22px; padding: 0 6px; font-size: 11.5px; }
@@ -713,7 +733,7 @@ details[open] > summary .sum { display: none; }
       </div>
       <div class="status">
         <span class="live" id="status" aria-live="polite"></span>
-        <span class="end"><span class="note">Files stay on this device</span></span>
+        <span class="end"><span class="sinfo" id="sinfo" hidden></span><span class="note" id="snote">Files stay on this device</span></span>
       </div>
     </section>
 
@@ -2894,7 +2914,7 @@ details[open] > summary .sum { display: none; }
   function fitTopBars() {
     var wrap = stage.parentNode, tl = $('fbar-tl'), tr = $('fbar-tr'), mainEl = document.querySelector('.main');
     wrap.classList.remove('tr-low'); mainEl.classList.remove('trlow');
-    if (mode !== 'measure' || tl.hidden || tr.hidden || !flOn()) return;
+    if ((mode !== 'measure' && mode !== 'shop' && mode !== 'layout') || tl.hidden || tr.hidden || !flOn()) return;
     // The selection box then gets a row of its own under them.
     if (tl.getBoundingClientRect().right + 12 > tr.getBoundingClientRect().left) { wrap.classList.add('tr-low'); mainEl.classList.add('trlow'); wrap.style.setProperty('--trw', tr.offsetWidth + 'px'); }
   }
@@ -3379,34 +3399,29 @@ details[open] > summary .sum { display: none; }
   var SHORT = { 'Title block': 'Title', 'Whole job': 'Job' };
   function shortLab(t) { return SHORT[t] ? '<span class="lf">' + esc(t) + '</span><span class="ls">' + SHORT[t] + '</span>' : esc(t); }
   // A left card's header on wide windows: its name, a note, and a close button.
+  // The bottom of Shop's and Layout's settings card: which side their list goes (shared with Draw's Layers on the left).
+  function listSideOpt(name) { return flOn() ? '<div class="ly-foot"><label class="chk ly-opt"><input type="checkbox" id="layers-left"' + (layersLeft ? ' checked' : '') + '> ' + esc(name) + ' on the left</label><p class="hint" style="margin:0">Puts ' + esc(name) + ' left of the canvas instead of under the settings, on every page. Remembered in this browser.</p></div>' : ''; }
   function cardHead(title, sub) { return flOn() ? '<div class="dk-head"><b>' + esc(title) + '</b><span class="dk-sub">' + esc(sub || '') + '</span><button type="button" class="dk-x" data-cardclose="l" aria-label="Close">×</button></div>' : ''; }
   // Shop drawing: each section of the Sheet card is a dock chip; the card shows the one picked (Export from the top right).
-  var SHOP_SECS = [['sh_sheet', 'Sheet'], ['sh_view', 'Drawing'], ['sh_pics', 'Images'], ['sh_tb', 'Title block'], ['sh_exp', 'Export']];
+  var SHOP_SECS = [['sh_sheet', 'Sheet'], ['sh_view', 'Drawing'], ['sh_tb', 'Title block'], ['sh_pics', 'Images'], ['sh_exp', 'Export']];
   function shopFocus() { var f = UI.shop.focus; return SHOP_SECS.some(function (x) { return x[0] === f; }) ? f : 'sh_sheet'; }
   function shopFocusRight() {
     var old = rightEl.querySelector(':scope > .dk-head'); if (old) old.remove();
     if (!flOn() || mode !== 'shop') { rightEl.querySelectorAll('details[data-sec]').forEach(function (dt) { dt.hidden = false; dt.classList.remove('solo'); }); return; }
-    var f = shopFocus(), lab = SHOP_SECS.find(function (x) { return x[0] === f; })[1];
+    var f = shopFocus(), x = '<button type="button" class="dk-x" data-cardclose="r" title="Close ' + (f === 'sh_exp' ? 'Export (/)' : 'settings (.)') + '" aria-label="Close">×</button>';
     rightEl.querySelectorAll('details[data-sec]').forEach(function (dt) { var keep = dt.dataset.sec === f; dt.hidden = !keep; if (keep) dt.open = true; dt.classList.toggle('solo', keep); });
-    rightEl.insertAdjacentHTML('afterbegin', '<div class="dk-head"><b>' + esc(lab) + '</b><span class="dk-sub">Shop drawing</span><button type="button" class="dk-x" data-cardclose="r" aria-label="Close">×</button></div>');
+    rightEl.insertAdjacentHTML('afterbegin', f === 'sh_exp' ? '<div class="dk-head"><b>Export</b><span class="dk-sub">Shop drawing</span>' + x + '</div>'
+      : '<div class="dk-head dk-tabs" role="tablist" aria-label="Sheet settings">' + SHOP_SECS.filter(function (s) { return s[0] !== 'sh_exp'; }).map(function (s) { return '<button type="button" role="tab" data-sfocus="' + s[0] + '" aria-selected="' + (s[0] === f) + '">' + s[1] + '</button>'; }).join('') + '<span class="dk-sp"></span>' + x + '</div>');
+    if (f !== 'sh_exp') rightEl.insertAdjacentHTML('beforeend', listSideOpt('Layers'));
   }
-  function setShopFocus(f) { UI.shop.focus = f; shopFocusRight(); rightEl.scrollTop = 0; }
+  function setShopFocus(f) { UI.shop.focus = f; if (mode === 'shop') Shop.panels(); else shopFocusRight(); rightEl.scrollTop = 0; }
   function renderDock0() {
     var el = $('dock'), ch = $('dchips'); if (!el) return;
     if (!flOn()) { el.hidden = true; ch.hidden = true; return; }
     el.hidden = false;
     var cp = curPage();
     el.innerHTML = '<span class="pages">' + PAGES.map(function (pg) { var on = cp === pg[0]; return '<button type="button" class="dchip pg' + (on ? ' on' : '') + '" data-page="' + pg[0] + '" aria-pressed="' + on + '" title="' + pg[1] + '">' + (pg[2] ? '<span class="lf">' + pg[1] + '</span><span class="ls">' + pg[2] + '</span>' : pg[1]) + '</button>'; }).join('') + '</span>';
-    var h = '';
-    if (mode === 'layout') {
-      // Layout: the job's inputs (left card), then each settings tab, the whole-job settings and Totals (right card).
-      var fc = UI.layout.r ? Lay.getFocus() : '';
-      h = Lay.chips().filter(function (c) { return c[0] !== 'export'; }).map(function (c) { var on = fc === c[0]; return '<button type="button" class="dchip' + (on ? ' on' : '') + '" data-lfocus="' + c[0] + '" aria-pressed="' + on + '" title="' + esc(c[1]) + '">' + shortLab(c[1]) + '</button>'; }).join('');
-    } else if (mode === 'shop') {
-      var sf = UI.shop.r ? shopFocus() : '';
-      h = SHOP_SECS.filter(function (x) { return x[0] !== 'sh_exp'; }).map(function (x) { var on = sf === x[0]; return '<button type="button" class="dchip' + (on ? ' on' : '') + '" data-sfocus="' + x[0] + '" aria-pressed="' + on + '" title="' + x[1] + '">' + shortLab(x[1]) + '</button>'; }).join('');
-    }
-    ch.hidden = !h; ch.innerHTML = h;
+    ch.hidden = true; ch.innerHTML = '';
   }
   // Wide windows: no title bar; floating boxes over the canvas; Draw floats its cards, Layout and Shop drawing show theirs beside it.
   function applyDockLayout() {
@@ -3417,9 +3432,9 @@ details[open] > summary .sum { display: none; }
     mainEl.classList.toggle('dk-right', on && !!M.panel);
     mainEl.classList.toggle('ly-on', on && layersOpen);
     mainEl.classList.toggle('ly-left', on && layersOpen && layersLeft);
-    mainEl.classList.toggle('rcol', on && (!!M.panel || (layersOpen && !layersLeft)));
+    mainEl.classList.toggle('rcol', (on && (!!M.panel || (layersOpen && !layersLeft))) || (pnl && (!!u.r || (!!u.l && !layersLeft))));
     mainEl.classList.toggle('pnl', pnl); mainEl.classList.toggle('lay', pnl && mode === 'layout'); mainEl.classList.toggle('shopm', pnl && mode === 'shop');
-    mainEl.classList.toggle('lc', pnl && !!u.l); mainEl.classList.toggle('rc', pnl && !!u.r);
+    mainEl.classList.toggle('lc', pnl && !!u.l); mainEl.classList.toggle('rc', pnl && !!u.r); mainEl.classList.toggle('lyl', pnl && !!u.l && layersLeft);
     stage.classList.toggle('flpad', fl);
   }
   // Everything around the canvas on wide windows, for whichever page is open.
@@ -3429,6 +3444,7 @@ details[open] > summary .sum { display: none; }
     u[k] = force == null ? !u[k] : force;
     try { localStorage.setItem('dim-cards', JSON.stringify(UI)); } catch (e) {}
     renderChrome();
+    if (mode === 'shop' && k === 'r') Shop.panels();   // the selected item's settings move between the card and its Layers row
   }
   function setDock(v) {
     // Settings, Export and Help share the top of the right-hand column, one at a time; Layers sits under them.
@@ -3446,16 +3462,16 @@ details[open] > summary .sum { display: none; }
   function setLayersLeft(v) {
     layersLeft = !!v;
     try { localStorage.setItem('dim-layers-left', layersLeft ? '1' : '0'); } catch (e) {}
-    applyDockLayout(); renderLeft(); renderFloat();
+    applyDockLayout(); if (mode === 'measure') renderLeft(); renderFloat();
   }
   document.addEventListener('click', function (e) {
     var pg = e.target.closest('[data-page]'); if (pg) { showPage(pg.dataset.page); return; }
     var cd = e.target.closest('[data-card]'); if (cd) { toggleCard(cd.dataset.card); return; }
     var cc = e.target.closest('[data-cardclose]'); if (cc) { toggleCard(cc.dataset.cardclose, false); return; }
     var sfc = e.target.closest('[data-sfocus]');
-    if (sfc && mode === 'shop') { var sid = sfc.dataset.sfocus; if (UI.shop.r && shopFocus() === sid) toggleCard('r', false); else { setShopFocus(sid); toggleCard('r', true); } return; }
+    if (sfc && mode === 'shop') { setShopFocus(sfc.dataset.sfocus); if (!UI.shop.r) toggleCard('r', true); else renderFloat(); return; }
     var lf = e.target.closest('[data-lfocus]');
-    if (lf && mode === 'layout') { var id = lf.dataset.lfocus; if (UI.layout.r && Lay.getFocus() === id) toggleCard('r', false); else { Lay.focus(id); toggleCard('r', true); rightEl.scrollTop = 0; } return; }
+    if (lf && mode === 'layout') { Lay.focus(lf.dataset.lfocus); if (!UI.layout.r) toggleCard('r', true); else renderFloat(); rightEl.scrollTop = 0; return; }
     if (mode !== 'measure') return;
     var f = e.target.closest('[data-lyf]'); if (f) { setFilter(f.dataset.lyf); return; }
     if (e.target.closest('[data-lyclose]')) { toggleLayers(false); return; }
@@ -3583,9 +3599,10 @@ details[open] > summary .sum { display: none; }
       var rv = mode === 'layout' ? (Lay.getFocus() === 'export' ? 'export' : 'edit') : '', rOpen = !!UI[mode].r;
       if (mode === 'shop') rv = shopFocus() === 'sh_exp' ? 'export' : 'edit';
       var guideBtns = mode === 'shop' ? sq('rulers', 'ruler', 'Rulers and guides (Shift+R)', rulersOn) + sq('smart', 'smart', 'Smart guides: line things up with other items as you drag', smartOn) + gap : '';
-        var lname = mode === 'layout' ? LEFT_LABEL[Lay.getJob()] || 'Inputs' : 'On sheet';
+      var lname = mode === 'layout' ? LEFT_LABEL[Lay.getJob()] || 'Inputs' : 'Layers';
       tr.innerHTML = undo() + gap + guideBtns + sq('layers', 'layers', lname + ' (,)', !!UI[mode].l) + sq('settings', 'gear', (mode === 'layout' ? 'Layout settings' : 'Sheet settings') + ' (.)', rOpen && rv !== 'export') +
         '<button type="button" class="sqx' + (rOpen && rv === 'export' ? ' on' : '') + '" data-fa="export" title="Export (/)">' + ficon('export') + 'Export</button>';
+      fitTopBars();
       return;
     }
     tr.hidden = false;
@@ -4775,7 +4792,7 @@ details[open] > summary .sum { display: none; }
     function drawFilm(rowIdx) {
       var c = setupCanvas(), ctx = c.ctx, F2 = L.film, selRow = F2.panes[F2.sel], list;
       lastScale = NaN; filmSync();
-      if (!F2.panes.length) { txt(ctx, 'Add a glass pane in the left panel', c.cw / 2, c.ch / 2, { size: 13 }); return; }
+      if (!F2.panes.length) { txt(ctx, 'Add a glass pane in the Panes list', c.cw / 2, c.ch / 2, { size: 13 }); return; }
       list = rowIdx ? rowIdx.map(function (i) { return F2.panes[i]; }).filter(Boolean).slice(0, 8) : selRow && filmFrame(selRow) ? [selRow] : F2.panes.slice(0, 8);
       if (!list.length) { txt(ctx, 'Pick at least one film row', c.cw / 2, c.ch / 2, { size: 13 }); return; }
       // A plain pane sits on its sill: the glass starts Sill height above the floor, on a wall drawn below it (the bleed laps onto the wall).
@@ -4880,7 +4897,7 @@ details[open] > summary .sum { display: none; }
       var c = setupCanvas(), ctx = c.ctx, K = L.markers, list = (runIdx || [K.sel]).map(function (i) { return K.runs[i]; }).filter(Boolean);
       lastScale = NaN;
       if (!list.length && !runIdx && K.runs[0]) list = [K.runs[0]];
-      if (!list.length) { txt(ctx, runIdx && K.runs.length ? 'Pick at least one glass run' : 'Add a glass run in the left panel', c.cw / 2, c.ch / 2, { size: 13 }); return; }
+      if (!list.length) { txt(ctx, runIdx && K.runs.length ? 'Pick at least one glass run' : 'Add a glass run in the Runs list', c.cw / 2, c.ch / 2, { size: 13 }); return; }
       syncLens();
       var H = Math.max.apply(null, list.map(runTop)), maxShown = Math.max.apply(null, list.map(shownLen)), best = null;
       for (var cols = 1; cols <= list.length; cols++) {
@@ -5216,7 +5233,7 @@ details[open] > summary .sum { display: none; }
       var c = setupCanvas(), ctx = c.ctx, G = L.graphic, list = (runIdx || [G.sel]).map(function (i) { return G.runs[i] ? { r: G.runs[i], i: i } : null; }).filter(Boolean);
       lastScale = NaN; if (!offTarget) gGeo = [];
       if (!list.length && !runIdx && G.runs[0]) list = [{ r: G.runs[0], i: 0 }];
-      if (!list.length) { txt(ctx, runIdx && G.runs.length ? 'Pick at least one elevation' : 'Add an elevation in the left panel', c.cw / 2, c.ch / 2, { size: 13 }); return; }
+      if (!list.length) { txt(ctx, runIdx && G.runs.length ? 'Pick at least one elevation' : 'Add an elevation in the Elevations list', c.cw / 2, c.ch / 2, { size: 13 }); return; }
       syncLens(G);
       var H = Math.max.apply(null, list.map(function (x) { return elevTop(x.r); })), W = Math.max.apply(null, list.map(function (x) { return elevLen(x.r); })), best = null;
       for (var cols = 1; cols <= list.length; cols++) {
@@ -5493,14 +5510,17 @@ details[open] > summary .sum { display: none; }
     }
     function focusPanel(P) {
       if (!lastChips.some(function (c) { return c[0] === rfocus; })) rfocus = lastChips[0] ? lastChips[0][0] : '';
-      var lab = (lastChips.find(function (c) { return c[0] === rfocus; }) || ['', ''])[1];
-      var h = '<div class="lp focus' + (tips ? ' tips' : '') + '"><div class="lp-top"><div class="lp-head"><div><div class="lp-title">' + esc(lab || P.title) + '</div><div class="lp-sub">' + esc(P.title + (P.sub ? ' · ' + P.sub : '')) + '</div></div>' +
-        '<button type="button" class="lp-tips" data-tips="1" aria-pressed="' + tips + '" title="' + (tips ? 'Hide tips' : 'Show tips') + '" aria-label="Tips">' + TIP_ICON + '</button><button type="button" class="dk-x" data-cardclose="r" aria-label="Close">×</button></div></div><div class="lp-body">';
+      // The head: a tab per section (Export has its own button, so it gets a plain title), then tips and close.
+      var TAB_SHORT = { 'Whole job': 'Job' }, exp = rfocus === 'export';
+      var end = '<button type="button" class="lp-tips" data-tips="1" aria-pressed="' + tips + '" title="' + (tips ? 'Hide tips' : 'Show tips') + '" aria-label="Tips">' + TIP_ICON + '</button><button type="button" class="dk-x" data-cardclose="r" title="Close ' + (exp ? 'Export (/)' : 'settings (.)') + '" aria-label="Close">×</button>';
+      var h = '<div class="lp focus' + (tips ? ' tips' : '') + '"><div class="lp-top">' + (exp ? '<div class="dk-head"><b>Export</b><span class="dk-sub">' + esc(P.title) + '</span>' + end + '</div>'
+        : '<div class="dk-head dk-tabs" role="tablist" aria-label="' + esc(P.title) + ' settings">' + lastChips.filter(function (c) { return c[0] !== 'export'; }).map(function (c) { return '<button type="button" role="tab" data-lfocus="' + c[0] + '" aria-selected="' + (c[0] === rfocus) + '">' + esc(TAB_SHORT[c[1]] || c[1]) + '</button>'; }).join('') + '<span class="dk-sp"></span>' + end + '</div>') +
+        '</div><div class="lp-body">';
       if (rfocus.indexOf('tab:') === 0) { var id = rfocus.slice(4), t = P.tabs.filter(Boolean).find(function (x) { return x[0] === id; }); rtab[L.job] = id; h += '<div class="sec rtab-body">' + (t ? t[2] : '') + '</div>'; }
       else if (rfocus === 'job') h += P.job.join('');
       else if (rfocus === 'totals') h += P.totals;
       else if (rfocus === 'export') h += P.out;
-      return h + '</div></div>';
+      return h + '</div>' + (exp ? '' : listSideOpt(LEFT_LABEL[L.job] || 'The list')) + '</div>';
     }
     function panel(P) {
       lastChips = chipsOf(P);
@@ -5624,7 +5644,7 @@ details[open] > summary .sum { display: none; }
         var wallT = null;
         if (er && isWall(er)) { if (!er.color) er.color = wallColor(er); wallT = ['wall', 'Wall', colorF((FINISHES[er.finish] || FINISHES.paint)[0] + ' color', 'graphic.runs.' + G.sel + '.color') + '<p class="hint" style="margin:0">Change the finish in the elevation’s Type menu. Brick and block are drawn at true size, coursed from the floor.</p>']; }
         var dims = dimsSec('graphic', '<p class="hint" style="margin:0">Shown for every graphic, here and on the shop drawing. AFF is above finished floor.</p>');
-        P = { title: er ? er.name : 'Graphic mockup', sub: er ? (isWall(er) ? (FINISHES[er.finish] || FINISHES.paint)[0] + ' · ' + fmtFt(er.len) + ' × ' + fmtFt(er.wallH) : 'Glass · ' + fmtFt(elevLen(er))) : 'Add an elevation in the left panel',
+        P = { title: er ? er.name : 'Graphic mockup', sub: er ? (isWall(er) ? (FINISHES[er.finish] || FINISHES.paint)[0] + ' · ' + fmtFt(er.len) + ' × ' + fmtFt(er.wallH) : 'Glass · ' + fmtFt(elevLen(er))) : 'Add an elevation in the Elevations list',
           tabs: [['art', 'Graphics', gt + lib], wallT, anyGlass ? ['frame', 'Frame', scope('Frame for every glass elevation') + frameSec('graphic', null, 'frame')] : null, anyGlass ? ['doors', 'Doors', scope('Doors for every glass elevation') + frameSec('graphic', null, 'doors')] : null],
           jobLabel: 'Whole job', job: [dims], out: shopSec() };
       } else {
@@ -5676,10 +5696,12 @@ details[open] > summary .sum { display: none; }
       rightEl.scrollTop = keepTop;
     }
     function status() {
-      if (L.job === 'mural') { var m = muralPanels(); statusEl.textContent = 'Mural · ' + m.n + ' panels on ' + L.roll + '" · orange = overlap, light edge = bleed, dashed = wall'; }
-      else if (L.job === 'film') { var ft = filmTotals(); statusEl.textContent = 'Privacy film · orange dashes are seams · ' + filmQty(ft) + ' · ' + num(ft.lf) + ' ft of ' + L.roll + '" roll'; }
-      else if (L.job === 'graphic') { var er2 = selElev(), si = selItem(); statusEl.textContent = 'Graphic mockup · ' + (er2 ? er2.name + ' · ' : '') + (si ? 'drag to move, or type sizes in the right panel' : 'click a graphic to select it, drag to move it'); }
-      else statusEl.textContent = 'Distraction markers · click a run in the list to preview it · ' + num(Math.ceil(markerTotals().lf), 0) + ' LF';
+      // The job in bold, then what's on the canvas and what you can do with it.
+      var put = function (name, rest) { statusEl.innerHTML = '<b>' + esc(name) + '</b> <span class="hintx">' + esc(rest) + '</span>'; };
+      if (L.job === 'mural') { var m = muralPanels(); put('Mural', m.n + ' panels on ' + L.roll + '" · orange = overlap, light edge = bleed, dashed = wall · drag a seam to move it'); }
+      else if (L.job === 'film') { var ft = filmTotals(); put('Privacy film', 'orange dashes are seams · ' + filmQty(ft) + ' · ' + num(ft.lf) + ' ft of ' + L.roll + '" roll'); }
+      else if (L.job === 'graphic') { var er2 = selElev(), si = selItem(); put('Graphic mockup', (er2 ? er2.name + ' · ' : '') + (si ? 'drag to move, or type sizes in the settings' : 'click a graphic to select it, drag to move it')); }
+      else put('Distraction markers', 'click a run in the list to preview it · ' + num(Math.ceil(markerTotals().lf), 0) + ' LF');
     }
     function all() { tools(); left(); right(); draw(); status(); History.record(); }
     // Re-render after a field changes, then put the cursor back in whichever field it moved to.
@@ -6450,6 +6472,10 @@ details[open] > summary .sum { display: none; }
       serif: { label: 'Serif', css: '"Times New Roman", Times, serif', pdf: ['TimesRoman', 'TimesRomanBold', 'TimesRomanItalic', 'TimesRomanBoldItalic'], avg: [0.47, 0.5] },
       mono: { label: 'Mono', css: '"Courier New", Courier, monospace', pdf: ['Courier', 'CourierBold', 'CourierOblique', 'CourierBoldOblique'], avg: [0.6, 0.6] } };
     function fontOf(fam, bold, ital) { var F = FONTS[fam] || FONTS.sans; return F.pdf[(bold ? 1 : 0) + (ital ? 2 : 0)]; }
+    // Text can also use any font on this computer. Those can't go in the PDF as text, so each line is drawn there as a sharp image.
+    function sysFont(fam) { return !!fam && !FONTS[fam]; }
+    function sysCss(fam, bold, ital, px) { return (ital ? 'italic ' : '') + (bold ? '700 ' : '400 ') + px + 'px ' + fontStack(fam); }
+    var twCtx = null;
     function ib(icon, attr, on, title) { return '<button type="button" class="ib' + (on ? ' on' : '') + '" ' + attr + ' title="' + title + '" aria-label="' + title + '" aria-pressed="' + (on ? 'true' : 'false') + '"><svg width="16" height="16" viewBox="0 0 18 18" aria-hidden="true">' + SICON[icon] + '</svg></button>'; }
     function toolCard() { var ti = TOOL_INFO[tool] || TOOL_INFO.select; return '<div class="block toolcard"><div class="tool-name">' + ti[0] + ' <kbd>' + ti[1] + '</kbd></div><p class="tip">' + ti[2] + '</p></div>'; }
     var SIZES = [8, 10, 12, 14, 18, 24, 36, 48, 72], WIDTHS = [0.5, 1, 1.5, 2, 3, 4, 6];
@@ -6485,7 +6511,9 @@ details[open] > summary .sum { display: none; }
         .then(function (f) { metrics = {}; names.forEach(function (nm, i) { metrics[nm] = f[i]; }); if (mode === 'shop') paint(); }).catch(function () { loadMetrics.p = null; });
     }
     // Text width in points, in the font the PDF will use (fam is sans, serif or mono).
-    function tw(t, size, bold, fam, ital) { t = pdfText(t); var m = metrics && metrics[fontOf(fam, bold, ital)]; return m ? m.widthOfTextAtSize(t, size) : t.length * size * (FONTS[fam] || FONTS.sans).avg[bold ? 1 : 0]; }
+    function tw(t, size, bold, fam, ital) {
+      if (sysFont(fam)) { twCtx = twCtx || document.createElement('canvas').getContext('2d'); twCtx.font = sysCss(fam, bold, ital, 100); return twCtx.measureText(String(t)).width * size / 100; }
+      t = pdfText(t); var m = metrics && metrics[fontOf(fam, bold, ital)]; return m ? m.widthOfTextAtSize(t, size) : t.length * size * (FONTS[fam] || FONTS.sans).avg[bold ? 1 : 0]; }
     function fitText(t, size, bold, maxW) { t = pdfText(t || ''); if (tw(t, size, bold) <= maxW) return t; while (t.length > 1 && tw(t + '...', size, bold) > maxW) t = t.slice(0, -1); return t + '...'; }
     function wrap(text, size, bold, maxW, fam, ital) {
       var out = [];
@@ -6770,7 +6798,7 @@ details[open] > summary .sum { display: none; }
       if (n.k === 'ellipse') { P.push({ k: 'ellipse', cx: b.x + b.w / 2, cy: b.y + b.h / 2, rx: b.w / 2, ry: b.h / 2, fill: n.fill, stroke: n.stroke, sw: n.sw, dash: dash }); return; }
       if (n.fill || n.stroke) P.push({ k: 'rect', x: b.x, y: b.y, w: b.w, h: b.h, fill: n.fill, stroke: n.stroke, sw: n.sw, dash: dash });
       if (n.k === 'text') {
-        var pad = 4, fam = FONTS[n.font] ? n.font : 'sans', lines = wrap(n.text, n.size, n.bold, Math.max(10, b.w - 2 * pad), fam, n.ital);
+        var pad = 4, fam = n.font || 'sans', lines = wrap(n.text, n.size, n.bold, Math.max(10, b.w - 2 * pad), fam, n.ital);
         lines.forEach(function (t, i) {
           var w = tw(t, n.size, n.bold, fam, n.ital), x = n.align === 'center' ? b.x + (b.w - w) / 2 : n.align === 'right' ? b.x + b.w - pad - w : b.x + pad;
           P.push({ k: 'text', x: x, y: b.y + pad + n.size * 0.82 + i * n.size * 1.2, size: n.size, bold: n.bold, ital: n.ital, font: fam, color: n.color, text: t });
@@ -6846,7 +6874,7 @@ details[open] > summary .sum { display: none; }
       if (p.k === 'line') return '<line x1="' + p.x1 + '" y1="' + p.y1 + '" x2="' + p.x2 + '" y2="' + p.y2 + '"' + st + ' stroke-linecap="round"/>';
       if (p.k === 'poly') return '<polygon points="' + svgPts(p.pts) + '" fill="' + p.fill + '"/>';
       if (p.k === 'path') return '<path d="' + p.d + '" transform="translate(' + p.x + ' ' + p.y + ') scale(' + p.sc + ')" fill="' + hexOr(p.fill, 'none') + '"' + (p.stroke ? ' stroke="' + p.stroke + '" stroke-width="' + p.sw / p.sc + '" stroke-linejoin="round"' : '') + '/>';
-      if (p.k === 'text') return '<text x="' + p.x + '" y="' + p.y + '" font-family=\'' + (FONTS[p.font] || FONTS.sans).css + '\' font-size="' + p.size + '" font-weight="' + (p.bold ? 700 : 400) + '"' + (p.ital ? ' font-style="italic"' : '') + ' fill="' + p.color + '" xml:space="preserve">' + esc(p.text) + '</text>';
+      if (p.k === 'text') return '<text x="' + p.x + '" y="' + p.y + '" font-family="' + esc(sysFont(p.font) ? fontStack(p.font) : (FONTS[p.font] || FONTS.sans).css) + '" font-size="' + p.size + '" font-weight="' + (p.bold ? 700 : 400) + '"' + (p.ital ? ' font-style="italic"' : '') + ' fill="' + p.color + '" xml:space="preserve">' + esc(p.text) + '</text>';
       if (p.k === 'image' && p.src === 'pic') return '<image href="' + pics[p.pic].url + '" x="' + p.x + '" y="' + p.y + '" width="' + p.w + '" height="' + p.h + '" preserveAspectRatio="none"/>';
       if (p.k === 'image' && p.src === 'logo') return '<image href="' + logo.url + '" x="' + p.x + '" y="' + p.y + '" width="' + p.w + '" height="' + p.h + '" preserveAspectRatio="none"/>';
       if (p.k === 'image') {
@@ -7077,11 +7105,11 @@ details[open] > summary .sum { display: none; }
         }
         paint(); left(); if (d.pan) right();
         if (d.moved || d.create) History.record();
-        if (d.create && n && n.k === 'text') { var ta = leftEl.querySelector('[data-sn="text"]'); if (ta) { ta.focus(); ta.select(); } }
+        if (d.create && n && n.k === 'text') { var ta = textBox(); if (ta) { ta.focus(); ta.select(); } }
       });
       svg.addEventListener('dblclick', function (e) {
         if (selGuide != null && !hitNote(toSheet(e)) && hitGuide(toSheet(e))) return;
-        var n = hitNote(toSheet(e)); if (n && n.k === 'text') { sel = n.id; left(); var ta = leftEl.querySelector('[data-sn="text"]'); if (ta) { ta.focus(); ta.select(); } }
+        var n = hitNote(toSheet(e)); if (n && n.k === 'text') { sel = n.id; left(); var ta = textBox(); if (ta) { ta.focus(); ta.select(); } }
       });
     }
 
@@ -7114,16 +7142,24 @@ details[open] > summary .sum { display: none; }
       return h;
     }
     function opts(list, v, fmt) { return list.map(function (x) { return '<option value="' + x + '"' + (String(x) === String(v) ? ' selected' : '') + '>' + (fmt ? fmt(x) : x) + '</option>'; }).join(''); }
-    function left() {
+    // Wide windows: the selected item's settings show in the settings card (when it's open) instead of under its Layers row.
+    function textBox() { return (itemInRight() ? rightEl : leftEl).querySelector('[data-sn="text"]'); }
+    function itemInRight() { return flOn() && mode === 'shop' && UI.shop.r && shopFocus() !== 'sh_exp' && sel != null && !!noteById(sel); }
+    function sheetName() { return String(S.tb.sheet || '').trim() || 'Sheet ' + (cur + 1); }
+    // The list re-renders the settings card too on wide windows, since a new selection changes what it shows.
+    function left() { leftList(); if (flOn() && mode === 'shop') right(); }
+    function leftList() {
       if (mode !== 'shop') return;
-      var p = PAPERS[S.paper], si = scaleInfo(), h = toolCard() + '<div class="block"><div class="label">' + (sheets.length > 1 ? 'Sheet ' + (cur + 1) + ' of ' + sheets.length : 'Shop drawing') + ' · ' + esc(p[2]) + (S.orient === 'port' ? ', portrait' : '') + '</div><div class="readout small">' + esc(si ? si.label : 'Not to scale') + '</div></div>';
-      h = cardHead('On sheet', sheets.length > 1 ? 'Sheet ' + (cur + 1) + ' of ' + sheets.length : 'Shop drawing') + h;
+      var wide = flOn(), inR = itemInRight(), p = PAPERS[S.paper], si = scaleInfo(), h;
+      if (wide) h = '<div class="dk-head"><b>Layers</b><span class="dk-sub">' + esc(sheetName()) + ' · front to back</span><button type="button" class="dk-x" data-cardclose="l" title="Close Layers (,)" aria-label="Close Layers">×</button></div>' +
+        (S.notes.length ? '' : '<p class="hint dk-empty">Nothing on this sheet yet. Text, shapes, dimensions, people and images you add show here, front to back.</p>');
+      else h = toolCard() + '<div class="block"><div class="label">' + (sheets.length > 1 ? 'Sheet ' + (cur + 1) + ' of ' + sheets.length : 'Shop drawing') + ' · ' + esc(p[2]) + (S.orient === 'port' ? ', portrait' : '') + '</div><div class="readout small">' + esc(si ? si.label : 'Not to scale') + '</div></div>';
       if (!S.notes.length) { leftEl.innerHTML = h; return; }
-      h += '<div class="block"><div class="label">On sheet · front to back</div>';
+      h += wide ? '<div class="block">' : '<div class="block"><div class="label">On sheet · front to back</div>';
       h += '<div class="list">' + S.notes.slice().reverse().map(function (n) {
         var on = isSel(n.id), label = n.k === 'pic' ? (pics[n.pic] ? pics[n.pic].name : 'Image') : n.k === 'text' ? (n.text || '').split('\n')[0].slice(0, 40) || 'Text' : n.k === 'figure' ? (FIGS[n.who] || FIGS.man).label + ', ' + archLen(n.hIn) : n.k === 'dim' ? (n.o === 'h' ? 'Across ' : 'Up ') + dimLabel(n) + (dimStale(n) ? ' (check)' : '') : n.k === 'view' ? (n.cap || (n.src === 'measure' ? 'Measure' : SOURCES[n.src])) : KIND[n.k];
         var row = '<div class="item' + (on ? ' sel' : '') + '" data-snote="' + n.id + '"><span class="chip" style="background:' + (n.k === 'pic' && pics[n.pic] ? '#ffffff url(' + pics[n.pic].url + ') center/cover' : n.k === 'text' ? n.color : n.fill || n.stroke || '#ffffff') + '"></span><span>' + esc(label) + '</span><b>' + KIND[n.k] + '</b><button type="button" data-sdel="' + n.id + '" aria-label="Delete">×</button>';
-        if (on) row += '<div class="item-more">' + props(n) + '</div>';
+        if (on && !inR) row += '<div class="item-more">' + props(n) + '</div>';
         return row + '</div>';
       }).join('') + '</div>';
       leftEl.innerHTML = h + '</div>';
@@ -7155,9 +7191,13 @@ details[open] > summary .sum { display: none; }
       }
       if (n.k === 'text') {
         h += '<textarea class="stext" data-sn="text" rows="3" aria-label="Text">' + esc(n.text) + '</textarea>';
-        h += '<div class="sty"><span class="sty-l">Font</span><select data-sp="font" aria-label="Font">' + opts(Object.keys(FONTS), FONTS[n.font] ? n.font : 'sans', function (x) { return FONTS[x].label; }) + '</select><span class="seg">' + ib('bold', 'data-stog="bold"', n.bold, 'Bold') + ib('ital', 'data-stog="ital"', n.ital, 'Italic') + '</span></div>';
+        var cf = n.font || 'sans', sys = fontList().slice(); if (sysFont(cf) && sys.indexOf(cf) < 0) sys.unshift(cf);
+        var fo = function (v, label, css) { return '<option value="' + esc(v) + '"' + (v === cf ? ' selected' : '') + ' style="font-family:' + esc(css) + '">' + esc(label) + '</option>'; };
+        h += '<div class="sty"><span class="sty-l">Font</span><select data-sp="font" aria-label="Font"><optgroup label="Stay text in the PDF">' + Object.keys(FONTS).map(function (k) { return fo(k, FONTS[k].label, FONTS[k].css); }).join('') + '</optgroup>' +
+          '<optgroup label="On this computer: images in the PDF">' + sys.map(function (f) { return fo(f, f, fontStack(f)); }).join('') + (window.queryLocalFonts && !allFonts ? '<option value="__all">All fonts on this computer…</option>' : '') + '</optgroup></select><span class="seg">' + ib('bold', 'data-stog="bold"', n.bold, 'Bold') + ib('ital', 'data-stog="ital"', n.ital, 'Italic') + '</span></div>';
         h += '<div class="sty"><span class="sty-l">Size</span><select data-sp="size" aria-label="Text size">' + opts(SIZES, n.size, function (x) { return x + ' pt'; }) + '</select><span class="seg">' + ['left', 'center', 'right'].map(function (a) { return ib(a, 'data-sset="align" data-v="' + a + '"', (n.align || 'left') === a, 'Align ' + a); }).join('') + '</span></div>';
         h += '<div class="sty"><span class="sty-s">Text</span>' + swatches('color', n.color) + '</div>';
+        if (sysFont(cf)) h += '<p class="hint keep" style="margin:0">' + esc(cf) + ' goes in the PDF as a sharp image of the text. Sans, Serif and Mono stay selectable text.</p>';
       }
       if (n.k === 'figure') {
         h += '<label class="sty"><span class="sty-l">Person</span><select data-sp="who">' + opts(['man', 'woman'], n.who, function (x) { return FIGS[x].label; }) + '</select></label>';
@@ -7174,8 +7214,15 @@ details[open] > summary .sum { display: none; }
       }).join('') + '</span></div>';
       return h;
     }
+    function itemPanel() {
+      var n = noteById(sel), many = selList().length, x = '<button type="button" class="dk-x" data-cardclose="r" title="Close settings (.)" aria-label="Close settings">×</button>';
+      var h = '<div class="dk-head"><button type="button" class="dk-back" data-sact="desel" title="Back to the sheet’s settings (Esc)">' + esc(sheetName()) + ' ›</button><b>' + (many > 1 ? many + ' selected' : KIND[n.k]) + '</b><span class="dk-sub"></span>' + x + '</div>';
+      if (many > 1) return h + '<div class="isec"><p class="hint" style="margin:0">Drag any of them to move them all; arrows nudge them. Shift+click on the sheet or in Layers adds an item or takes it out.</p><div class="row"><button type="button" class="btn" data-sdelsel>Delete ' + many + ' items</button></div></div>';
+      return h + '<div class="isec"><div class="item-more">' + props(n) + '</div><div class="row"><button type="button" class="btn" data-sdel="' + n.id + '">Delete</button></div><p class="hint" style="margin:0">Esc or ' + esc(sheetName()) + ' › goes back to the sheet’s settings.</p></div>';
+    }
     function right() {
       if (mode !== 'shop') return;
+      if (itemInRight()) { rightEl.innerHTML = itemPanel(); return; }
       var t = S.tb, h = '';
       var sh = '<div class="row2"><label class="field">Paper<select data-sk="paper">' + Object.keys(PAPERS).map(function (k) { return '<option value="' + k + '"' + (S.paper === k ? ' selected' : '') + '>' + PAPERS[k][2] + '</option>'; }).join('') + '</select></label>' +
         '<label class="field">Orientation<select data-sk="orient"><option value="land"' + (S.orient === 'land' ? ' selected' : '') + '>Landscape</option><option value="port"' + (S.orient === 'port' ? ' selected' : '') + '>Portrait</option></select></label></div>';
@@ -7204,7 +7251,7 @@ details[open] > summary .sum { display: none; }
       }
       var nv = views().length - 1;
       dv += '<div class="label" style="margin-top:6px">More drawings on this sheet' + (nv ? ' (' + nv + ')' : '') + '</div><div class="row"><select data-addsrc aria-label="Drawing to add">' + ['graphic', 'markers', 'film', 'mural', 'measure'].map(function (k) { return '<option value="' + k + '">' + esc(srcName(k)) + '</option>'; }).join('') + '</select><button type="button" class="btn" data-sact="addview">+ Add</button></div>' +
-        '<p class="hint keep" style="margin:0">Adds a drawing box you can move and resize, with its own runs, scale and caption. Select it to set those in the left panel.</p>';
+        '<p class="hint keep" style="margin:0">Adds a drawing box you can move and resize, with its own runs, scale and caption. Select it to set those in its settings.</p>';
       h += sec('sh_view', 'Drawing', dv);
       h += sec('sh_pics', 'Images', '<div class="row"><label class="btn" for="shop-pic">Upload image</label><input type="file" id="shop-pic" accept="image/*" multiple hidden></div><p class="hint" style="margin:0">Photos, renderings or logos go on the sheet. Drag to move, drag a corner to resize. You can also drop image files on the sheet.</p>');
       var f = function (label, key, ph) { return '<label class="field">' + label + '<input type="text" data-stb="' + key + '" value="' + esc(t[key]) + '"' + (ph ? ' placeholder="' + esc(ph) + '"' : '') + '></label>'; };
@@ -7222,7 +7269,11 @@ details[open] > summary .sum { display: none; }
       rightEl.innerHTML = h;
       shopFocusRight();
     }
-    function status() { var ti = TOOL_INFO[tool] || TOOL_INFO.select; statusEl.innerHTML = '<b>' + ti[0] + '</b> <kbd>' + ti[1] + '</kbd> · ' + (sheets.length > 1 ? 'Sheet ' + (cur + 1) + ' of ' + sheets.length + ' · ' : '') + esc(PAPERS[S.paper][2]) + (S.notes.length ? ' · ' + S.notes.length + ' item' + (S.notes.length === 1 ? '' : 's') : ''); }
+    function status() {
+      var ti = TOOL_INFO[tool] || TOOL_INFO.select, si = scaleInfo(), info = (sheets.length > 1 ? 'Sheet ' + (cur + 1) + ' of ' + sheets.length + ' · ' : '') + esc(PAPERS[S.paper][2]) + (S.orient === 'port' ? ', portrait' : '') + (si ? ' · ' + esc(si.label) : '') + (S.notes.length ? ' · ' + S.notes.length + ' item' + (S.notes.length === 1 ? '' : 's') : '');
+      if (flOn()) { statusEl.innerHTML = '<b>' + ti[0] + '</b> <kbd>' + ti[1] + '</kbd> <span class="hintx">' + ti[2] + '</span>'; setStatusInfo(info); }
+      else { statusEl.innerHTML = '<b>' + ti[0] + '</b> <kbd>' + ti[1] + '</kbd> · ' + info; setStatusInfo(''); }
+    }
     function enter() {
       loadMetrics();
       stage.innerHTML = '<div class="sheet-tabs" id="sheet-tabs" role="tablist" aria-label="Sheets"></div><svg id="sheet" class="sheet" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Shop drawing sheet"></svg>';
@@ -7268,8 +7319,9 @@ details[open] > summary .sum { display: none; }
       if (i === j) return;
       S.notes.splice(i, 1); S.notes.splice(j, 0, n); left(); paint(); History.record();
     }
-    leftEl.addEventListener('click', function (e) {
+    [leftEl, rightEl].forEach(function (box) { box.addEventListener('click', function (e) {
       if (mode !== 'shop') return;
+      if (e.target.closest('[data-sdelsel]')) { var gone0 = selList(); S.notes = S.notes.filter(function (x) { return gone0.indexOf(x) < 0; }); sel = null; multi = []; all(); History.record(); return; }
       var del = e.target.closest('[data-sdel]');
       if (del) { var id = Number(del.dataset.sdel); S.notes = S.notes.filter(function (n) { return n.id !== id; }); if (sel === id) sel = null; all(); History.record(); return; }
       var va = e.target.closest('[data-vact]');
@@ -7291,15 +7343,15 @@ details[open] > summary .sum { display: none; }
         if (e.shiftKey && sel != null) { if (isSel(rid)) { if (sel === rid) sel = multi.length ? multi.pop() : null; else multi = multi.filter(function (x) { return x !== rid; }); } else { multi.push(sel); sel = rid; } }
         else { sel = rid; multi = []; }
         left(); paint(); }
-    });
+    }); });
     document.addEventListener('pointerdown', function (e) { if (mode === 'shop' && cpOpen && !e.target.closest('.cpop, [data-cpopen]')) { cpOpen = null; left(); } }, true);
-    leftEl.addEventListener('input', function (e) {
+    [leftEl, rightEl].forEach(function (box) { box.addEventListener('input', function (e) {
       if (mode !== 'shop') return;
       var d = e.target.dataset;
       if (d.sn === 'text') edit(function (n) { n.text = e.target.value; });
       else if (d.spick) edit(function (n) { n[d.spick] = e.target.value; });
-    });
-    leftEl.addEventListener('change', function (e) {
+    }); });
+    [leftEl, rightEl].forEach(function (box) { box.addEventListener('change', function (e) {
       if (mode !== 'shop') return;
       var d = e.target.dataset;
       if (d.sn === 'text') { left(); History.record(); return; }
@@ -7315,6 +7367,7 @@ details[open] > summary .sum { display: none; }
         edit(function (n) { if (n.k !== 'view') return; n[key] = (n[key] || []).filter(function (x) { return x !== vi; }); if (!on) n[key].push(vi); });
         left(); History.record(); return;
       }
+      if (d.sp === 'font' && e.target.value === '__all') { var nf = noteById(sel); e.target.value = nf && nf.font || 'sans'; loadLocalFonts().then(function () { left(); }); return; }
       if (d.sp === 'who') { edit(function (n) { n.who = S.style.who = e.target.value; n.hIn = FIGS[n.who].hIn; fitFig(n); }); left(); History.record(); return; }
       if (d.sp === 'realW') { var rw = parseLen(e.target.value, true), rr2 = realPerPt(); edit(function (n) { if (rw > 0 && isFinite(rr2)) { var nw = rw / rr2, cx = n.x + n.w / 2, cy = n.y + n.h / 2; n.h = n.h * nw / n.w; n.w = nw; n.x = cx - n.w / 2; n.y = cy - n.h / 2; } }); left(); History.record(); return; }
       if (d.sp === 'hIn') { var hv = parseLen(e.target.value, true); edit(function (n) { if (hv > 0) { n.hIn = hv; fitFig(n); } }); left(); History.record(); return; }
@@ -7325,7 +7378,7 @@ details[open] > summary .sum { display: none; }
           n[d.sp] = v; S.style[d.sp] = v;
         }); left(); History.record();
       }
-    });
+    }); });
     rightEl.addEventListener('input', function (e) { if (mode === 'shop' && e.target.dataset.stb) { S.tb[e.target.dataset.stb] = e.target.value; paint(); } });
     rightEl.addEventListener('change', function (e) {
       if (mode !== 'shop') return;
@@ -7348,6 +7401,7 @@ details[open] > summary .sum { display: none; }
       var b = e.target.closest('[data-sact]'); if (!b) return;
       var a = b.dataset.sact;
       if (sheetAct(a)) return;
+      if (a === 'desel') { sel = null; multi = []; left(); paint(); return; }
       if (a === 'pdf') exportPdf();
       else if (a === 'pdfone') exportPdf(true);
       else if (a === 'center') { S.pan = { x: 0, y: 0 }; all(); History.record(); }
@@ -7430,6 +7484,16 @@ details[open] > summary .sum { display: none; }
     function keepLogo() { try { if (logo) localStorage.setItem('dim-logo', JSON.stringify(logo)); else localStorage.removeItem('dim-logo'); } catch (e) {} }
     try { setLogo(JSON.parse(localStorage.getItem('dim-logo') || 'null')); } catch (e) {}
 
+    // One line of text in a font from this computer, as a transparent PNG at 600 ppi (less for very long lines), with room for
+    // ascenders, descenders and italic overhang. Returns the image and where it goes on the sheet, in points.
+    function textPng(p) {
+      var asc = p.size * 1.05, desc = p.size * 0.4, padX = p.size * 0.3, w = tw(p.text, p.size, p.bold, p.font, p.ital) + 2 * padX;
+      var k = Math.min(600 / 72, 8000 / Math.max(1, w), 4000 / (asc + desc)), cv = document.createElement('canvas');
+      cv.width = Math.max(1, Math.ceil(w * k)); cv.height = Math.max(1, Math.ceil((asc + desc) * k));
+      var ctx = cv.getContext('2d'); ctx.font = sysCss(p.font, p.bold, p.ital, p.size * k); ctx.fillStyle = p.color || '#1c1c1c'; ctx.textBaseline = 'alphabetic';
+      ctx.fillText(p.text, padX * k, asc * k);
+      return { url: cv.toDataURL('image/png'), x: p.x - padX, y: p.y - asc, w: cv.width / k, h: cv.height / k };
+    }
     // ---- PDF: the same shapes, drawn with pdf-lib ----
     // Every sheet is a page (or just the open one). Each is laid out as if it were open: S is swapped for that moment only.
     function exportPdf(onlyCur) {
@@ -7450,10 +7514,12 @@ details[open] > summary .sum { display: none; }
           var jpg = Promise.all(vrs.map(jpgOf)).then(function (imgs) { var m = {}; ids.forEach(function (id, i) { m[id] = imgs[i]; }); return m; });
           var names = [], picIds = [];
           built.P.forEach(function (p) {
-            var nm = p.k === 'text' && fontOf(p.font, p.bold, p.ital); if (nm && !fonts[nm] && names.indexOf(nm) < 0) names.push(nm);
+            var nm = p.k === 'text' && !sysFont(p.font) && fontOf(p.font, p.bold, p.ital); if (nm && !fonts[nm] && names.indexOf(nm) < 0) names.push(nm);
             if (p.k === 'image' && p.src === 'pic' && pics[p.pic] && !picImg[p.pic] && picIds.indexOf(p.pic) < 0) picIds.push(p.pic);
           });
+          var sysTxt = built.P.filter(function (p) { return p.k === 'text' && p.text && sysFont(p.font); });
           return Promise.all([jpg,
+            Promise.all(sysTxt.map(function (p) { var r = textPng(p); return doc.embedPng(r.url).then(function (im) { p.img = im; p.box = r; }); })),
             Promise.all(names.map(function (nm) { return doc.embedFont(PL.StandardFonts[nm]).then(function (f) { fonts[nm] = f; }); })),
             Promise.all(picIds.map(function (id) { return (pics[id].jpg ? doc.embedJpg(pics[id].url) : doc.embedPng(pics[id].url)).then(function (im) { picImg[id] = im; }); })),
             logo && !logoImg ? doc.embedPng(logo.url).then(function (im) { logoImg = im; }) : null]).then(function (e) {
@@ -7464,7 +7530,8 @@ details[open] > summary .sum { display: none; }
               else if (p.k === 'line' && p.stroke) pg.drawLine({ start: { x: p.x1, y: Y(p.y1) }, end: { x: p.x2, y: Y(p.y2) }, thickness: p.sw, color: C(p.stroke), dashArray: p.dash || undefined, lineCap: PL.LineCapStyle ? PL.LineCapStyle.Round : undefined });
               else if (p.k === 'poly' && p.fill) pg.drawSvgPath('M ' + p.pts.map(function (q) { return q.x.toFixed(2) + ' ' + q.y.toFixed(2); }).join(' L ') + ' Z', { x: 0, y: g.H, color: C(p.fill), borderWidth: 0 });
               else if (p.k === 'path') pg.drawSvgPath(p.d, { x: p.x, y: Y(p.y), scale: p.sc, color: p.fill ? C(p.fill) : undefined, borderColor: p.stroke ? C(p.stroke) : undefined, borderWidth: p.stroke ? p.sw / p.sc : 0 });
-              else if (p.k === 'text' && p.text) pg.drawText(pdfText(p.text), { x: p.x, y: Y(p.y), size: p.size, font: fonts[fontOf(p.font, p.bold, p.ital)], color: C(p.color) });
+              else if (p.k === 'text' && p.img) pg.drawImage(p.img, { x: p.box.x, y: Y(p.box.y + p.box.h), width: p.box.w, height: p.box.h });
+              else if (p.k === 'text' && p.text && !sysFont(p.font)) pg.drawText(pdfText(p.text), { x: p.x, y: Y(p.y), size: p.size, font: fonts[fontOf(p.font, p.bold, p.ital)], color: C(p.color) });
               else if (p.k === 'image' && p.src === 'view' && viewImgs[p.vid || 'm']) pg.drawImage(viewImgs[p.vid || 'm'], { x: p.x, y: Y(p.y + p.h), width: p.w, height: p.h });
               else if (p.k === 'image' && p.src === 'pic' && picImg[p.pic]) pg.drawImage(picImg[p.pic], { x: p.x, y: Y(p.y + p.h), width: p.w, height: p.h });
               else if (p.k === 'image' && p.src === 'logo' && logoImg) pg.drawImage(logoImg, { x: p.x, y: Y(p.y + p.h), width: p.w, height: p.h });
@@ -7492,7 +7559,7 @@ details[open] > summary .sum { display: none; }
       cur = Math.max(0, Math.min(sheets.length - 1, st.sheets ? st.cur | 0 : 0)); S = sheets[cur];
       if (sel != null && !noteById(sel)) sel = null; if (selGuide != null && !guideById(selGuide)) selGuide = null; resetViews();
     }
-    return { enter: enter, paint: paint, rulerHost: rulerHost, getState: getState, setState: setState, setLogo: setLogo, getLogo: function () { return logo; }, getPics: getPics, setPics: setPics, addPics: function (files, e) { addPics(files, e && dropAt(e)); },
+    return { enter: enter, paint: paint, panels: function () { left(); status(); }, rulerHost: rulerHost, getState: getState, setState: setState, setLogo: setLogo, getLogo: function () { return logo; }, getPics: getPics, setPics: setPics, addPics: function (files, e) { addPics(files, e && dropAt(e)); },
       // Open as shop drawing: go to the sheet that already shows this layout, or put it on the open sheet.
       useSource: function (src) { var i = S.src === src ? cur : sheets.map(function (sh) { return sh.src; }).indexOf(src); if (i >= 0) { cur = i; S = sheets[i]; sel = null; return; } S.src = src; S.pan = { x: 0, y: 0 }; } };
   })();
@@ -7515,8 +7582,10 @@ details[open] > summary .sum { display: none; }
     statusEl.textContent = M.src !== 'none' ? 'Home · ' + M.name + ' is open' : 'Home';
   }
   var booting = true;   // during startup Draw is set up behind Home; it shouldn't name a new canvas yet
+  // The right end of the status bar: the open sheet's details in Shop drawing, otherwise a note that files stay here.
+  function setStatusInfo(t) { var el = $('sinfo'); el.innerHTML = t; el.hidden = !t; $('snote').hidden = !!t; }
   function setMode(m) {
-    mode = m; applyDockLayout();
+    mode = m; applyDockLayout(); setStatusInfo('');
     if (m !== 'measure') { $('page-tabs').hidden = true; document.querySelector('.main').classList.remove('ptabs'); }
     document.querySelector('.main').classList.toggle('home', m === 'home');
     document.querySelectorAll('[data-mode]').forEach(function (b) { b.classList.toggle('on', b.dataset.mode === m); b.setAttribute('aria-pressed', b.dataset.mode === m ? 'true' : 'false'); });
