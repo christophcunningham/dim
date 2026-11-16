@@ -855,7 +855,7 @@ details[open] > summary .sum { display: none; }
   var CATS = [['', 'No category'], ['mural', 'Mural'], ['film', 'Privacy film'], ['markers', 'Distraction markers'], ['signage', 'Signage']];
   function freshN() { return { circle: 0, length: 0, run: 0, curve: 0, area: 0, count: 0, angle: 0, note: 0, rect: 0 }; }
   var PRESETS = [];
-  [['3/32', 0.09375], ['1/8', 0.125], ['3/16', 0.1875], ['1/4', 0.25], ['3/8', 0.375], ['1/2', 0.5], ['3/4', 0.75], ['1', 1], ['1 1/2', 1.5], ['3', 3]].forEach(function (a) {
+  [['1/16', 0.0625], ['3/32', 0.09375], ['1/8', 0.125], ['3/16', 0.1875], ['1/4', 0.25], ['3/8', 0.375], ['1/2', 0.5], ['3/4', 0.75], ['1', 1], ['1 1/2', 1.5], ['3', 3]].forEach(function (a) {
     PRESETS.push({ id: 'a' + a[1], group: 'Architectural', label: a[0] + '" = 1\'-0"', inPerUnit: 1 / (6 * a[1]) });
   });
   [10, 20, 30, 40, 50, 100].forEach(function (n) { PRESETS.push({ id: 'e' + n, group: 'Engineering', label: '1" = ' + n + '\'-0"', inPerUnit: n / 6 }); });
@@ -968,7 +968,11 @@ details[open] > summary .sum { display: none; }
     var my = ++pageGen;
     endTextEdit();
     M.page = n; M.draft = []; M.calib = []; M.autoFit = true; M.sel = null; M.multi = null; M.selGuide = null; M.pen = null; M.create = null; M.activeCount = null; M.hl = null;
-    if (M.tool === 'scale') M.tool = 'edit';
+    // The Scale tool stays open on the new page (each page has its own scale), except on a blank canvas, which is true size.
+    if (M.tool === 'scale' && rec.kind === 'blank') M.tool = 'edit';
+    // Stop drawing the page being left, so it can't land on the new page's canvas.
+    if (renderTask) { try { renderTask.cancel(); } catch (e) {} renderTask = null; }
+    clearTimeout(rasterTimer);
     M.src = rec.kind === 'blank' ? 'blank' : M.fileSrc; M.pageObj = null; M.w = rec.w; M.h = rec.h;
     if (rec.kind === 'blank') setBlank(rec.blank); else M.blank = null;
     var show = function () { if (my !== pageGen) return; if (mode === 'measure') { buildPage(); fit(); renderAll(); } buildSnaps(n); };
@@ -2937,6 +2941,23 @@ details[open] > summary .sum { display: none; }
     h += '<p class="hint" style="margin:0">' + (M.src === 'image' ? 'Images have no true size: calibrate from a length you know.' : s ? 'Check it: measure a dimension printed on the sheet.' : 'Printed scale works when the PDF is at full size.') + '</p>';
     return h + '</div>';
   }
+  // Lists (Layers in Draw and Shop drawing, Layout's lists) are rebuilt on every change. Rebuilding keeps the list where it
+  // was scrolled; when the selection changes, the selected row scrolls into view, only as far as needed to show it.
+  var listShown = {};
+  function keepListView(key, scroller, selKey, rowSel, render) {
+    var el = scroller(), top = el ? el.scrollTop : 0;
+    render();
+    el = scroller(); if (el) el.scrollTop = top;
+    if (selKey != null && listShown[key] !== selKey && el) { var row = el.querySelector(rowSel); if (row) scrollRowIntoView(el, row); }
+    listShown[key] = selKey;
+  }
+  // Scroll just the list (not the page around it) so the row shows, with a little room.
+  function scrollRowIntoView(box, row) {
+    var b = box.getBoundingClientRect(), r = row.getBoundingClientRect(), pad = 8;
+    var head = box.querySelector(':scope > .dk-head, :scope > .lp-top'), ht = head && getComputedStyle(head).position === 'sticky' ? head.offsetHeight : 0;
+    if (r.top < b.top + ht + pad) box.scrollTop -= b.top + ht + pad - r.top;
+    else if (r.bottom > b.bottom - pad) box.scrollTop += Math.min(r.bottom - b.bottom + pad, r.top - b.top - ht - pad);
+  }
   function renderLeft() {
     if (mode !== 'measure') return;
     M.sizeEdit = null;
@@ -2951,7 +2972,8 @@ details[open] > summary .sum { display: none; }
     // Wide windows: the selection box floats at the top left of the canvas, and the list lives in Layers.
     if (dockOn()) {
       leftEl.innerHTML = topLeftBoxes();
-      layersEl.innerHTML = layersOpen ? layersCard(mine) : '';
+      var selId = M.sel && M.sel.item != null ? M.sel.item : null;
+      keepListView('draw', function () { return layersEl.querySelector('.dk-list'); }, selId == null ? null : M.page + ':' + selId, '[data-item="' + selId + '"]', function () { layersEl.innerHTML = layersOpen ? layersCard(mine) : ''; });
       updateLive(); updateStatus(); return;
     }
     layersEl.innerHTML = '';
@@ -2959,7 +2981,8 @@ details[open] > summary .sum { display: none; }
     h += '<div class="block"><div class="label">' + (mine.some(function (x) { return x.shape; }) ? 'On the canvas' : 'Measurements') + (M.pages > 1 ? ' · ' + esc(pageName()) : '') + '</div>';
     h += '<div class="list">' + mine.map(itemRow).join('') + '</div>';
     h += '</div>';
-    leftEl.innerHTML = h;
+    var selN = M.sel && M.sel.item != null ? M.sel.item : null;
+    keepListView('drawn', function () { return leftEl; }, selN == null ? null : M.page + ':' + selN, '[data-item="' + selN + '"]', function () { leftEl.innerHTML = h; });
     updateLive(); updateStatus();
   }
   function resizePanel() {
@@ -5495,7 +5518,8 @@ details[open] > summary .sum { display: none; }
         }).join('') + '</div><div class="row" style="margin-top:8px"><button type="button" class="btn" data-addrow="1">+ Add run</button>' + (fromMeasureCount() ? '<button type="button" class="btn" data-frommeasure="1">Add from Draw</button>' : '') + '</div></div>';
       }
       h = cardHead(LEFT_LABEL[L.job] || 'Inputs', { graphic: 'Graphic mockup', mural: 'Mural', film: 'Privacy film', markers: 'Distraction markers' }[L.job] || '') + h;
-      leftEl.innerHTML = h;
+      var lk = L.job === 'mural' ? null : L.job + ':' + FK().sel;
+      keepListView('layout', function () { return leftEl; }, lk, '.ed.sel', function () { leftEl.innerHTML = h; });
     }
     // The right panel: what is selected on top, its settings in tabs, the job's own settings folded below with a one-line summary,
     // and a bar at the bottom to switch to Totals (results and quote) or Export. Tips stay behind the (i) button until asked for.
@@ -7162,7 +7186,7 @@ details[open] > summary .sum { display: none; }
         if (on && !inR) row += '<div class="item-more">' + props(n) + '</div>';
         return row + '</div>';
       }).join('') + '</div>';
-      leftEl.innerHTML = h + '</div>';
+      keepListView('shop', function () { return leftEl; }, sel == null ? null : cur + ':' + sel, '[data-snote="' + sel + '"]', function () { leftEl.innerHTML = h + '</div>'; });
     }
     function viewProps(n) {
       var h = '<label class="field">Caption<input type="text" data-vk="cap" value="' + esc(n.cap || '') + '" placeholder="Detail A"></label>';
